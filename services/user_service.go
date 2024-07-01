@@ -3,28 +3,63 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
-	"os"
 	"pos/models"
 )
 
-func GetAllUsers() ([]models.User, error) {
-	collectionID := os.Getenv("USERS_COLLECTION_ID")
-	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", appwriteEndpoint, appwriteProjectID, collectionID)
+func (c *AppwriteClient) CreateUser(collectionID string, user models.User) error {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := newAppwriteRequest("GET", url, nil)
+	userData := map[string]interface{}{
+		"name":     user.Name,
+		"email":    user.Email,
+		"password": user.Password,
+	}
+	documentData := map[string]interface{}{
+		"documentId":  "unique()",
+		"data":        userData,
+		"permissions": []string{"read(\"any\")"},
+	}
+	userBytes, err := json.Marshal(documentData)
+	if err != nil {
+		return err
+	}
+
+	req, err := c.newRequest("POST", url, userBytes)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to create user: %s", string(body))
+	}
+
+	return nil
+}
+
+func (c *AppwriteClient) GetAllUsers(collectionID string) ([]models.User, error) {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
+
+	req, err := c.newRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := appwriteClient.Do(req)
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -40,55 +75,21 @@ func GetAllUsers() ([]models.User, error) {
 	return response.Documents, nil
 }
 
-func CreateUser(user models.User) error {
-	collectionID := os.Getenv("USERS_COLLECTION_ID")
-	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", appwriteEndpoint, appwriteProjectID, collectionID)
+func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.User, error) {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	userData := map[string]interface{}{
-		"name":     user.Name,
-		"email":    user.Email,
-		"password": user.Password,
-	}
-	userBytes, err := json.Marshal(userData)
-	if err != nil {
-		return err
-	}
-
-	req, err := newAppwriteRequest("POST", url, userBytes)
-	if err != nil {
-		return err
-	}
-
-	resp, err := appwriteClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		body, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("failed to create user: %s", string(body))
-	}
-
-	return nil
-}
-
-func GetUserByEmail(email string) (*models.User, error) {
-	collectionID := os.Getenv("USERS_COLLECTION_ID")
-	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", appwriteEndpoint, appwriteProjectID, collectionID)
-
-	req, err := newAppwriteRequest("GET", url, nil)
+	req, err := c.newRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := appwriteClient.Do(req)
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

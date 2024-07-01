@@ -3,12 +3,13 @@ package controllers
 import (
 	"html/template"
 	"net/http"
+	"os"
 	"pos/services"
 )
 
-func UserController(w http.ResponseWriter, r *http.Request) {
+func UserController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
 	if r.Method == http.MethodGet {
-		users, err := services.GetAllUsers()
+		users, err := client.GetAllUsers(os.Getenv("USERS"))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -16,7 +17,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 
 		tmpl, err := template.ParseFiles(
 			"views/templates/backend.html",
-			"views/pages/users/list.go",
+			"views/pages/users/list.html",
 		)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

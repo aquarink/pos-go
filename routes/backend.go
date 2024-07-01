@@ -3,13 +3,21 @@ package routes
 import (
 	"net/http"
 	"pos/controllers"
+	"pos/services"
 )
 
-// registerRouteWithPrefix menambahkan prefiks "/app" pada setiap rute
 func registerRouteWithPrefix(path string, handler http.HandlerFunc) {
 	http.HandleFunc("/app"+path, handler)
 }
 
-func RegisterBackendRoutes() {
-	registerRouteWithPrefix("/users", controllers.UserController)
+func RegisterBackendRoutes(client *services.AppwriteClient) {
+	registerRouteWithPrefix("/signup", func(w http.ResponseWriter, r *http.Request) {
+		controllers.SignupController(w, r, client)
+	})
+	registerRouteWithPrefix("/signin", func(w http.ResponseWriter, r *http.Request) {
+		controllers.SigninController(w, r, client)
+	})
+	registerRouteWithPrefix("/users", func(w http.ResponseWriter, r *http.Request) {
+		controllers.UserController(w, r, client)
+	})
 }

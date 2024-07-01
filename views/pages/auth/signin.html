@@ -1,11 +1,10 @@
 {{define "content"}}
 <h2>Signin</h2>
-<form action="/back/signin" method="POST">
+<form action="/app/signin" method="POST">
     <label for="email">Email:</label>
     <input type="email" id="email" name="email" required><br>
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" required><br>
-    <div class="cf-turnstile" data-sitekey="your-site-key"></div>
     <button type="submit">Signin</button>
 </form>
 {{end}}

@@ -1,33 +1,37 @@
 package services
 
 import (
-	"fmt"
+	"bytes"
+	"log"
 	"net/http"
 )
 
-var appwriteClient *http.Client
-var appwriteEndpoint string
-var appwriteProjectID string
-var appwriteAPIKey string
-
-func InitAppwriteClient(endpoint, projectID, apiKey string) {
-	appwriteClient = &http.Client{}
-	appwriteEndpoint = endpoint
-	appwriteProjectID = projectID
-	appwriteAPIKey = apiKey
+type AppwriteClient struct {
+	Client     *http.Client
+	Endpoint   string
+	ProjectID  string
+	APIKey     string
+	DatabaseID string
 }
 
-func getAppwriteURL(databaseID, collectionID, documentID string) string {
-	return fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", appwriteEndpoint, databaseID, collectionID, documentID)
+func NewAppwriteClient(endpoint, projectID, apiKey, databaseID string) *AppwriteClient {
+	log.Printf("Appwrite client initialized with endpoint: %s, projectID: %s", endpoint, projectID)
+	return &AppwriteClient{
+		Client:     &http.Client{},
+		Endpoint:   endpoint,
+		ProjectID:  projectID,
+		APIKey:     apiKey,
+		DatabaseID: databaseID,
+	}
 }
 
-func newAppwriteRequest(method, url string, body []byte) (*http.Request, error) {
-	req, err := http.NewRequest(method, url, nil)
+func (c *AppwriteClient) newRequest(method, url string, body []byte) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-Appwrite-Key", appwriteAPIKey)
-	req.Header.Add("X-Appwrite-Project", appwriteProjectID)
+	req.Header.Add("X-Appwrite-Key", c.APIKey)
+	req.Header.Add("X-Appwrite-Project", c.ProjectID)
 	return req, nil
 }
