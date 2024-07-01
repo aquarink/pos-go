@@ -13,4 +13,5 @@ type SessionData struct {
 	LastLogin string
 }
 
+// ngelempar data ke global session
 var GlobalSessionData SessionData

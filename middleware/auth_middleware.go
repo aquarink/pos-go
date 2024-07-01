@@ -9,7 +9,8 @@ import (
 
 var store = sessions.NewCookieStore([]byte("something-very-secret"))
 
-// Middleware to ensure the user is authenticated
+// ngecek apakah user masih login atau masih ada session
+// pada selain auth page
 func CheckSignin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, _ := store.Get(r, "session")
@@ -21,7 +22,8 @@ func CheckSignin(next http.Handler) http.Handler {
 	})
 }
 
-// Middleware to redirect authenticated users away from login/signup pages
+// ngecek apakah user masih login atau masih ada session
+// pada auth page
 func CheckSession(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, _ := store.Get(r, "session")
@@ -33,6 +35,7 @@ func CheckSession(next http.Handler) http.Handler {
 	})
 }
 
+// ini supaya sessionnya bisa di akses global
 func SessionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, _ := store.Get(r, "session")
