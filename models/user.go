@@ -1,10 +1,29 @@
 package models
 
 type User struct {
-	ID       string
-	Name     string
-	Email    string
-	Password string
+	ID            string
+	Name          string `json:"name"`
+	Email         string `json:"email"`
+	Password      string `json:"password"`
+	EmailVerified bool   `json:"email_verified"`
+	Role          string `json:"role"`
+}
+
+// Define constants for valid roles
+const (
+	RoleAdmin    = "admin"
+	RoleMerchant = "merchant"
+	RoleCashier  = "cashier"
+	RoleKitchen  = "kitchen"
+)
+
+func IsValidRole(role string) bool {
+	switch role {
+	case RoleAdmin, RoleMerchant, RoleCashier, RoleKitchen:
+		return true
+	default:
+		return false
+	}
 }
 
 type Mails struct {

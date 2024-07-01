@@ -1,10 +1,67 @@
-{{define "content"}}
-<h2>Signin</h2>
-<form action="/app/signin" method="POST">
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required><br>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required><br>
-    <button type="submit">Signin</button>
-</form>
-{{end}}
+{{ define "content" }}
+<main class="main-content mt-0">
+    <section>
+        <div class="page-header min-vh-100">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
+                        <div class="card card-plain mt-8">
+                            <div class="card-header pb-0 text-left bg-transparent">
+                                <h3 class="font-weight-bolder text-info text-gradient">Welcome back</h3>
+                                <p class="mb-0">Enter your email and password to sign in</p>
+                                
+                                {{ if .Error }}
+                                    <p class="text-danger">{{ .Error }}</p>
+                                {{ end }}
+
+                                {{ if .Msg }}
+                                    <p class="text-info">{{ .Msg }}</p>
+                                {{ end }}
+                            </div>
+                            <div class="card-body">
+                                <form role="form" action="/app/signin" method="POST">
+                                    <label>Email</label>
+                                    <div class="mb-3">
+                                        <input type="text" name="email" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="email-addon" required>
+                                    </div>
+
+                                    <label>Password</label>
+                                    <div class="mb-3">
+                                        <input type="password" name="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="password-addon" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="cf-turnstile" 
+                                            data-sitekey="0x4AAAAAAAdOJS2tgCuNYB4-"
+                                            data-callback="turnstileCallback"
+                                            data-expired-callback="turnstileExpiredCallback">
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button id="submitBtn" type="submit" class="btn btn-info w-100 mt-4 mb-0" disabled>Sign in</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                                <p class="mb-4 text-sm mx-auto"> Don't have an account? <a href="/app/signup" class="text-info text-gradient font-weight-bold">Sign up</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 d-lg-flex d-none h-100 pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
+                        <div class="position-relative bg-gradient-info h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center">
+                            <img src="/assets/back/assets/img/shapes/pattern-lines.svg" alt="pattern-lines" class="position-absolute opacity-6">
+                            <div class="position-relative">
+                                <img class="max-width-500 w-100 position-relative z-index-2" src="/assets/back/assets/img/illustrations/rocket-white.png" alt="rocket">
+                            </div>
+                            <h4 class="mt-5 text-white font-weight-bolder">"Attention is the new currency"</h4>
+                            <p class="text-white">The more effortless the writing looks, the more effort the writer actually put into the process.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{{ end }}

@@ -35,6 +35,9 @@ func main() {
 	routes.RegisterFrontendRoutes()
 	routes.RegisterBackendRoutes(client)
 
+	fs := http.FileServer(http.Dir("assets"))
+	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
+
 	log.Println("Server started at :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
