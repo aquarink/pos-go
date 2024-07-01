@@ -37,14 +37,3 @@ func HomeController(w http.ResponseWriter, r *http.Request) {
 
 	tmpl.Execute(w, nil)
 }
-
-// Contoh controller untuk dashboard
-func DashboardController(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("views/templates/backend.html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	tmpl.Execute(w, nil)
-}

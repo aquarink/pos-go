@@ -1,24 +1,25 @@
+{{define "layout"}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
-    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/back/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/back/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/back/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/assets/back/favicon/site.webmanifest">
 
     <title>{{ .Title }}</title>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
     <!-- Nucleo Icons -->
-    <link href="/assets/css/nucleo-icons.css" rel="stylesheet" />
-    <link href="/assets/css/nucleo-svg.css" rel="stylesheet" />
+    <link href="/assets/back/assets/back/assets/css/nucleo-icons.css" rel="stylesheet" />
+    <link href="/assets/back/assets/css/nucleo-svg.css" rel="stylesheet" />
     <!-- Font Awesome Icons -->
-    <link href="/assets/css/nucleo-svg.css" rel="stylesheet" />
+    <link href="/assets/back/assets/css/nucleo-svg.css" rel="stylesheet" />
     <!-- CSS Files -->
-    <link id="pagestyle" href="/assets/css/argon-dashboard.css?v=2.0.4" rel="stylesheet" />
+    <link id="pagestyle" href="/assets/back/assets/css/argon-dashboard.css?v=2.0.4" rel="stylesheet" />
 
     <!-- DATA TABLES -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
@@ -124,7 +125,11 @@
                         <li class="nav-item d-flex align-items-center">
                             <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
                                 <i class="fa fa-user me-sm-1"></i>
-                                <span>{{ .Session.Role | title }}</span>
+                                {{ if .Session.Role }}
+                                    <span>{{ .Session.Role }}</span>
+                                {{ else }}
+                                    <span>No Role</span>
+                                {{ end }}
                             </a>
                         </li>
                     </ul>
@@ -152,16 +157,16 @@
 
     <!--   Core JS Files   -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="/assets/js/core/popper.min.js"></script>
-    <script src="/assets/js/core/bootstrap.min.js"></script>
-    <script src="/assets/js/plugins/perfect-scrollbar.min.js"></script>
-    <script src="/assets/js/plugins/smooth-scrollbar.min.js"></script>
+    <script src="/assets/back/assets/js/core/popper.min.js"></script>
+    <script src="/assets/back/assets/js/core/bootstrap.min.js"></script>
+    <script src="/assets/back/assets/js/plugins/perfect-scrollbar.min.js"></script>
+    <script src="/assets/back/assets/js/plugins/smooth-scrollbar.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
     <!-- Font Awesome Icons -->
     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 
-    <script src="/assets/js/argon-dashboard.min.js?v=2.0.4"></script>
+    <script src="/assets/back/assets/js/argon-dashboard.min.js?v=2.0.4"></script>
 
     <!-- Tautan ke Date Range Picker JS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/moment.min.js"></script>
@@ -182,3 +187,4 @@
     </script>
 </body>
 </html>
+{{end}}

@@ -1,10 +1,11 @@
 package routes
 
 import (
-	"net/http"
 	"pos/controllers"
+
+	"github.com/gorilla/mux"
 )
 
-func RegisterFrontendRoutes() {
-	http.HandleFunc("/", controllers.HomeController)
+func RegisterFrontendRoutes(router *mux.Router) {
+	router.HandleFunc("/", controllers.HomeController)
 }

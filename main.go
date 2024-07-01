@@ -1,12 +1,15 @@
 package main
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"pos/models"
 	"pos/routes"
 	"pos/services"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
@@ -31,15 +34,42 @@ func main() {
 
 	// Initialize Appwrite client
 	client := services.NewAppwriteClient(appwriteEndpoint, appwriteProjectID, appwriteAPIKey, appwriteDatabaseID)
+	router := mux.NewRouter()
 
-	routes.RegisterFrontendRoutes()
-	routes.RegisterBackendRoutes(client)
+	routes.RegisterFrontendRoutes(router)
+	routes.RegisterBackendRoutes(router, client)
 
 	fs := http.FileServer(http.Dir("assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
 
+	router.NotFoundHandler = http.HandlerFunc(Handle404)
+
 	log.Println("Server started at :8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
+	}
+}
+
+func Handle404(w http.ResponseWriter, r *http.Request) {
+	data := models.PublicData{
+		Title: "Page Not Found",
+		Data:  map[string]interface{}{},
+		Error: r.URL.Query().Get("error"),
+		Msg:   r.URL.Query().Get("msg"),
+	}
+
+	tmpl, err := template.ParseFiles("views/pages/auth/404.html")
+	if err != nil {
+		log.Println("Error parsing 404 template:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("Rendering 404 template")
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		log.Println("Error executing 404 template:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }

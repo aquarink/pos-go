@@ -162,3 +162,18 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 		}
 	}
 }
+
+func DashboardController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
+	if r.Method == http.MethodGet {
+		data := models.PublicData{
+			Title: "Dashboard",
+			Data:  map[string]interface{}{},
+			Error: r.URL.Query().Get("error"),
+			Msg:   r.URL.Query().Get("msg"),
+		}
+
+		utils.RenderTemplateWithSidebar(w, "views/templates/backend.html", "views/pages/dashboard/dashboard.html", data)
+		return
+	}
+	http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)
+}

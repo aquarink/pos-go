@@ -4,20 +4,18 @@ import (
 	"net/http"
 	"pos/controllers"
 	"pos/services"
+
+	"github.com/gorilla/mux"
 )
 
-func registerRouteWithPrefix(path string, handler http.HandlerFunc) {
-	http.HandleFunc("/app"+path, handler)
-}
-
-func RegisterBackendRoutes(client *services.AppwriteClient) {
-	registerRouteWithPrefix("/signup", func(w http.ResponseWriter, r *http.Request) {
+func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient) {
+	router.HandleFunc("/app/signup", func(w http.ResponseWriter, r *http.Request) {
 		controllers.SignupController(w, r, client)
-	})
-	registerRouteWithPrefix("/signin", func(w http.ResponseWriter, r *http.Request) {
+	}).Methods("GET", "POST")
+	router.HandleFunc("/app/signin", func(w http.ResponseWriter, r *http.Request) {
 		controllers.SigninController(w, r, client)
-	})
-	registerRouteWithPrefix("/users", func(w http.ResponseWriter, r *http.Request) {
-		controllers.UserController(w, r, client)
-	})
+	}).Methods("GET", "POST")
+	router.HandleFunc("/app/dashboard", func(w http.ResponseWriter, r *http.Request) {
+		controllers.DashboardController(w, r, client)
+	}).Methods("GET")
 }

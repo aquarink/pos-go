@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/appwrite/sdk-for-go v0.0.0-20220115201206-e8cdd5639793 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.3.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
