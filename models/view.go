@@ -12,3 +12,5 @@ type SessionData struct {
 	Role      string
 	LastLogin string
 }
+
+var GlobalSessionData SessionData

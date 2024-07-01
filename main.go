@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"pos/middleware"
 	"pos/models"
 	"pos/routes"
 	"pos/services"
@@ -36,11 +37,14 @@ func main() {
 	client := services.NewAppwriteClient(appwriteEndpoint, appwriteProjectID, appwriteAPIKey, appwriteDatabaseID)
 	router := mux.NewRouter()
 
+	// middleware
+	router.Use(middleware.SessionMiddleware)
+
 	routes.RegisterFrontendRoutes(router)
 	routes.RegisterBackendRoutes(router, client)
 
 	fs := http.FileServer(http.Dir("assets"))
-	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
+	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", fs))
 
 	router.NotFoundHandler = http.HandlerFunc(Handle404)
 

@@ -8,6 +8,7 @@ import (
 	"pos/models"
 	"pos/services"
 	"pos/utils"
+	"strings"
 
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
@@ -156,6 +157,7 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 			// Set session
 			session, _ := store.Get(r, "session")
 			session.Values["user_id"] = user.ID
+			session.Values["role"] = strings.Title(strings.ToLower(user.Role))
 			session.Save(r, w)
 
 			http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)
@@ -166,14 +168,24 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 func DashboardController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
 	if r.Method == http.MethodGet {
 		data := models.PublicData{
-			Title: "Dashboard",
-			Data:  map[string]interface{}{},
-			Error: r.URL.Query().Get("error"),
-			Msg:   r.URL.Query().Get("msg"),
+			Title:   "Dashboard",
+			Data:    map[string]interface{}{},
+			Error:   r.URL.Query().Get("error"),
+			Msg:     r.URL.Query().Get("msg"),
+			Session: models.GlobalSessionData,
 		}
+
+		log.Println("======== :", models.GlobalSessionData.Role)
 
 		utils.RenderTemplateWithSidebar(w, "views/templates/backend.html", "views/pages/dashboard/dashboard.html", data)
 		return
 	}
 	http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)
+}
+
+func SignoutController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
+	session, _ := store.Get(r, "session")
+	delete(session.Values, "user_id")
+	session.Save(r, w)
+	http.Redirect(w, r, "/app/signin", http.StatusSeeOther)
 }
