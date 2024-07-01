@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"log"
 	"net/smtp"
 	"os"
 )
@@ -21,8 +21,15 @@ func SendEmail(to, subject, text, html string) error {
 
 	// Authentication
 	auth := smtp.PlainAuth("", username, password, host)
-	addr := fmt.Sprintf("%s:%s", host, port)
 
 	// Sending email
-	return smtp.SendMail(addr, auth, username, []string{to}, []byte(msg))
+	err := smtp.SendMail(host+":"+port, auth, username, []string{to}, []byte(msg))
+
+	if err != nil {
+		log.Printf("Failed to send email: %v", err)
+		return err
+	}
+
+	log.Println("Email sent successfully")
+	return nil
 }
