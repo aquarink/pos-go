@@ -6,3 +6,12 @@ type User struct {
 	Email    string
 	Password string
 }
+
+type Mails struct {
+	ID      string
+	UserID  string
+	Email   string
+	Subject string
+	Text    string
+	HTML    string
+}

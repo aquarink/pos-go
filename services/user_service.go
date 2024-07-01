@@ -110,3 +110,44 @@ func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.Use
 
 	return nil, fmt.Errorf("user not found")
 }
+
+func (c *AppwriteClient) CreateEmail(collectionID string, email models.Mails) error {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
+
+	emailData := map[string]interface{}{
+		"user_id": email.ID,
+		"email":   email.Email,
+		"subject": email.Subject,
+		"text":    email.Text,
+		"html":    email.HTML,
+	}
+
+	documentData := map[string]interface{}{
+		"documentId":  "unique()",
+		"data":        emailData,
+		"permissions": []string{"read(\"any\")"},
+	}
+
+	emailBytes, err := json.Marshal(documentData)
+	if err != nil {
+		return err
+	}
+
+	req, err := c.newRequest("POST", url, emailBytes)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to create email document: %s", string(body))
+	}
+
+	return nil
+}

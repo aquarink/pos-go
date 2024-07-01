@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -35,6 +36,12 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 			return
 		}
 
+		existingUser, _ := client.GetUserByEmail(os.Getenv("USERS"), email)
+		if existingUser != nil {
+			http.Redirect(w, r, "/app/signup?error=email sudah ada", http.StatusSeeOther)
+			return
+		}
+
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			log.Println("Error generating password hash:", err)
@@ -51,6 +58,35 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 		err = client.CreateUser(os.Getenv("USERS"), user)
 		if err != nil {
 			log.Println("Error creating user:", err)
+			http.Redirect(w, r, "/app/signup?error=internal server error", http.StatusSeeOther)
+			return
+		}
+
+		// Kirim email verifikasi
+		verifyId := user.ID
+		subject := "Email Verification"
+		text := fmt.Sprintf("Hi %s,\n\nThank you for registering with us.", name)
+		html := fmt.Sprintf("Hi %s,<br><br>Thank you for registering with us.<br>Click <a href='%s%s'>here</a> to verify your email.", name, os.Getenv("EMAIL_VERIFY_URL"), verifyId)
+
+		err = utils.SendEmail(email, subject, text, html)
+		if err != nil {
+			log.Println("Error sending verification email:", err)
+			http.Redirect(w, r, "/app/signup?error=gagal mengirim email verifikasi", http.StatusSeeOther)
+			return
+		}
+
+		// Buat dokumen email ke koleksi MAILS
+		emailDoc := models.Mails{
+			UserID:  user.ID,
+			Email:   email,
+			Subject: subject,
+			Text:    text,
+			HTML:    html,
+		}
+
+		err = client.CreateEmail(os.Getenv("MAILS"), emailDoc)
+		if err != nil {
+			log.Println("Error creating email document:", err)
 			http.Redirect(w, r, "/app/signup?error=internal server error", http.StatusSeeOther)
 			return
 		}
