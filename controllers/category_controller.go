@@ -51,13 +51,28 @@ func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.Appwri
 
 	//
 	if r.Method == http.MethodPost {
-		name := r.FormValue("name")
+		name := r.FormValue("categoryName")
 		user_id := models.GlobalSessionData.UserId
 
 		if name == "" || user_id == "" {
 			http.Redirect(w, r, "/app/category/add?error=form tidak lengkap", http.StatusSeeOther)
 			return
 		}
+
+		slugs := utils.CreateSlug(name)
+		categoryData := models.Categories{
+			Name:   name,
+			Slug:   slugs,
+			UserID: user_id,
+		}
+
+		err := client.CreateCategory(os.Getenv("CATEGORIES"), categoryData)
+		if err != nil {
+			http.Redirect(w, r, "/app/category/list?error=kesalahan data, harap coba kembali", http.StatusSeeOther)
+			return
+		}
+
+		http.Redirect(w, r, "/app/category/list?msg=berhasil menambahkan kategori baru", http.StatusSeeOther)
 	}
 }
 
