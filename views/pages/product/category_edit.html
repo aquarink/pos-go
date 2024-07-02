@@ -23,6 +23,7 @@
                             {{.CSRFToken}}
                         </div>
                         <button type="submit" class="btn btn-primary">Update Category</button>
+                        <a class="btn btn-danger" href="/app/category/remove/{{.Data.category.ID}}" onclick="return confirm('Are you sure you want to remove this category?');">Remove Category</a>
                     </form>
                 </div>
             </div>

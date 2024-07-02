@@ -50,6 +50,10 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 		controllers.CategoryUpdate(w, r, client, store)
 	}))).Methods("POST")
 
+	router.Handle("/app/category/remove/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.CategoryDelete(w, r, client, store)
+	}))).Methods("GET")
+
 	router.Handle("/app/signout", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.SignoutController(w, r, client, store)
 	}))).Methods("GET")

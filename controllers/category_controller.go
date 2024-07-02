@@ -92,13 +92,49 @@ func CategoryEdit(w http.ResponseWriter, r *http.Request, client *services.Appwr
 
 func CategoryUpdate(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodPost {
-		id := r.FormValue("id")
-		name := r.FormValue("name")
+		id := r.FormValue("categoryId")
+		name := r.FormValue("categoryName")
 		user_id := models.GlobalSessionData.UserId
 
 		if id == "" || name == "" || user_id == "" {
-			http.Redirect(w, r, "/app/category/edit?data="+id+"&error=form tidak lengkap", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/category/list?error=form tidak lengkap", http.StatusSeeOther)
 			return
 		}
+
+		slugs := utils.CreateSlug(name)
+		category := models.Categories{
+			ID:     id,
+			Name:   name,
+			Slug:   slugs,
+			UserID: user_id,
+		}
+
+		_, err := client.UpdateCategory(os.Getenv("CATEGORIES"), id, category)
+		if err != nil {
+			http.Redirect(w, r, "/app/category/list?error=gagal edit kategori", http.StatusSeeOther)
+			return
+		}
+
+		http.Redirect(w, r, "/app/category/list?msg=kategori berhasil di update", http.StatusSeeOther)
+	}
+}
+
+func CategoryDelete(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		if id == "" {
+			http.Redirect(w, r, "/app/category/list?error=invalid data", http.StatusSeeOther)
+			return
+		}
+
+		err := client.DeleteCategory(os.Getenv("CATEGORIES"), id)
+		if err != nil {
+			http.Redirect(w, r, "/app/category/list?error=kategori tidak ditemukan", http.StatusSeeOther)
+			return
+		}
+
+		http.Redirect(w, r, "/app/category/list?msg=berhasil menghapus kategori", http.StatusSeeOther)
 	}
 }

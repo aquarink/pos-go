@@ -2,6 +2,7 @@ package utils
 
 import (
 	"html/template"
+	"regexp"
 	"strings"
 	"time"
 
@@ -41,4 +42,14 @@ func AddTemplateFuncs(t *template.Template) *template.Template {
 		"dateFormat": DateFormat,
 		"ucwords":    UcWords,
 	})
+}
+
+func CreateSlug(input string) string {
+	slug := strings.ToLower(input)
+	re := regexp.MustCompile(`[^\w\s]`)
+	slug = re.ReplaceAllString(slug, "")
+	slug = strings.ReplaceAll(slug, " ", "-")
+	slug = strings.Trim(slug, "-")
+
+	return slug
 }

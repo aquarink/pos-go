@@ -180,7 +180,16 @@ func (c *AppwriteClient) CategoryByUserId(collectionID, userID string) ([]models
 func (c *AppwriteClient) UpdateCategory(collectionID, id string, category models.Categories) (*models.Categories, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
-	categoryJSON, err := json.Marshal(category)
+	catData := map[string]interface{}{
+		"name":    category.Name,
+		"slug":    category.Slug,
+		"user_id": category.UserID,
+	}
+	updateData := map[string]interface{}{
+		"data": catData,
+	}
+
+	categoryJSON, err := json.Marshal(updateData)
 	if err != nil {
 		return nil, err
 	}
@@ -195,6 +204,11 @@ func (c *AppwriteClient) UpdateCategory(collectionID, id string, category models
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to update category: %s", string(body))
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -225,7 +239,8 @@ func (c *AppwriteClient) DeleteCategory(collectionID, id string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("failed to delete category")
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to delete category: %s", string(body))
 	}
 
 	return nil
