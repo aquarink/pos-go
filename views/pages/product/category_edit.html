@@ -20,7 +20,7 @@
                             <label for="categoryName" class="font-weight-bold">Category Name</label>
                             <input value="{{.Data.category.Name}}" required name="categoryName" type="text" class="form-control form-control-alternative" placeholder="Enter category name">
                             <input type="hidden" name="categoryId" value="{{.Data.category.ID}}">
-                            <input type="hidden" name="_csrf" value="{{.Session.CSRFToken}}">
+                            {{.csrfField}}
                         </div>
                         <button type="submit" class="btn btn-primary">Update Category</button>
                     </form>

@@ -7,48 +7,50 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-var store = sessions.NewCookieStore([]byte("something-very-secret"))
-
 // ngecek apakah user masih login atau masih ada session
 // pada selain auth page
-func CheckSignin(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, _ := store.Get(r, "session")
-		if session.Values["user_id"] == nil {
-			http.Redirect(w, r, "/app/signin", http.StatusSeeOther)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
+func CheckSignin(store *sessions.CookieStore) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			session, _ := store.Get(r, "session")
+			if session.Values["user_id"] == nil {
+				http.Redirect(w, r, "/app/signin", http.StatusSeeOther)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 // ngecek apakah user masih login atau masih ada session
 // pada auth page
-func CheckSession(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, _ := store.Get(r, "session")
-		if session.Values["user_id"] != nil {
-			http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
+func CheckSession(store *sessions.CookieStore) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			session, _ := store.Get(r, "session")
+			if session.Values["user_id"] != nil {
+				http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 // ini supaya sessionnya bisa di akses global
-func SessionMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, _ := store.Get(r, "session")
-		user_id, _ := session.Values["user_id"].(string)
-		role, _ := session.Values["role"].(string)
-		lastLogin, _ := session.Values["last_login"].(string)
+func SessionMiddleware(store *sessions.CookieStore) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			session, _ := store.Get(r, "session")
+			user_id, _ := session.Values["user_id"].(string)
+			role, _ := session.Values["role"].(string)
 
-		models.GlobalSessionData = models.SessionData{
-			UserId:    user_id,
-			Role:      role,
-			LastLogin: lastLogin,
-		}
+			models.GlobalSessionData = models.SessionData{
+				UserId: user_id,
+				Role:   role,
+			}
 
-		next.ServeHTTP(w, r)
-	})
+			next.ServeHTTP(w, r)
+		})
+	}
 }

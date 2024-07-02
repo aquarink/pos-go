@@ -6,9 +6,11 @@ import (
 	"pos/models"
 	"pos/services"
 	"pos/utils"
+
+	"github.com/gorilla/sessions"
 )
 
-func CategoryList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
+func CategoryList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
 		cat, err := client.ListCategory(os.Getenv("CATEGORIES"))
 		if err != nil {
@@ -31,7 +33,7 @@ func CategoryList(w http.ResponseWriter, r *http.Request, client *services.Appwr
 	}
 }
 
-func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
+func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
 
 		data := models.PublicData{
@@ -58,7 +60,7 @@ func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.Appwri
 	}
 }
 
-func CategoryEdit(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
+func CategoryEdit(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
 		id := r.URL.Query().Get("data")
 

@@ -12,14 +12,17 @@ import (
 
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 )
+
+var sessStore *sessions.CookieStore
 
 func main() {
 	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Fatalf("Some required environment variables are missing in env")
 	}
 
 	appwriteEndpoint := os.Getenv("APPWRITE_ENDPOINT")
@@ -28,20 +31,34 @@ func main() {
 	appwriteDatabaseID := os.Getenv("POS_DB")
 
 	if appwriteEndpoint == "" || appwriteProjectID == "" || appwriteAPIKey == "" || appwriteDatabaseID == "" {
-		log.Fatalf("Some required environment variables are missing")
+		log.Fatalf("Some required environment variables are missing in appwrite")
 	}
+
+	csrfAuthKey := os.Getenv("CSRF_AUTH_KEY")
+	cookiesKey := os.Getenv("COOKIES_KEY")
+
+	if csrfAuthKey == "" || cookiesKey == "" {
+		log.Fatalf("Some required environment variables are missing in csrf")
+	}
+
+	if len(cookiesKey) < 32 {
+		log.Fatal("COOKIES_KEY must be at least 32 bytes long")
+	}
+
+	sessStore = sessions.NewCookieStore([]byte(cookiesKey))
+	log.Printf("Cookie store initialized with key: %s", cookiesKey)
 
 	// Initialize Appwrite client
 	client := services.NewAppwriteClient(appwriteEndpoint, appwriteProjectID, appwriteAPIKey, appwriteDatabaseID)
 	router := mux.NewRouter()
 
-	csrfMiddleware := csrf.Protect([]byte(os.Getenv("CSRF_AUTH_KEY")), csrf.Secure(false))
+	csrfMiddleware := csrf.Protect([]byte(csrfAuthKey), csrf.Secure(false))
 
 	// middleware
-	router.Use(middleware.SessionMiddleware)
+	router.Use(middleware.SessionMiddleware(sessStore))
 
-	routes.RegisterFrontendRoutes(router)
-	routes.RegisterBackendRoutes(router, client)
+	routes.RegisterFrontendRoutes(router, sessStore)
+	routes.RegisterBackendRoutes(router, client, sessStore)
 
 	fs := http.FileServer(http.Dir("assets"))
 	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", fs))
@@ -49,7 +66,7 @@ func main() {
 	router.NotFoundHandler = http.HandlerFunc(Handle404)
 
 	if err := http.ListenAndServe(":8080", csrfMiddleware(router)); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+		log.Fatalf("Some required environment variables are missing in ListenAndServe")
 	}
 }
 

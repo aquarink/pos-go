@@ -2,20 +2,20 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"pos/models"
 	"pos/services"
 	"pos/utils"
-	"strings"
 
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var store = sessions.NewCookieStore([]byte("something-very-secret"))
+// var store = sessions.NewCookieStore([]byte(os.Getenv("COOKIES_KEY")))
 
-func SignupController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
+func SignupController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
 		data := models.PublicData{
 			Title: "Sign Up",
@@ -104,7 +104,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 	}
 }
 
-func SigninController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
+func SigninController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
 		data := models.PublicData{
 			Title: "Sign In",
@@ -124,27 +124,32 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 
 		err := utils.VerifyTurnstile(turnstileToken)
 		if err != nil {
+			log.Printf("Turnstile validation failed: %v", err)
 			http.Redirect(w, r, "/app/signup?error=validasi gagal", http.StatusSeeOther)
 			return
 		} else {
 			if email == "" || password == "" {
+				log.Printf("Email or password is empty")
 				http.Redirect(w, r, "/app/signin?error=form tidak lengkap", http.StatusSeeOther)
 				return
 			}
 
 			user, err := client.GetUserByEmail(os.Getenv("USERS"), email)
 			if err != nil {
+				log.Printf("Error getting user by email: %v", err)
 				http.Redirect(w, r, "/app/signin?error=email atau password salah", http.StatusSeeOther)
 				return
 			}
 
 			err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 			if err != nil {
+				log.Printf("Password mismatch: %v", err)
 				http.Redirect(w, r, "/app/signin?error=email atau password salah", http.StatusSeeOther)
 				return
 			}
 
 			if !user.EmailVerified {
+				log.Printf("Email not verified for user: %v", user.Email)
 				http.Redirect(w, r, "/app/signin?error=email belum diverifikasi", http.StatusSeeOther)
 				return
 			}
@@ -152,15 +157,21 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 			// Set session
 			session, _ := store.Get(r, "session")
 			session.Values["user_id"] = user.ID
-			session.Values["role"] = strings.Title(strings.ToLower(user.Role))
-			session.Save(r, w)
+			session.Values["role"] = utils.UcWords(user.Role)
+
+			err = session.Save(r, w)
+			if err != nil {
+				log.Printf("Error saving session: %v", err)
+				http.Redirect(w, r, "/app/signin?error=perbaikan sistem, mohon coba lagi nant", http.StatusSeeOther)
+				return
+			}
 
 			http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)
 		}
 	}
 }
 
-func DashboardController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
+func DashboardController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
 		data := models.PublicData{
 			Title:   "Dashboard",
@@ -176,7 +187,7 @@ func DashboardController(w http.ResponseWriter, r *http.Request, client *service
 	http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)
 }
 
-func SignoutController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient) {
+func SignoutController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	session, _ := store.Get(r, "session")
 	delete(session.Values, "user_id")
 	session.Save(r, w)
