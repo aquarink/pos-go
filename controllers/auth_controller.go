@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"pos/models"
@@ -57,7 +56,6 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 			if err != nil {
-				log.Println("Error generating password hash:", err)
 				http.Redirect(w, r, "/app/signup?error=internal server error", http.StatusSeeOther)
 				return
 			}
@@ -70,7 +68,6 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			err = client.CreateUser(os.Getenv("USERS"), user)
 			if err != nil {
-				log.Println("Error creating user:", err)
 				http.Redirect(w, r, "/app/signup?error=internal server error", http.StatusSeeOther)
 				return
 			}
@@ -83,7 +80,6 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			err = utils.SendEmail(email, subject, text, html)
 			if err != nil {
-				log.Println("Error sending verification email:", err)
 				http.Redirect(w, r, "/app/signup?error=gagal mengirim email verifikasi", http.StatusSeeOther)
 				return
 			}
@@ -99,7 +95,6 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			err = client.CreateEmail(os.Getenv("MAILS"), emailDoc)
 			if err != nil {
-				log.Println("Error creating email document:", err)
 				http.Redirect(w, r, "/app/signup?error=internal server error", http.StatusSeeOther)
 				return
 			}
@@ -174,8 +169,6 @@ func DashboardController(w http.ResponseWriter, r *http.Request, client *service
 			Msg:     r.URL.Query().Get("msg"),
 			Session: models.GlobalSessionData,
 		}
-
-		log.Println("======== :", models.GlobalSessionData.Role)
 
 		utils.RenderTemplateWithSidebar(w, "views/templates/backend.html", "views/pages/dashboard/dashboard.html", data)
 		return

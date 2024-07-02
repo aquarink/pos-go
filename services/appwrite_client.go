@@ -2,7 +2,6 @@ package services
 
 import (
 	"bytes"
-	"log"
 	"net/http"
 )
 
@@ -15,7 +14,6 @@ type AppwriteClient struct {
 }
 
 func NewAppwriteClient(endpoint, projectID, apiKey, databaseID string) *AppwriteClient {
-	log.Printf("Appwrite client initialized with endpoint: %s, projectID: %s", endpoint, projectID)
 	return &AppwriteClient{
 		Client:     &http.Client{},
 		Endpoint:   endpoint,

@@ -30,9 +30,6 @@ func main() {
 		log.Fatalf("Some required environment variables are missing")
 	}
 
-	log.Printf("Appwrite endpoint: %s", appwriteEndpoint)
-	log.Printf("Appwrite project ID: %s", appwriteProjectID)
-
 	// Initialize Appwrite client
 	client := services.NewAppwriteClient(appwriteEndpoint, appwriteProjectID, appwriteAPIKey, appwriteDatabaseID)
 	router := mux.NewRouter()
@@ -48,7 +45,6 @@ func main() {
 
 	router.NotFoundHandler = http.HandlerFunc(Handle404)
 
-	log.Println("Server started at :8080")
 	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
@@ -64,15 +60,12 @@ func Handle404(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("views/pages/auth/404.html")
 	if err != nil {
-		log.Println("Error parsing 404 template:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	log.Println("Rendering 404 template")
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		log.Println("Error executing 404 template:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

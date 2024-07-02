@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"log"
 	"net/smtp"
 	"os"
 )
@@ -26,10 +25,8 @@ func SendEmail(to, subject, text, html string) error {
 	err := smtp.SendMail(host+":"+port, auth, username, []string{to}, []byte(msg))
 
 	if err != nil {
-		log.Printf("Failed to send email: %v", err)
 		return err
 	}
 
-	log.Println("Email sent successfully")
 	return nil
 }
