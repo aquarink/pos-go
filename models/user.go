@@ -7,6 +7,8 @@ type User struct {
 	Password      string `json:"password"`
 	EmailVerified bool   `json:"email_verified"`
 	Role          string `json:"role"`
+	CreatedAt     string `json:"$createdAt"`
+	UpdatedAt     string `json:"$updatedAt"`
 }
 
 // Define constants for valid roles
@@ -27,10 +29,12 @@ func IsValidRole(role string) bool {
 }
 
 type Mails struct {
-	ID      string `json:"$id"`
-	UserID  string
-	Email   string
-	Subject string
-	Text    string
-	HTML    string
+	ID        string `json:"$id"`
+	UserID    string
+	Email     string
+	Subject   string
+	Text      string
+	HTML      string
+	CreatedAt string `json:"$createdAt"`
+	UpdatedAt string `json:"$updatedAt"`
 }

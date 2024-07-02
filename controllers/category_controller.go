@@ -26,7 +26,7 @@ func CategoryList(w http.ResponseWriter, r *http.Request, client *services.Appwr
 			Session: models.GlobalSessionData,
 		}
 
-		utils.RenderTemplateWithSidebar(w, "views/templates/backend.html", "views/pages/product/category_list.html", data)
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/product/category_list.html", data)
 		return
 	}
 }
@@ -42,7 +42,7 @@ func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			Session: models.GlobalSessionData,
 		}
 
-		utils.RenderTemplateWithSidebar(w, "views/templates/backend.html", "views/pages/product/category_add.html", data)
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/product/category_add.html", data)
 		return
 	}
 
@@ -67,15 +67,21 @@ func CategoryEdit(w http.ResponseWriter, r *http.Request, client *services.Appwr
 			return
 		}
 
+		category, err := client.CategoryById(os.Getenv("CATEGORIES"), id)
+		if err != nil {
+			http.Redirect(w, r, "/app/category/list?error=category not found", http.StatusSeeOther)
+			return
+		}
+
 		data := models.PublicData{
 			Title:   "Edit Category",
-			Data:    map[string]interface{}{},
+			Data:    map[string]interface{}{"category": category},
 			Error:   r.URL.Query().Get("error"),
 			Msg:     r.URL.Query().Get("msg"),
 			Session: models.GlobalSessionData,
 		}
 
-		utils.RenderTemplateWithSidebar(w, "views/templates/backend.html", "views/pages/product/category_edit.html", data)
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/product/category_edit.html", data)
 		return
 	}
 

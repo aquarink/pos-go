@@ -23,7 +23,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 			Error: r.URL.Query().Get("error"),
 			Msg:   r.URL.Query().Get("msg"),
 		}
-		utils.RenderTemplate(w, "views/templates/auth.html", "views/pages/auth/signup.html", data)
+		utils.RenderTemplate(w, r, "views/templates/auth.html", "views/pages/auth/signup.html", data)
 		return
 	}
 
@@ -113,7 +113,7 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 			Msg:   r.URL.Query().Get("msg"),
 		}
 
-		utils.RenderTemplate(w, "views/templates/auth.html", "views/pages/auth/signin.html", data)
+		utils.RenderTemplate(w, r, "views/templates/auth.html", "views/pages/auth/signin.html", data)
 		return
 	}
 
@@ -170,7 +170,7 @@ func DashboardController(w http.ResponseWriter, r *http.Request, client *service
 			Session: models.GlobalSessionData,
 		}
 
-		utils.RenderTemplateWithSidebar(w, "views/templates/backend.html", "views/pages/dashboard/dashboard.html", data)
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/dashboard/dashboard.html", data)
 		return
 	}
 	http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)

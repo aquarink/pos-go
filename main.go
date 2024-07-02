@@ -10,6 +10,7 @@ import (
 	"pos/routes"
 	"pos/services"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -34,6 +35,8 @@ func main() {
 	client := services.NewAppwriteClient(appwriteEndpoint, appwriteProjectID, appwriteAPIKey, appwriteDatabaseID)
 	router := mux.NewRouter()
 
+	csrfMiddleware := csrf.Protect([]byte(os.Getenv("CSRF_AUTH_KEY")), csrf.Secure(false))
+
 	// middleware
 	router.Use(middleware.SessionMiddleware)
 
@@ -45,7 +48,7 @@ func main() {
 
 	router.NotFoundHandler = http.HandlerFunc(Handle404)
 
-	if err := http.ListenAndServe(":8080", router); err != nil {
+	if err := http.ListenAndServe(":8080", csrfMiddleware(router)); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }
