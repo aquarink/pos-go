@@ -40,10 +40,15 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 		controllers.CategoryAdd(w, r, client, store)
 	}))).Methods("GET", "POST")
 
-	// edit form dan submit
-	router.Handle("/app/category/edit", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// edit form
+	router.Handle("/app/category/edit/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.CategoryEdit(w, r, client, store)
-	}))).Methods("GET", "POST")
+	}))).Methods("GET")
+
+	// edit form submit
+	router.Handle("/app/category/edit", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.CategoryUpdate(w, r, client, store)
+	}))).Methods("POST")
 
 	router.Handle("/app/signout", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.SignoutController(w, r, client, store)

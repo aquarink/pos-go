@@ -7,6 +7,7 @@ import (
 	"pos/services"
 	"pos/utils"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
 
@@ -62,7 +63,8 @@ func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.Appwri
 
 func CategoryEdit(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
-		id := r.URL.Query().Get("data")
+		vars := mux.Vars(r)
+		id := vars["id"]
 
 		if id == "" {
 			http.Redirect(w, r, "/app/category/list?error=invalid data", http.StatusSeeOther)
@@ -86,8 +88,9 @@ func CategoryEdit(w http.ResponseWriter, r *http.Request, client *services.Appwr
 		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/product/category_edit.html", data)
 		return
 	}
+}
 
-	//
+func CategoryUpdate(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodPost {
 		id := r.FormValue("id")
 		name := r.FormValue("name")
