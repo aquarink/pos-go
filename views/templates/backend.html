@@ -126,7 +126,7 @@
                             <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
                                 <i class="fa fa-user me-sm-1"></i>
                                 {{ if .Session.Role }}
-                                    <span>{{ .Session.Role }}</span>
+                                    <span>{{ .Session.Role | ucwords }}</span>
                                 {{ else }}
                                     <span>No Role</span>
                                 {{ end }}

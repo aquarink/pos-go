@@ -1,7 +1,7 @@
 package models
 
 type User struct {
-	ID            string
+	ID            string `json:"$id"`
 	Name          string `json:"name"`
 	Email         string `json:"email"`
 	Password      string `json:"password"`
@@ -27,7 +27,7 @@ func IsValidRole(role string) bool {
 }
 
 type Mails struct {
-	ID      string
+	ID      string `json:"$id"`
 	UserID  string
 	Email   string
 	Subject string

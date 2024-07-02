@@ -39,10 +39,12 @@ func CheckSession(next http.Handler) http.Handler {
 func SessionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, _ := store.Get(r, "session")
+		user_id, _ := session.Values["user_id"].(string)
 		role, _ := session.Values["role"].(string)
 		lastLogin, _ := session.Values["last_login"].(string)
 
 		models.GlobalSessionData = models.SessionData{
+			UserId:    user_id,
 			Role:      role,
 			LastLogin: lastLogin,
 		}

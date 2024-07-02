@@ -9,6 +9,7 @@ type PublicData struct {
 }
 
 type SessionData struct {
+	UserId    string
 	Role      string
 	LastLogin string
 }

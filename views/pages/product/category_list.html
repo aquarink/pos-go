@@ -1,3 +1,4 @@
+{{ define "content" }}
 <div class="row mt-4">
     <div class="col-lg-12 mb-lg-0 mb-4">
         <div class="card">
@@ -7,15 +8,16 @@
                     
                     <div class="text-primary"></div>
                     <div>
-                        <% if (locals.msg) { %>
-                            <p class="text-info"><%= msg %></p>
-                        <% } %>
-                        <% if (locals.error) { %>
-                            <p class="text-danger"><%= error %></p>
-                        <% } %>
+                        {{ if .Error }}
+                            <p class="text-danger">{{ .Error }}</p>
+                        {{ end }}
+
+                        {{ if .Msg }}
+                            <p class="text-info">{{ .Msg }}</p>
+                        {{ end }}
                     </div>
 
-                    <form action="/back/category" method="get">
+                    <form action="/app/category" method="get">
                         <div class="form-group">
                             <div class="input-group mb-4">
                               <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span>
@@ -33,27 +35,23 @@
                                 <tr>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Title</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Slug</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Creation Date</th>
                                     <th class="text-secondary opacity-7"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% categoryList.documents.forEach(function(category) { %>
+                                {{range .Data.categories}}
                                     <tr>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><%= category.name.replace(/\b\w/g, char => char.toUpperCase()) %></p>
+                                            <p class="text-sm font-weight-bold mb-0">{{.Name | ucwords}}</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0"><%= category.slug %></p>
-                                        </td>
-                                        <td>
-                                            <p class="text-sm font-weight-bold mb-0"><%= category.$createdAt ? new Date(category.$createdAt).toLocaleDateString("en-US") : 'N/A' %></p>
+                                            <p class="text-sm font-weight-bold mb-0">{{.Slug}}</p>
                                         </td>
                                         <td class="align-middle">
-                                            <a href="/back/category/edit/<%= category.$id %>" class="text-secondary font-weight-bold text-xs">Edit</a>
+                                            <a href="/app/category/edit/{{.ID}}" class="text-secondary font-weight-bold text-xs">Edit</a>
                                         </td>
                                     </tr>
-                                <% }); %>
+                                {{end}}
                             </tbody>
                         </table>
                     </div>
@@ -62,3 +60,4 @@
         </div>
     </div>
 </div>
+{{ end }}
