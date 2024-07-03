@@ -66,6 +66,10 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 		controllers.ProductList(w, r, client, store)
 	}))).Methods("GET")
 
+	router.Handle("/app/product/", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.ProductList(w, r, client, store)
+	}))).Methods("GET")
+
 	router.Handle("/app/product/list", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.ProductList(w, r, client, store)
 	}))).Methods("GET")
