@@ -3,6 +3,7 @@ package utils
 import (
 	"html/template"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -52,4 +53,37 @@ func CreateSlug(input string) string {
 	slug = strings.Trim(slug, "-")
 
 	return slug
+}
+
+func NumberFormat(number float64, decimals int) string {
+	decPoint := "."
+	thousandsSep := ","
+
+	// ANGKA KE STRING
+	strNumber := strconv.FormatFloat(number, 'f', decimals, 64)
+
+	// SPLIT
+	parts := strings.Split(strNumber, ".")
+	integerPart := parts[0]
+	fractionalPart := ""
+	if len(parts) > 1 {
+		fractionalPart = parts[1]
+	}
+
+	// KASIH PER NOL 3
+	result := ""
+	count := 0
+	for i := len(integerPart) - 1; i >= 0; i-- {
+		if count > 0 && count%3 == 0 {
+			result = thousandsSep + result
+		}
+		result = string(integerPart[i]) + result
+		count++
+	}
+
+	if decimals > 0 {
+		result = result + decPoint + fractionalPart
+	}
+
+	return result
 }
