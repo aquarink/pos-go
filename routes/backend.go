@@ -23,6 +23,10 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 		controllers.SignupController(w, r, client, store)
 	}))).Methods("GET", "POST")
 
+	router.Handle("/app/signout", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.SignoutController(w, r, client, store)
+	}))).Methods("GET")
+
 	router.Handle("/app/dashboard", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.DashboardController(w, r, client, store)
 	}))).Methods("GET")
@@ -56,10 +60,6 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 		controllers.CategoryDelete(w, r, client, store)
 	}))).Methods("GET")
 
-	router.Handle("/app/signout", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		controllers.SignoutController(w, r, client, store)
-	}))).Methods("GET")
-
 	// PRODUCT
 
 	router.Handle("/app/product", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +80,11 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 
 	router.Handle("/app/product/edit/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.ProductEdit(w, r, client, store)
-	}))).Methods("GET", "POST")
+	}))).Methods("GET")
+
+	router.Handle("/app/product/update", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.ProductUpdate(w, r, client, store)
+	}))).Methods("POST")
 
 	router.Handle("/app/product/delete/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.ProductDelete(w, r, client, store)

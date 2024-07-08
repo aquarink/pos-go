@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -21,7 +22,6 @@ func ProductList(w http.ResponseWriter, r *http.Request, client *services.Appwri
 	if r.Method == http.MethodGet {
 		prods, err := client.ListProducts(os.Getenv("PRODUCTS"))
 		if err != nil {
-			log.Println(err.Error())
 			http.Redirect(w, r, "/app/dashboard?error=failed to load products", http.StatusSeeOther)
 			return
 		}
@@ -76,7 +76,7 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 
 		categoriesData, err := client.CategoryById(os.Getenv("CATEGORIES"), category)
 		if err != nil {
-			http.Redirect(w, r, "/app/dashboard?error=failed to load products", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/product/list?error=failed to load products", http.StatusSeeOther)
 			return
 		}
 
@@ -105,8 +105,6 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 
 		tempFile, err := os.CreateTemp("", uniqueFileName)
 		if err != nil {
-
-			log.Println(err.Error())
 			http.Redirect(w, r, "/app/product/add?error=failed to create temp file", http.StatusSeeOther)
 			return
 		}
@@ -121,7 +119,6 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 
 		photoURL, err := client.UploadFile(os.Getenv("PRODUCTS_BUCKET"), uniqueFileName, tempFile.Name())
 		if err != nil {
-			log.Println(err.Error())
 			http.Redirect(w, r, "/app/product/add?error=failed to upload photo to server", http.StatusSeeOther)
 			return
 		}
@@ -130,8 +127,6 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 
 		now := time.Now().Format(time.RFC3339)
 
-		log.Println("uniqueFileName : " + uniqueFileName)
-		log.Println("resPhoto : " + photoURL)
 		product := models.Products{
 			Name:      name,
 			Category:  []string{categoriesData.ID, categoriesData.Name},
@@ -145,7 +140,6 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 
 		err = client.CreateProduct(os.Getenv("PRODUCTS"), product)
 		if err != nil {
-			log.Printf(err.Error())
 			http.Redirect(w, r, "/app/product/add?error=failed to create product", http.StatusSeeOther)
 			return
 		}
@@ -170,9 +164,18 @@ func ProductEdit(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
+		category, err := client.CategoryByUserId(os.Getenv("CATEGORIES"), models.GlobalSessionData.UserId)
+		if err != nil {
+			http.Redirect(w, r, "/app/product/list?error=failed to load products", http.StatusSeeOther)
+			return
+		}
+
 		data := models.PublicData{
-			Title:   "Edit Product",
-			Data:    map[string]interface{}{"product": product},
+			Title: "Update Product",
+			Data: map[string]interface{}{
+				"product":    product,
+				"categories": category,
+			},
 			Error:   r.URL.Query().Get("error"),
 			Msg:     r.URL.Query().Get("msg"),
 			Session: models.GlobalSessionData,
@@ -181,79 +184,108 @@ func ProductEdit(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/product/product_edit.html", data)
 		return
 	}
+}
 
+func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodPost {
-		id := r.FormValue("productId")
 		name := r.FormValue("name")
 		category := r.FormValue("category")
 		price := r.FormValue("price")
+		productId := r.FormValue("productId")
 		user_id := models.GlobalSessionData.UserId
 
-		if id == "" || name == "" || category == "" || price == "" || user_id == "" {
-			http.Redirect(w, r, "/app/product/edit/"+id+"?error=form tidak lengkap", http.StatusSeeOther)
+		if name == "" || category == "" || price == "" || productId == "" || user_id == "" {
+			http.Redirect(w, r, "/app/product/list?error=form tidak lengkap", http.StatusSeeOther)
+			return
+		}
+
+		product, err := client.GetProductByID(os.Getenv("PRODUCTS"), productId)
+		if err != nil {
+			http.Redirect(w, r, "/app/product/list?error=product not found", http.StatusSeeOther)
 			return
 		}
 
 		categoriesData, err := client.CategoryById(os.Getenv("CATEGORIES"), category)
 		if err != nil {
-			http.Redirect(w, r, "/app/dashboard?error=failed to load products", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/product/list?error=failed to load categories", http.StatusSeeOther)
 			return
 		}
 
 		priceInt, err := strconv.Atoi(price)
 		if err != nil {
-			http.Redirect(w, r, "/app/product/edit/"+id+"?error=invalid price", http.StatusSeeOther)
+			http.Redirect(w, r, fmt.Sprintf("/app/product/edit/%s?error=invalid price", productId), http.StatusSeeOther)
 			return
 		}
 
-		// Handle file upload
-		var photoID string
+		var photoURL string
+		var projectID string
+
 		file, _, err := r.FormFile("photo")
 		if err == nil {
 			defer file.Close()
 
-			tempFile, err := os.CreateTemp("", "upload-*.png")
+			// Generate a unique file name using uuidgen command
+			uniqueFileNameBytes, err := exec.Command("uuidgen").Output()
 			if err != nil {
-				http.Redirect(w, r, "/app/product/edit/"+id+"?error=failed to create temp file", http.StatusSeeOther)
+				log.Println("ddd : " + err.Error())
+				http.Redirect(w, r, fmt.Sprintf("/app/product/edit/%s?error=failed to generate unique file name", productId), http.StatusSeeOther)
 				return
 			}
+
+			uniqueFileName := strings.TrimSpace(string(uniqueFileNameBytes))
+
+			tempFile, err := os.CreateTemp("", uniqueFileName)
+			if err != nil {
+				log.Println("dddasasas : " + err.Error())
+				http.Redirect(w, r, "/app/product/add?error=failed to create temp file", http.StatusSeeOther)
+				return
+			}
+			defer tempFile.Close()
 			defer os.Remove(tempFile.Name())
 
 			_, err = io.Copy(tempFile, file)
 			if err != nil {
-				http.Redirect(w, r, "/app/product/edit/"+id+"?error=failed to save temp file", http.StatusSeeOther)
+				log.Println("cccc : " + err.Error())
+				http.Redirect(w, r, "/app/product/add?error=failed to save temp file", http.StatusSeeOther)
 				return
 			}
 
-			photoID, err = client.UploadFile(os.Getenv("BUCKET_ID"), "unique()", tempFile.Name())
+			photoURL, err = client.UploadFile(os.Getenv("PRODUCTS_BUCKET"), uniqueFileName, tempFile.Name())
 			if err != nil {
-				http.Redirect(w, r, "/app/product/edit/"+id+"?error=failed to upload photo to server", http.StatusSeeOther)
+				log.Println("aaa : " + err.Error())
+				http.Redirect(w, r, fmt.Sprintf("/app/product/edit/%s?error=failed to upload file", productId), http.StatusSeeOther)
 				return
 			}
+
+			projectID = os.Getenv("APPWRITE_PROJECT_ID")
+		} else {
+			photoURL = product.Photo[0]
+			projectID = product.Photo[1]
 		}
 
 		slug := utils.CreateSlug(name)
 
-		product := models.Products{
-			ID:       id,
-			Name:     name,
-			Category: []string{categoriesData.ID, categoriesData.Name},
-			Price:    priceInt,
-			UserID:   user_id,
-			Slug:     slug,
+		now := time.Now().Format(time.RFC3339)
+
+		productUpdate := models.Products{
+			Name:      name,
+			Category:  []string{categoriesData.ID, categoriesData.Name},
+			Price:     priceInt,
+			UserID:    user_id,
+			Photo:     []string{photoURL, projectID},
+			Slug:      slug,
+			CreatedAt: now,
+			UpdatedAt: now,
 		}
 
-		if photoID != "" {
-			product.Photo = []string{photoID, os.Getenv("APPWRITE_PROJECT_ID")}
-		}
-
-		_, err = client.UpdateProduct(os.Getenv("PRODUCTS"), id, product)
+		_, err = client.UpdateProduct(os.Getenv("PRODUCTS"), productId, productUpdate)
 		if err != nil {
-			http.Redirect(w, r, "/app/product/edit/"+id+"?error=failed to update product", http.StatusSeeOther)
+			log.Println("yyy : " + err.Error())
+			http.Redirect(w, r, "/app/product/list?error=failed to create product", http.StatusSeeOther)
 			return
 		}
 
-		http.Redirect(w, r, "/app/product/list?msg=product updated successfully", http.StatusSeeOther)
+		http.Redirect(w, r, "/app/product/list?msg=product created successfully", http.StatusSeeOther)
 	}
 }
 

@@ -35,8 +35,7 @@
                                         <td>{{.Price}}</td>
                                         <td><img src="{{index .Photo 0}}?project={{index .Photo 1}}" alt="{{.Name}}" style="max-width: 100px;"></td>
                                         <td>
-                                            <a href="/app/product/edit/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
-                                            <a href="/app/product/delete/{{.ID}}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                                            <a href="/app/product/edit/{{.ID}}" class="text-secondary font-weight-bold text-xs">Edit</a>
                                         </td>
                                     </tr>
                                 {{end}}

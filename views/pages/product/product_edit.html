@@ -2,11 +2,6 @@
 <div class="row mt-4">
     <div class="col-lg-12 mb-lg-0 mb-4">
         <div class="card">
-            <div class="card-header pb-0 p-3">
-                <div class="d-flex justify-content-between">
-                    <h4>Edit Product</h4>
-                </div>
-            </div>
             <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
                 <div class="p-4" style="background-color: #f8f9fa;">
                     {{if .Error}}
@@ -15,25 +10,39 @@
                     {{if .Msg}}
                         <p class="text-info">{{.Msg}}</p>
                     {{end}}
-                    <form method="post" action="/app/product/edit" enctype="multipart/form-data">
+                    <form method="post" action="/app/product/update" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="name" class="font-weight-bold">Product Name</label>
-                            <input value="{{.Data.product.Name}}" required name="name" type="text" class="form-control form-control-alternative" placeholder="Enter product name">
+                            <input value="{{ .Data.product.Name }}" required name="name" type="text" class="form-control form-control-alternative" placeholder="Enter product name" >
+                            {{.CSRFToken}}
+                            <input required type="hidden" name="productId" value="{{.Data.product.ID}}">
                         </div>
+
                         <div class="form-group">
                             <label for="category" class="font-weight-bold">Category</label>
-                            <input value="{{.Data.product.Category}}" required name="category" type="text" class="form-control form-control-alternative" placeholder="Enter category">
+                            <select required name="category" class="form-control form-control-alternative">
+                                {{range .Data.categories}}
+                                    <option value="{{.ID}}" {{if eq .ID (index $.Data.product.Category 0)}}selected{{end}}>{{.Name | ucwords}}</option>
+                                {{end}}
+                            </select>
                         </div>
+
                         <div class="form-group">
-                            <label for="price" class="font-weight-bold">Price</label>
-                            <input value="{{.Data.product.Price}}" required name="price" type="text" class="form-control form-control-alternative" placeholder="Enter price">
+                            <label for="price" class="font-weight-bold">Product Price</label>
+                            <input value="{{ .Data.product.Price }}" required name="price" type="number" class="form-control form-control-alternative" placeholder="Enter price">
                         </div>
+
                         <div class="form-group">
-                            <label for="photo" class="font-weight-bold">Photo</label>
-                            <input name="photo" type="file" class="form-control form-control-alternative">
+                            <label for="photo" class="font-weight-bold">Photo Product</label>
+                            <input name="photo" type="file" class="form-control form-control-alternative" accept=".png, .jpeg, .jpg">
                         </div>
-                        <input type="hidden" name="productId" value="{{.Data.product.ID}}">
+
+                        <div class="form-group">
+                            <label for="existingPhoto" class="font-weight-bold">Existing Photo Product</label>
+                            <img src="{{index .Data.product.Photo 0}}?project={{index .Data.product.Photo 1}}" alt="{{.Data.product.Name}}" style="max-width: 100px;">
+                        </div>
                         <button type="submit" class="btn btn-primary">Update Product</button>
+                        <a href="/app/product/delete/{{ .Data.product.ID }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?');">Remove Product</a>
                     </form>
                 </div>
             </div>
