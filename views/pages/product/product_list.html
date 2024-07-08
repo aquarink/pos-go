@@ -11,10 +11,10 @@
             <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
                 <div class="p-4" style="background-color: #f8f9fa;">
                     {{if .Error}}
-                        <p class="text-danger">{{.Error}}</p>
+                        <p class="text-danger">{{.Error | ucwords}}</p>
                     {{end}}
                     {{if .Msg}}
-                        <p class="text-info">{{.Msg}}</p>
+                        <p class="text-info">{{.Msg | ucwords}}</p>
                     {{end}}
                     <div class="table-responsive">
                         <table class="table align-items-center mb-0">

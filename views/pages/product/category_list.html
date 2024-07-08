@@ -8,13 +8,12 @@
                     
                     <div class="text-primary"></div>
                     <div>
-                        {{ if .Error }}
-                            <p class="text-danger">{{ .Error }}</p>
-                        {{ end }}
-
-                        {{ if .Msg }}
-                            <p class="text-info">{{ .Msg }}</p>
-                        {{ end }}
+                        {{if .Error}}
+                            <p class="text-danger">{{.Error | ucwords}}</p>
+                        {{end}}
+                        {{if .Msg}}
+                            <p class="text-info">{{.Msg | ucwords}}</p>
+                        {{end}}
                     </div>
 
                     <form action="/app/category" method="get">

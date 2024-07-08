@@ -10,13 +10,12 @@
                                 <h3 class="font-weight-bolder text-info text-gradient">Welcome back</h3>
                                 <p class="mb-0">Enter your email and password to sign in</p>
                                 
-                                {{ if .Error }}
-                                    <p class="text-danger">{{ .Error }}</p>
-                                {{ end }}
-
-                                {{ if .Msg }}
-                                    <p class="text-info">{{ .Msg }}</p>
-                                {{ end }}
+                                {{if .Error}}
+                                    <p class="text-danger">{{.Error | ucwords}}</p>
+                                {{end}}
+                                {{if .Msg}}
+                                    <p class="text-info">{{.Msg | ucwords}}</p>
+                                {{end}}
                             </div>
                             <div class="card-body">
                                 <form role="form" action="/app/signin" method="POST">
