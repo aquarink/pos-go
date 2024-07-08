@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"pos/models"
@@ -124,32 +123,27 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 
 		err := utils.VerifyTurnstile(turnstileToken)
 		if err != nil {
-			log.Printf("Turnstile validation failed: %v", err)
 			http.Redirect(w, r, "/app/signup?error=validasi gagal", http.StatusSeeOther)
 			return
 		} else {
 			if email == "" || password == "" {
-				log.Printf("Email or password is empty")
 				http.Redirect(w, r, "/app/signin?error=form tidak lengkap", http.StatusSeeOther)
 				return
 			}
 
 			user, err := client.GetUserByEmail(os.Getenv("USERS"), email)
 			if err != nil {
-				log.Printf("Error getting user by email: %v", email)
 				http.Redirect(w, r, "/app/signin?error=email atau password salah", http.StatusSeeOther)
 				return
 			}
 
 			err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 			if err != nil {
-				log.Printf("Password mismatch: %v", err)
 				http.Redirect(w, r, "/app/signin?error=email atau password salah", http.StatusSeeOther)
 				return
 			}
 
 			if !user.EmailVerified {
-				log.Printf("Email not verified for user: %v", user.Email)
 				http.Redirect(w, r, "/app/signin?error=email belum diverifikasi", http.StatusSeeOther)
 				return
 			}
@@ -161,7 +155,6 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			err = session.Save(r, w)
 			if err != nil {
-				log.Printf("Error saving session: %v", err)
 				http.Redirect(w, r, "/app/signin?error=perbaikan sistem, mohon coba lagi nant", http.StatusSeeOther)
 				return
 			}

@@ -46,7 +46,6 @@ func main() {
 	}
 
 	sessStore = sessions.NewCookieStore([]byte(cookiesKey))
-	log.Printf("Cookie store initialized with key: %s", cookiesKey)
 
 	// Initialize Appwrite client
 	client := services.NewAppwriteClient(appwriteEndpoint, appwriteProjectID, appwriteAPIKey, appwriteDatabaseID)

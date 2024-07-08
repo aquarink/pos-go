@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -187,7 +186,6 @@ func (c *AppwriteClient) DeleteProduct(collectionID, id string) error {
 func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (string, error) {
 	url := fmt.Sprintf("%s/storage/buckets/%s/files", c.Endpoint, bucketID)
 
-	log.Printf("Opening file: %s", filePath)
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to open file: %w", err)
@@ -197,8 +195,7 @@ func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (s
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
 
-	log.Printf("Creating form field for file ID: %s", fileID)
-	// Write the file ID
+	// pake the file ID
 	fw, err := w.CreateFormField("fileId")
 	if err != nil {
 		return "", fmt.Errorf("failed to create form field for file ID: %w", err)
@@ -208,8 +205,7 @@ func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (s
 		return "", fmt.Errorf("failed to write file ID: %w", err)
 	}
 
-	// Write the file data
-	log.Printf("Creating form file with base name: %s", filepath.Base(filePath))
+	// bikin the file data
 	fw, err = w.CreateFormFile("file", filepath.Base(filePath))
 	if err != nil {
 		return "", fmt.Errorf("failed to create form file: %w", err)
@@ -221,7 +217,6 @@ func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (s
 
 	w.Close()
 
-	log.Printf("Creating HTTP request to URL: %s", url)
 	req, err := http.NewRequest("POST", url, &b)
 	if err != nil {
 		return "", fmt.Errorf("failed to create HTTP request: %w", err)
@@ -230,7 +225,6 @@ func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (s
 	req.Header.Set("X-Appwrite-Project", c.ProjectID)
 	req.Header.Set("X-Appwrite-Key", c.APIKey)
 
-	log.Printf("Executing HTTP request")
 	resp, err := c.Client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to execute HTTP request: %w", err)
@@ -242,7 +236,6 @@ func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (s
 		return "", fmt.Errorf("failed to upload file, status code: %d, response: %s", resp.StatusCode, string(body))
 	}
 
-	log.Printf("Reading response body")
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to read response body: %w", err)
@@ -251,13 +244,12 @@ func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (s
 	var fileResponse struct {
 		FileID string `json:"$id"`
 	}
-	log.Printf("Unmarshalling response body")
+
 	err = json.Unmarshal(body, &fileResponse)
 	if err != nil {
 		return "", fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
-	log.Printf("File uploaded successfully with file ID: %s", fileResponse.FileID)
 	fileURL := fmt.Sprintf("%s/storage/buckets/%s/files/%s/view", c.Endpoint, bucketID, fileResponse.FileID)
 	return fileURL, nil
 }

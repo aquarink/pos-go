@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -227,7 +226,6 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 			// Generate a unique file name using uuidgen command
 			uniqueFileNameBytes, err := exec.Command("uuidgen").Output()
 			if err != nil {
-				log.Println("ddd : " + err.Error())
 				http.Redirect(w, r, fmt.Sprintf("/app/product/edit/%s?error=failed to generate unique file name", productId), http.StatusSeeOther)
 				return
 			}
@@ -236,7 +234,6 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 
 			tempFile, err := os.CreateTemp("", uniqueFileName)
 			if err != nil {
-				log.Println("dddasasas : " + err.Error())
 				http.Redirect(w, r, "/app/product/add?error=failed to create temp file", http.StatusSeeOther)
 				return
 			}
@@ -245,14 +242,12 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 
 			_, err = io.Copy(tempFile, file)
 			if err != nil {
-				log.Println("cccc : " + err.Error())
 				http.Redirect(w, r, "/app/product/add?error=failed to save temp file", http.StatusSeeOther)
 				return
 			}
 
 			photoURL, err = client.UploadFile(os.Getenv("PRODUCTS_BUCKET"), uniqueFileName, tempFile.Name())
 			if err != nil {
-				log.Println("aaa : " + err.Error())
 				http.Redirect(w, r, fmt.Sprintf("/app/product/edit/%s?error=failed to upload file", productId), http.StatusSeeOther)
 				return
 			}
@@ -280,7 +275,6 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 
 		_, err = client.UpdateProduct(os.Getenv("PRODUCTS"), productId, productUpdate)
 		if err != nil {
-			log.Println("yyy : " + err.Error())
 			http.Redirect(w, r, "/app/product/list?error=failed to create product", http.StatusSeeOther)
 			return
 		}
