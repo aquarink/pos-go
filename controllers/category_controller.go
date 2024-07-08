@@ -49,7 +49,6 @@ func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		return
 	}
 
-	//
 	if r.Method == http.MethodPost {
 		name := r.FormValue("categoryName")
 		user_id := models.GlobalSessionData.UserId

@@ -12,16 +12,16 @@ func SendEmail(to, subject, text, html string) error {
 	username := os.Getenv("SMTP_USERNAME")
 	password := os.Getenv("SMTP_PASSWORD")
 
-	// Setup email message
+	// Pesan Email
 	msg := "From: " + from + "\n" +
 		"To: " + to + "\n" +
 		"Subject: " + subject + "\n" +
 		"MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n" + html
 
-	// Authentication
+	// Auth nya
 	auth := smtp.PlainAuth("", username, password, host)
 
-	// Sending email
+	// Proses kirim
 	err := smtp.SendMail(host+":"+port, auth, username, []string{to}, []byte(msg))
 
 	if err != nil {

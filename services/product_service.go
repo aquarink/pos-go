@@ -195,7 +195,7 @@ func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (s
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
 
-	// pake the file ID
+	// pake file ID
 	fw, err := w.CreateFormField("fileId")
 	if err != nil {
 		return "", fmt.Errorf("failed to create form field for file ID: %w", err)
@@ -205,7 +205,7 @@ func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (s
 		return "", fmt.Errorf("failed to write file ID: %w", err)
 	}
 
-	// bikin the file data
+	// bikin file data
 	fw, err = w.CreateFormFile("file", filepath.Base(filePath))
 	if err != nil {
 		return "", fmt.Errorf("failed to create form file: %w", err)

@@ -12,8 +12,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// var store = sessions.NewCookieStore([]byte(os.Getenv("COOKIES_KEY")))
-
 func SignupController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
 		data := models.PublicData{
@@ -71,7 +69,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 				return
 			}
 
-			// Kirim email verifikasi
+			// KIRIM EMAIL
 			verifyId := user.ID
 			subject := "Email Verification"
 			text := fmt.Sprintf("Hi %s,\n\nThank you for registering with us.", name)
@@ -83,7 +81,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 				return
 			}
 
-			// Buat dokumen email ke koleksi MAILS
+			// MODEL MAILS
 			emailDoc := models.Mails{
 				UserID:  user.ID,
 				Email:   email,
@@ -148,7 +146,7 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 				return
 			}
 
-			// Set session
+			// SESSION KAYA $_SESSION NYA PHP
 			session, _ := store.Get(r, "session")
 			session.Values["user_id"] = user.ID
 			session.Values["role"] = utils.UcWords(user.Role)

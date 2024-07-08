@@ -1,14 +1,11 @@
 package utils
 
 import (
-	"encoding/hex"
-	"fmt"
 	"html/template"
 	"regexp"
 	"strings"
 	"time"
 
-	"golang.org/x/exp/rand"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -55,25 +52,4 @@ func CreateSlug(input string) string {
 	slug = strings.Trim(slug, "-")
 
 	return slug
-}
-
-func GenerateUnique(length int) (string, error) {
-	if length <= 0 {
-		return "", fmt.Errorf("invalid length")
-	}
-	// Generate random bytes
-	randomBytes := make([]byte, length/2)
-	if _, err := rand.Read(randomBytes); err != nil {
-		return "", fmt.Errorf("failed to generate random bytes: %w", err)
-	}
-
-	// Encode to hex
-	randomID := hex.EncodeToString(randomBytes)
-
-	// Ensure the ID is of the desired length
-	if len(randomID) > length {
-		randomID = randomID[:length]
-	}
-
-	return randomID, nil
 }

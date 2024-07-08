@@ -19,7 +19,6 @@ import (
 var sessStore *sessions.CookieStore
 
 func main() {
-	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("mana env mu")
@@ -34,13 +33,13 @@ func main() {
 
 	sessStore = sessions.NewCookieStore([]byte(cookiesKey))
 
-	// Initialize Appwrite client
+	// LOAD APPWRITE
 	client := services.NewAppwriteClient(appwriteEndpoint, appwriteProjectID, appwriteAPIKey, appwriteDatabaseID)
 	router := mux.NewRouter()
 
 	csrfMiddleware := csrf.Protect([]byte(csrfAuthKey), csrf.Secure(false))
 
-	// middleware
+	// MIDDLEWARE
 	router.Use(middleware.SessionMiddleware(sessStore))
 
 	routes.RegisterFrontendRoutes(router, sessStore)

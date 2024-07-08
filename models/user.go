@@ -11,7 +11,6 @@ type User struct {
 	UpdatedAt     string `json:"$updatedAt"`
 }
 
-// Define constants for valid roles
 const (
 	RoleAdmin    = "admin"
 	RoleMerchant = "merchant"

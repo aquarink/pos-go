@@ -85,7 +85,7 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		// Handle file upload
+		// INI UPLOTAN
 		file, _, err := r.FormFile("photo")
 		if err != nil {
 			http.Redirect(w, r, "/app/product/add?error=failed to upload photo", http.StatusSeeOther)
@@ -93,7 +93,7 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		}
 		defer file.Close()
 
-		// Generate a unique file name
+		// BIKIN UUID
 		uniqueFileNameBytes, err := exec.Command("uuidgen").Output()
 		if err != nil {
 			http.Redirect(w, r, "/app/product/add?error=failed to generate unique file name", http.StatusSeeOther)
@@ -223,7 +223,7 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 		if err == nil {
 			defer file.Close()
 
-			// Generate a unique file name using uuidgen command
+			// RENAME
 			uniqueFileNameBytes, err := exec.Command("uuidgen").Output()
 			if err != nil {
 				http.Redirect(w, r, fmt.Sprintf("/app/product/edit/%s?error=failed to generate unique file name", productId), http.StatusSeeOther)
