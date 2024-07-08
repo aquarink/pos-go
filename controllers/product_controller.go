@@ -2,12 +2,16 @@ package controllers
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"pos/models"
 	"pos/services"
 	"pos/utils"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -17,6 +21,7 @@ func ProductList(w http.ResponseWriter, r *http.Request, client *services.Appwri
 	if r.Method == http.MethodGet {
 		prods, err := client.ListProducts(os.Getenv("PRODUCTS"))
 		if err != nil {
+			log.Println(err.Error())
 			http.Redirect(w, r, "/app/dashboard?error=failed to load products", http.StatusSeeOther)
 			return
 		}
@@ -38,9 +43,17 @@ func ProductList(w http.ResponseWriter, r *http.Request, client *services.Appwri
 
 func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
+		category, err := client.CategoryByUserId(os.Getenv("CATEGORIES"), models.GlobalSessionData.UserId)
+		if err != nil {
+			http.Redirect(w, r, "/app/dashboard?error=failed to load products", http.StatusSeeOther)
+			return
+		}
+
 		data := models.PublicData{
-			Title:   "Add New Product",
-			Data:    map[string]interface{}{},
+			Title: "Add New Product",
+			Data: map[string]interface{}{
+				"categories": category,
+			},
 			Error:   r.URL.Query().Get("error"),
 			Msg:     r.URL.Query().Get("msg"),
 			Session: models.GlobalSessionData,
@@ -61,6 +74,12 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
+		categoriesData, err := client.CategoryById(os.Getenv("CATEGORIES"), category)
+		if err != nil {
+			http.Redirect(w, r, "/app/dashboard?error=failed to load products", http.StatusSeeOther)
+			return
+		}
+
 		priceInt, err := strconv.Atoi(price)
 		if err != nil {
 			http.Redirect(w, r, "/app/product/add?error=invalid price", http.StatusSeeOther)
@@ -75,11 +94,23 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		}
 		defer file.Close()
 
-		tempFile, err := os.CreateTemp("", "upload-*.png")
+		// Generate a unique file name
+		uniqueFileNameBytes, err := exec.Command("uuidgen").Output()
 		if err != nil {
+			http.Redirect(w, r, "/app/product/add?error=failed to generate unique file name", http.StatusSeeOther)
+			return
+		}
+
+		uniqueFileName := strings.TrimSpace(string(uniqueFileNameBytes))
+
+		tempFile, err := os.CreateTemp("", uniqueFileName)
+		if err != nil {
+
+			log.Println(err.Error())
 			http.Redirect(w, r, "/app/product/add?error=failed to create temp file", http.StatusSeeOther)
 			return
 		}
+		defer tempFile.Close()
 		defer os.Remove(tempFile.Name())
 
 		_, err = io.Copy(tempFile, file)
@@ -88,25 +119,33 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		photoID, err := client.UploadFile(os.Getenv("BUCKET_ID"), "unique()", tempFile.Name())
+		photoURL, err := client.UploadFile(os.Getenv("PRODUCTS_BUCKET"), uniqueFileName, tempFile.Name())
 		if err != nil {
+			log.Println(err.Error())
 			http.Redirect(w, r, "/app/product/add?error=failed to upload photo to server", http.StatusSeeOther)
 			return
 		}
 
 		slug := utils.CreateSlug(name)
 
+		now := time.Now().Format(time.RFC3339)
+
+		log.Println("uniqueFileName : " + uniqueFileName)
+		log.Println("resPhoto : " + photoURL)
 		product := models.Products{
-			Name:     name,
-			Category: category,
-			Price:    priceInt,
-			UserID:   user_id,
-			Photo:    photoID,
-			Slug:     slug,
+			Name:      name,
+			Category:  []string{categoriesData.ID, categoriesData.Name},
+			Price:     priceInt,
+			UserID:    user_id,
+			Photo:     []string{photoURL, os.Getenv("APPWRITE_PROJECT_ID")},
+			Slug:      slug,
+			CreatedAt: now,
+			UpdatedAt: now,
 		}
 
 		err = client.CreateProduct(os.Getenv("PRODUCTS"), product)
 		if err != nil {
+			log.Printf(err.Error())
 			http.Redirect(w, r, "/app/product/add?error=failed to create product", http.StatusSeeOther)
 			return
 		}
@@ -155,6 +194,12 @@ func ProductEdit(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
+		categoriesData, err := client.CategoryById(os.Getenv("CATEGORIES"), category)
+		if err != nil {
+			http.Redirect(w, r, "/app/dashboard?error=failed to load products", http.StatusSeeOther)
+			return
+		}
+
 		priceInt, err := strconv.Atoi(price)
 		if err != nil {
 			http.Redirect(w, r, "/app/product/edit/"+id+"?error=invalid price", http.StatusSeeOther)
@@ -192,14 +237,14 @@ func ProductEdit(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		product := models.Products{
 			ID:       id,
 			Name:     name,
-			Category: category,
+			Category: []string{categoriesData.ID, categoriesData.Name},
 			Price:    priceInt,
 			UserID:   user_id,
 			Slug:     slug,
 		}
 
 		if photoID != "" {
-			product.Photo = photoID
+			product.Photo = []string{photoID, os.Getenv("APPWRITE_PROJECT_ID")}
 		}
 
 		_, err = client.UpdateProduct(os.Getenv("PRODUCTS"), id, product)

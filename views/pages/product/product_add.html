@@ -16,31 +16,33 @@
                     {{if .Msg}}
                         <p class="text-info">{{.Msg}}</p>
                     {{end}}
-                    <div class="table-responsive">
-                        <table class="table align-items-center mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Category</th>
-                                    <th>Price</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{range .Data.products}}
-                                    <tr>
-                                        <td>{{.Name}}</td>
-                                        <td>{{.Category}}</td>
-                                        <td>{{.Price}}</td>
-                                        <td>
-                                            <a href="/app/product/edit/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
-                                            <a href="/app/product/delete/{{.ID}}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
-                                        </td>
-                                    </tr>
+                    <form method="post" action="/app/product/add" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="name" class="font-weight-bold">Product Name</label>
+                            <input required name="name" type="text" class="form-control form-control-alternative" placeholder="Enter product name" >
+                            {{.CSRFToken}}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category" class="font-weight-bold">Category</label>
+                            <select required name="category" type="text" class="form-control form-control-alternative">
+                                {{range .Data.categories}}
+                                <option value="{{.ID}}">{{.Name | ucwords}}</option>
                                 {{end}}
-                            </tbody>
-                        </table>
-                    </div>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="price" class="font-weight-bold">Product Price</label>
+                            <input required name="price" type="number" class="form-control form-control-alternative" placeholder="Enter price">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="photo" class="font-weight-bold">Photo Product</label>
+                            <input required name="photo" type="file" class="form-control form-control-alternative" accept=".png, .jpeg, .jpg">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add New Product</button>
+                    </form>
                 </div>
             </div>
         </div>

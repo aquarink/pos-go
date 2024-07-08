@@ -56,7 +56,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 			if err != nil {
-				http.Redirect(w, r, "/app/signup?error=internal server error", http.StatusSeeOther)
+				http.Redirect(w, r, "/app/signup?error=internal server failed", http.StatusSeeOther)
 				return
 			}
 
@@ -68,7 +68,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			err = client.CreateUser(os.Getenv("USERS"), user)
 			if err != nil {
-				http.Redirect(w, r, "/app/signup?error=internal server error", http.StatusSeeOther)
+				http.Redirect(w, r, "/app/signup?error=internal server error "+err.Error(), http.StatusSeeOther)
 				return
 			}
 
@@ -95,7 +95,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			err = client.CreateEmail(os.Getenv("MAILS"), emailDoc)
 			if err != nil {
-				http.Redirect(w, r, "/app/signup?error=internal server error", http.StatusSeeOther)
+				http.Redirect(w, r, "/app/signup?error=internal server fails", http.StatusSeeOther)
 				return
 			}
 
@@ -136,7 +136,7 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			user, err := client.GetUserByEmail(os.Getenv("USERS"), email)
 			if err != nil {
-				log.Printf("Error getting user by email: %v", err)
+				log.Printf("Error getting user by email: %v", email)
 				http.Redirect(w, r, "/app/signin?error=email atau password salah", http.StatusSeeOther)
 				return
 			}

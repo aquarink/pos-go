@@ -10,13 +10,13 @@ type Categories struct {
 }
 
 type Products struct {
-	ID        string `json:"$id"`
-	Name      string `json:"name"`
-	Category  string `json:"category"` // String []
-	Price     int    `json:"price"`
-	UserID    string `json:"user_id"`
-	Photo     string `json:"photo"`
-	Slug      string `json:"slug"`
-	CreatedAt string `json:"$createdAt"`
-	UpdatedAt string `json:"$updatedAt"`
+	ID        string   `json:"$id"`
+	Name      string   `json:"name"`
+	Category  []string `json:"category"`
+	Price     int      `json:"price"`
+	UserID    string   `json:"user_id"`
+	Photo     []string `json:"photo"`
+	Slug      string   `json:"slug"`
+	CreatedAt string   `json:"$createdAt"`
+	UpdatedAt string   `json:"$updatedAt"`
 }
