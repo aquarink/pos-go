@@ -22,28 +22,15 @@ func main() {
 	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Some required environment variables are missing in env")
+		log.Fatalf("mana env mu")
 	}
 
 	appwriteEndpoint := os.Getenv("APPWRITE_ENDPOINT")
 	appwriteProjectID := os.Getenv("APPWRITE_PROJECT_ID")
 	appwriteAPIKey := os.Getenv("APPWRITE_API_KEY")
 	appwriteDatabaseID := os.Getenv("POS_DB")
-
-	if appwriteEndpoint == "" || appwriteProjectID == "" || appwriteAPIKey == "" || appwriteDatabaseID == "" {
-		log.Fatalf("Some required environment variables are missing in appwrite")
-	}
-
 	csrfAuthKey := os.Getenv("CSRF_AUTH_KEY")
 	cookiesKey := os.Getenv("COOKIES_KEY")
-
-	if csrfAuthKey == "" || cookiesKey == "" {
-		log.Fatalf("Some required environment variables are missing in csrf")
-	}
-
-	if len(cookiesKey) < 32 {
-		log.Fatal("COOKIES_KEY must be at least 32 bytes long")
-	}
 
 	sessStore = sessions.NewCookieStore([]byte(cookiesKey))
 
