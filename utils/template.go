@@ -9,7 +9,6 @@ import (
 )
 
 func RenderTemplate(w http.ResponseWriter, r *http.Request, layout string, tmpl string, data interface{}) {
-	// parsedTemplate, err := template.ParseFiles(layout, tmpl)
 	parsedTemplate, err := AddTemplateFuncs(template.New("layout")).ParseFiles(layout, tmpl)
 	if err != nil {
 		http.Redirect(w, r, "/app/signin?error=perbaikan grafik, harap coba lagi", http.StatusSeeOther)
@@ -39,7 +38,6 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, layout string, tmpl 
 }
 
 func RenderTemplateWithSidebar(w http.ResponseWriter, r *http.Request, layout string, tmpl string, data interface{}) {
-	// parsedTemplate, err := template.ParseFiles(layout, tmpl, "views/templates/sidebar.html")
 	parsedTemplate, err := AddTemplateFuncs(template.New("layout")).ParseFiles(layout, tmpl, "views/templates/sidebar.html")
 	if err != nil {
 		http.Redirect(w, r, "/app/signin?error=perbaikan grafik, harap coba lagi", http.StatusSeeOther)

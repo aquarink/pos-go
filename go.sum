@@ -1,5 +1,7 @@
 github.com/appwrite/sdk-for-go v0.0.0-20220115201206-e8cdd5639793 h1:6lewk8mRu+6czjjO/C1cT0JjPELnv/8w28nnG33c3e8=
 github.com/appwrite/sdk-for-go v0.0.0-20220115201206-e8cdd5639793/go.mod h1:76e02eUo9DgXQnEXo/pJIlmxshabJ3RiN2MS84DnDoU=
+github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
+github.com/dustin/go-humanize v1.0.1/go.mod h1:Mu1zIs6XwVuF/gI1OepvI0qD18qycQx+mFykh5fBlto=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gorilla/csrf v1.7.2 h1:oTUjx0vyf2T+wkrx09Trsev1TE+/EbDAeHtSTbtC2eI=

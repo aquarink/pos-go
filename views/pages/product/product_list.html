@@ -7,34 +7,35 @@
                     <h4>Product List</h4>
                     <a href="/app/product/add" class="btn btn-primary">Add New Product</a>
                 </div>
+
+                {{if .Error}}
+                    <p class="text-danger">{{.Error | ucwords}}</p>
+                {{end}}
+                {{if .Msg}}
+                    <p class="text-info">{{.Msg | ucwords}}</p>
+                {{end}}
             </div>
-            <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
-                <div class="p-4" style="background-color: #f8f9fa;">
-                    {{if .Error}}
-                        <p class="text-danger">{{.Error | ucwords}}</p>
-                    {{end}}
-                    {{if .Msg}}
-                        <p class="text-info">{{.Msg | ucwords}}</p>
-                    {{end}}
+            <div class="ct-example" style="position: relative;border: 2px solid #f5f7ff !important;border-bottom: none !important;padding: 1rem 1rem 2rem 1rem;margin-bottom: -1.25rem;">
+                <div class="p-4">
                     <div class="table-responsive">
-                        <table class="table align-items-center mb-0">
+                        <table id="dtTable" class="table align-items-center mb-0">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Category</th>
-                                    <th>Price</th>
-                                    <th>Preview</th>
-                                    <th>Actions</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Category</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Price</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Preview</th>
+                                    <th class="text-secondary opacity-7"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {{range .Data.products}}
                                     <tr>
-                                        <td>{{.Name | ucwords}}</td>
-                                        <td>{{index .Category 1 | ucwords}}</td>
-                                        <td>{{.Price}}</td>
-                                        <td><img src="{{index .Photo 0}}?project={{index .Photo 1}}" alt="{{.Name}}" style="max-width: 100px;"></td>
-                                        <td>
+                                        <td><p class="text-sm font-weight-bold mb-0">{{.Name | ucwords}}</p></td>
+                                        <td><p class="text-sm font-weight-bold mb-0">{{index .Category 1 | ucwords}}</p></td>
+                                        <td><p class="text-sm font-weight-bold mb-0">{{.Price | coma}}</p></td>
+                                        <td><img src="{{index .Photo 0}}?project={{index .Photo 1}}" alt="{{.Name}}" style="max-width: 90px;"></td>
+                                        <td class="align-middle">
                                             <a href="/app/product/edit/{{.ID}}" class="text-secondary font-weight-bold text-xs">Edit</a>
                                         </td>
                                     </tr>

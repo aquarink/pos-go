@@ -3,13 +3,22 @@ package utils
 import (
 	"html/template"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
+
+func AddTemplateFuncs(t *template.Template) *template.Template {
+	return t.Funcs(template.FuncMap{
+		"title":      Title,
+		"dateFormat": DateFormat,
+		"ucwords":    UcWords,
+		"coma":       Comma,
+	})
+}
 
 func Title(str string) string {
 	caser := cases.Title(language.English)
@@ -37,14 +46,6 @@ func UcWords(str string) string {
 	return strings.Join(words, " ")
 }
 
-func AddTemplateFuncs(t *template.Template) *template.Template {
-	return t.Funcs(template.FuncMap{
-		"title":      Title,
-		"dateFormat": DateFormat,
-		"ucwords":    UcWords,
-	})
-}
-
 func CreateSlug(input string) string {
 	slug := strings.ToLower(input)
 	re := regexp.MustCompile(`[^\w\s]`)
@@ -55,35 +56,6 @@ func CreateSlug(input string) string {
 	return slug
 }
 
-func NumberFormat(number float64, decimals int) string {
-	decPoint := "."
-	thousandsSep := ","
-
-	// ANGKA KE STRING
-	strNumber := strconv.FormatFloat(number, 'f', decimals, 64)
-
-	// SPLIT
-	parts := strings.Split(strNumber, ".")
-	integerPart := parts[0]
-	fractionalPart := ""
-	if len(parts) > 1 {
-		fractionalPart = parts[1]
-	}
-
-	// KASIH PER NOL 3
-	result := ""
-	count := 0
-	for i := len(integerPart) - 1; i >= 0; i-- {
-		if count > 0 && count%3 == 0 {
-			result = thousandsSep + result
-		}
-		result = string(integerPart[i]) + result
-		count++
-	}
-
-	if decimals > 0 {
-		result = result + decPoint + fractionalPart
-	}
-
-	return result
+func Comma(x int) string {
+	return humanize.Comma(int64(x))
 }

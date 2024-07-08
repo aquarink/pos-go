@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/appwrite/sdk-for-go v0.0.0-20220115201206-e8cdd5639793 // indirect
+	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/csrf v1.7.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
