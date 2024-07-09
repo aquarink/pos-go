@@ -11,7 +11,7 @@ import (
 func (c *AppwriteClient) ListPackage(collectionID string) ([]models.Packages, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (c *AppwriteClient) CreatePackage(collectionID string, category models.Pack
 		return err
 	}
 
-	req, err := c.newRequest("POST", url, jsons)
+	req, err := c.kirimRequestKeAppWrite("POST", url, jsons)
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (c *AppwriteClient) CreatePackage(collectionID string, category models.Pack
 func (c *AppwriteClient) PackageById(collectionID, id string) (*models.Packages, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (c *AppwriteClient) PackageById(collectionID, id string) (*models.Packages,
 func (c *AppwriteClient) PackageByName(collectionID, name string) (*models.Packages, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func (c *AppwriteClient) UpdatePackage(collectionID, id string, category models.
 		return nil, err
 	}
 
-	req, err := c.newRequest("PATCH", url, jsons)
+	req, err := c.kirimRequestKeAppWrite("PATCH", url, jsons)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (c *AppwriteClient) UpdatePackage(collectionID, id string, category models.
 func (c *AppwriteClient) DeletePackage(collectionID, id string) error {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
-	req, err := c.newRequest("DELETE", url, nil)
+	req, err := c.kirimRequestKeAppWrite("DELETE", url, nil)
 	if err != nil {
 		return err
 	}

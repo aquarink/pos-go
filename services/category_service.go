@@ -11,7 +11,7 @@ import (
 func (c *AppwriteClient) ListCategory(collectionID string) ([]models.Categories, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *AppwriteClient) CreateCategory(collectionID string, category models.Cat
 		return err
 	}
 
-	req, err := c.newRequest("POST", url, jsons)
+	req, err := c.kirimRequestKeAppWrite("POST", url, jsons)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func (c *AppwriteClient) CreateCategory(collectionID string, category models.Cat
 func (c *AppwriteClient) CategoryById(collectionID, id string) (*models.Categories, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (c *AppwriteClient) CategoryById(collectionID, id string) (*models.Categori
 func (c *AppwriteClient) CategoryByName(collectionID, name string) (*models.Categories, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (c *AppwriteClient) CategoryByName(collectionID, name string) (*models.Cate
 func (c *AppwriteClient) CategoryByNameAndUserId(collectionID, name, id string) (*models.Categories, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (c *AppwriteClient) CategoryByNameAndUserId(collectionID, name, id string) 
 func (c *AppwriteClient) CategoryByUserId(collectionID, userID string) ([]models.Categories, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +230,7 @@ func (c *AppwriteClient) UpdateCategory(collectionID, id string, category models
 		return nil, err
 	}
 
-	req, err := c.newRequest("PATCH", url, categoryJSON)
+	req, err := c.kirimRequestKeAppWrite("PATCH", url, categoryJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -263,7 +263,7 @@ func (c *AppwriteClient) UpdateCategory(collectionID, id string, category models
 func (c *AppwriteClient) DeleteCategory(collectionID, id string) error {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
-	req, err := c.newRequest("DELETE", url, nil)
+	req, err := c.kirimRequestKeAppWrite("DELETE", url, nil)
 	if err != nil {
 		return err
 	}

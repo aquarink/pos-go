@@ -15,7 +15,7 @@ import (
 func (c *AppwriteClient) ListProducts(collectionID string) ([]models.Products, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *AppwriteClient) CreateProduct(collectionID string, product models.Produ
 		return err
 	}
 
-	req, err := c.newRequest("POST", url, productJSON)
+	req, err := c.kirimRequestKeAppWrite("POST", url, productJSON)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (c *AppwriteClient) CreateProduct(collectionID string, product models.Produ
 func (c *AppwriteClient) GetProductByID(collectionID, id string) (*models.Products, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func (c *AppwriteClient) UpdateProduct(collectionID, id string, product models.P
 		return nil, err
 	}
 
-	req, err := c.newRequest("PATCH", url, jsons)
+	req, err := c.kirimRequestKeAppWrite("PATCH", url, jsons)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +164,7 @@ func (c *AppwriteClient) UpdateProduct(collectionID, id string, product models.P
 func (c *AppwriteClient) DeleteProduct(collectionID, id string) error {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
-	req, err := c.newRequest("DELETE", url, nil)
+	req, err := c.kirimRequestKeAppWrite("DELETE", url, nil)
 	if err != nil {
 		return err
 	}

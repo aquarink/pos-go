@@ -23,7 +23,7 @@ func NewAppwriteClient(endpoint, projectID, apiKey, databaseID string) *Appwrite
 	}
 }
 
-func (c *AppwriteClient) newRequest(method, url string, body []byte) (*http.Request, error) {
+func (c *AppwriteClient) kirimRequestKeAppWrite(method, url string, body []byte) (*http.Request, error) {
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err

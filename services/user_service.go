@@ -26,7 +26,7 @@ func (c *AppwriteClient) CreateUser(collectionID string, user models.User) error
 		return err
 	}
 
-	req, err := c.newRequest("POST", url, userBytes)
+	req, err := c.kirimRequestKeAppWrite("POST", url, userBytes)
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (c *AppwriteClient) CreateUser(collectionID string, user models.User) error
 func (c *AppwriteClient) GetAllUsers(collectionID string) ([]models.User, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (c *AppwriteClient) GetAllUsers(collectionID string) ([]models.User, error)
 func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.User, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.Use
 func (c *AppwriteClient) GetUserByID(collectionID, id string) (*models.User, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func (c *AppwriteClient) UpdateUser(collectionID, id string, user models.User) e
 		return err
 	}
 
-	req, err := c.newRequest("PATCH", url, userBytes)
+	req, err := c.kirimRequestKeAppWrite("PATCH", url, userBytes)
 	if err != nil {
 		return err
 	}
@@ -208,7 +208,7 @@ func (c *AppwriteClient) CreateEmail(collectionID string, email models.Mails) er
 		return err
 	}
 
-	req, err := c.newRequest("POST", url, emailBytes)
+	req, err := c.kirimRequestKeAppWrite("POST", url, emailBytes)
 	if err != nil {
 		return err
 	}

@@ -18,7 +18,7 @@ func (c *AppwriteClient) GetStoreByUserID(collectionID, userID string) (*models.
 	query := fmt.Sprintf("?queries[]=user=%s", userID)
 	url = url + query
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (c *AppwriteClient) GetStoreByUserID(collectionID, userID string) (*models.
 func (c *AppwriteClient) GetStoreByID(collectionID, id string) (*models.Store, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
-	req, err := c.newRequest("GET", url, nil)
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +85,7 @@ func (c *AppwriteClient) CreateStore(collectionID string, stores models.Store) e
 		"name":    stores.Name,
 		"address": []string{stores.Address[0], stores.Address[1]},
 		"logo":    []string{stores.Logo[0], stores.Logo[1]},
+		"slug":    stores.Slug,
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",
@@ -97,7 +98,7 @@ func (c *AppwriteClient) CreateStore(collectionID string, stores models.Store) e
 		return err
 	}
 
-	req, err := c.newRequest("POST", url, jsons)
+	req, err := c.kirimRequestKeAppWrite("POST", url, jsons)
 	if err != nil {
 		return err
 	}
@@ -130,6 +131,7 @@ func (c *AppwriteClient) UpdateStore(collectionID, userID string, stores models.
 		"name":    stores.Name,
 		"address": []string{stores.Address[0], stores.Address[1]},
 		"logo":    []string{stores.Logo[0], stores.Logo[1]},
+		"slug":    stores.Slug,
 	}
 	updateData := map[string]interface{}{
 		"data": dt,
@@ -140,7 +142,7 @@ func (c *AppwriteClient) UpdateStore(collectionID, userID string, stores models.
 		return nil, err
 	}
 
-	req, err := c.newRequest("PATCH", url, jsons)
+	req, err := c.kirimRequestKeAppWrite("PATCH", url, jsons)
 	if err != nil {
 		return nil, err
 	}
@@ -186,10 +188,6 @@ func (c *AppwriteClient) UploadLogo(bucketID, fileID string, filePath string) (s
 	fw, err := w.CreateFormField("fileId")
 	if err != nil {
 		return "", fmt.Errorf("failed to create form field for file ID: %w", err)
-	}
-	_, err = fw.Write([]byte(fileID))
-	if err != nil {
-		return "", fmt.Errorf("failed to write file ID: %w", err)
 	}
 
 	// bikin file data
