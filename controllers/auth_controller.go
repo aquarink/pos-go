@@ -182,5 +182,11 @@ func SignoutController(w http.ResponseWriter, r *http.Request, client *services.
 	session, _ := store.Get(r, "session")
 	delete(session.Values, "user_id")
 	session.Save(r, w)
-	http.Redirect(w, r, "/app/signin", http.StatusSeeOther)
+
+	msg := r.URL.Query().Get("msg")
+	if msg != "" {
+		http.Redirect(w, r, "/app/signin?msg="+msg, http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, "/app/signin", http.StatusSeeOther)
+	}
 }

@@ -1,0 +1,33 @@
+{{define "content"}}
+<div class="row mt-4">
+    <div class="col-lg-12 mb-lg-0 mb-4">
+        <div class="card">
+            <div class="card-header pb-0 p-3">
+                <div class="d-flex justify-content-between">
+                    <h4>Edit Category</h4>
+                </div>
+            </div>
+            <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
+                <div class="p-4" style="background-color: #f8f9fa;">
+                    {{if .Error}}
+                        <p class="text-danger">{{.Error | ucwords}}</p>
+                    {{end}}
+                    {{if .Msg}}
+                        <p class="text-info">{{.Msg | ucwords}}</p>
+                    {{end}}
+                    <form method="post" action="/app/category/edit">
+                        <div class="form-group">
+                            <label for="categoryName" class="font-weight-bold">Category Name</label>
+                            <input value="{{.Data.category.Name}}" required name="categoryName" type="text" class="form-control form-control-alternative" placeholder="Enter category name">
+                            <input type="hidden" name="categoryId" value="{{.Data.category.ID}}">
+                            {{.CSRFToken}}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Category</button>
+                        <a class="btn btn-danger" href="/app/category/remove/{{.Data.category.ID}}" onclick="return confirm('Are you sure you want to remove this category?');">Remove Category</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

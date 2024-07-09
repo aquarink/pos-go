@@ -33,8 +33,8 @@
                                     <tr>
                                         <td><p class="text-sm font-weight-bold mb-0">{{.Name | ucwords}}</p></td>
                                         <td><p class="text-sm font-weight-bold mb-0">{{index .Category 1 | ucwords}}</p></td>
-                                        <td><p class="text-sm font-weight-bold mb-0">{{.Price | coma}}</p></td>
-                                        <td><img src="{{index .Photo 0}}?project={{index .Photo 1}}" alt="{{.Name}}" style="max-width: 90px;"></td>
+                                        <td><p class="text-sm font-weight-bold mb-0">Rp.{{.Price | coma}}</p></td>
+                                        <td><img src="{{index .Photo 0}}?project={{index .Photo 1}}" alt="{{.Name}}" style="max-width: 50px;"></td>
                                         <td class="align-middle">
                                             <a href="/app/product/edit/{{.ID}}" class="text-secondary font-weight-bold text-xs">Edit</a>
                                         </td>

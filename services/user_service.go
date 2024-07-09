@@ -111,6 +111,81 @@ func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.Use
 	return nil, fmt.Errorf("user not found")
 }
 
+func (c *AppwriteClient) GetUserByID(collectionID, id string) (*models.User, error) {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
+
+	req, err := c.newRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var response struct {
+		Documents []models.User `json:"documents"`
+	}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, doc := range response.Documents {
+		if doc.ID == id {
+			return &doc, nil
+		}
+	}
+
+	return nil, fmt.Errorf("user not found")
+}
+
+func (c *AppwriteClient) UpdateUser(collectionID, id string, user models.User) error {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
+
+	userData := map[string]interface{}{
+		"name":           user.Name,
+		"email":          user.Email,
+		"password":       user.Password,
+		"email_verified": user.EmailVerified,
+		"role":           user.Role,
+	}
+	documentData := map[string]interface{}{
+		"data": userData,
+	}
+
+	userBytes, err := json.Marshal(documentData)
+	if err != nil {
+		return err
+	}
+
+	req, err := c.newRequest("PATCH", url, userBytes)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to update user: %s", string(body))
+	}
+
+	return nil
+}
+
 func (c *AppwriteClient) CreateEmail(collectionID string, email models.Mails) error {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
