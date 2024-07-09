@@ -20,7 +20,7 @@ func CategoryList(w http.ResponseWriter, r *http.Request, client *services.Appwr
 		}
 
 		data := models.PublicData{
-			Title: "List of Category",
+			Title: "List of Categories",
 			Data: map[string]interface{}{
 				"categories": cat,
 			},

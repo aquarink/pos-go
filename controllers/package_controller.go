@@ -14,7 +14,7 @@ import (
 func PackageList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
 		data := models.PublicData{
-			Title:   "List of Category",
+			Title:   "List of Packages",
 			Data:    map[string]interface{}{},
 			Error:   r.URL.Query().Get("error"),
 			Msg:     r.URL.Query().Get("msg"),

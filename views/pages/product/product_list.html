@@ -4,16 +4,27 @@
         <div class="card">
             <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
-                    <h4>Product List</h4>
-                    <a href="/app/product/add" class="btn btn-primary">Add New Product</a>
-                </div>
+                    <a href="/app/product/add" class="btn btn-primary">Create New Product</a>
+                    
+                    <div class="text-primary"></div>
+                    <div>
+                        {{if .Error}}
+                            <p class="text-danger">{{.Error | ucwords}}</p>
+                        {{end}}
+                        {{if .Msg}}
+                            <p class="text-info">{{.Msg | ucwords}}</p>
+                        {{end}}
+                    </div>
 
-                {{if .Error}}
-                    <p class="text-danger">{{.Error | ucwords}}</p>
-                {{end}}
-                {{if .Msg}}
-                    <p class="text-info">{{.Msg | ucwords}}</p>
-                {{end}}
+                    <form action="/app/product" method="get">
+                        <div class="form-group">
+                            <div class="input-group mb-4">
+                              <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span>
+                              <input name="search" class="form-control" placeholder="Search" type="text" autocomplete="off">
+                            </div>
+                          </div>
+                    </form>
+                </div>
             </div>
             <div class="ct-example" style="position: relative;border: 2px solid #f5f7ff !important;border-bottom: none !important;padding: 1rem 1rem 2rem 1rem;margin-bottom: -1.25rem;">
                 <div class="p-4">
