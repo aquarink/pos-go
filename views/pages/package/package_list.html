@@ -4,7 +4,7 @@
         <div class="card">
             <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
-                    <a href="/app/category/add" class="btn btn-primary">Create New Category</a>
+                    <a href="/app/package/add" class="btn btn-primary">Create New Package</a>
                     
                     <div class="text-primary"></div>
                     <div>
@@ -16,7 +16,7 @@
                         {{end}}
                     </div>
 
-                    <form action="/app/category" method="get">
+                    <form action="/app/package" method="get">
                         <div class="form-group">
                             <div class="input-group mb-4">
                               <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span>
@@ -32,26 +32,34 @@
                         <table id="dtTable" class="table align-items-center mb-0">
                             <thead>
                                 <tr>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Title</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Slug</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Creation Date</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Price</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cashiers</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Products</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Description</th>
                                     <th class="text-secondary opacity-7"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {{range .Data.categories}}
+                                {{range .Data.packages}}
                                     <tr>
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0">{{.Name | ucwords}}</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0">{{.Slug}}</p>
+                                            <td><p class="text-sm font-weight-bold mb-0">Rp.{{.Price | coma}}</p></td>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-bold mb-0">{{.CreatedAt | dateFormat "01-02-2006"}}</p>
+                                            <td><p class="text-sm font-weight-bold mb-0">{{.CashierAvailable | coma}}</p></td>
+                                        </td>
+                                        <td>
+                                            <td><p class="text-sm font-weight-bold mb-0">{{.ProductAvailable | coma}}</p></td>
+                                        </td>
+                                        <td>
+                                            <td><p class="text-sm font-weight-bold mb-0">{{.Description}}</p></td>
                                         </td>
                                         <td class="align-middle">
-                                            <a href="/app/category/edit/{{.ID}}" class="text-secondary font-weight-bold text-xs">Edit</a>
+                                            <a href="/app/package/edit/{{.ID}}" class="text-secondary font-weight-bold text-xs">Edit</a>
                                         </td>
                                     </tr>
                                 {{end}}

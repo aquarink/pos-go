@@ -90,6 +90,35 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 		controllers.ProductDelete(w, r, client, store)
 	}))).Methods("GET")
 
+	// PACKAGE
+
+	router.Handle("/app/package", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.PackageList(w, r, client, store)
+	}))).Methods("GET")
+
+	router.Handle("/app/package/list", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.PackageList(w, r, client, store)
+	}))).Methods("GET")
+
+	// add form dan submit
+	router.Handle("/app/package/add", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.PackageAdd(w, r, client, store)
+	}))).Methods("GET", "POST")
+
+	// edit form
+	router.Handle("/app/package/edit/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.PackageEdit(w, r, client, store)
+	}))).Methods("GET")
+
+	// edit form submit
+	router.Handle("/app/package/edit", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.PackageUpdate(w, r, client, store)
+	}))).Methods("POST")
+
+	router.Handle("/app/package/remove/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.PackageDelete(w, r, client, store)
+	}))).Methods("GET")
+
 	// USER
 
 	router.Handle("/app/password", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
