@@ -140,6 +140,42 @@ func (c *AppwriteClient) CategoryByName(collectionID, name string) (*models.Cate
 	return nil, fmt.Errorf("category not found")
 }
 
+func (c *AppwriteClient) CategoryByNameAndUserId(collectionID, name, id string) (*models.Categories, error) {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
+
+	req, err := c.newRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var response struct {
+		Documents []models.Categories `json:"documents"`
+	}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, doc := range response.Documents {
+		if doc.Name == name && doc.UserID == id {
+			return &doc, nil
+		}
+	}
+
+	return nil, fmt.Errorf("category not found")
+}
+
 func (c *AppwriteClient) CategoryByUserId(collectionID, userID string) ([]models.Categories, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 

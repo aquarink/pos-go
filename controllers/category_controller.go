@@ -58,6 +58,12 @@ func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
+		check, _ := client.CategoryByNameAndUserId(os.Getenv("CATEGORIES"), name, user_id)
+		if check != nil {
+			http.Redirect(w, r, "/app/category/list?error=nama kategori sudah ada", http.StatusSeeOther)
+			return
+		}
+
 		slugs := utils.CreateSlug(name)
 		categoryData := models.Categories{
 			Name:   name,

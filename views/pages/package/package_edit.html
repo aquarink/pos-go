@@ -1,12 +1,12 @@
-{{define "content"}}
+{{ define "content" }}
 <div class="row mt-4">
     <div class="col-lg-12 mb-lg-0 mb-4">
         <div class="card">
-            <div class="card-header pb-0 p-3">
+            <!-- <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
-                    <h4>Edit Category</h4>
+                    <h4>Add New Category</h4>
                 </div>
-            </div>
+            </div> -->
             <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
                 <div class="p-4" style="background-color: #f8f9fa;">
                     {{if .Error}}
@@ -15,19 +15,40 @@
                     {{if .Msg}}
                         <p class="text-info">{{.Msg | ucwords}}</p>
                     {{end}}
-                    <form method="post" action="/app/category/edit">
+                    <form method="post" action="/app/package/update">
                         <div class="form-group">
-                            <label for="categoryName" class="font-weight-bold">Category Name</label>
-                            <input value="{{.Data.category.Name}}" required name="categoryName" type="text" class="form-control form-control-alternative" placeholder="Enter category name">
-                            <input type="hidden" name="categoryId" value="{{.Data.category.ID}}">
+                            <label for="name" class="font-weight-bold">Name</label>
+                            <input value="{{ .Data.package.Name }}" required name="name" type="text" class="form-control form-control-alternative" placeholder="Enter package name" >
+                            <input type="hidden" name="id" value="{{.Data.package.ID}}">
                             {{.CSRFToken}}
                         </div>
-                        <button type="submit" class="btn btn-primary">Update Category</button>
-                        <a class="btn btn-danger" href="/app/category/remove/{{.Data.category.ID}}" onclick="return confirm('Are you sure you want to remove this category?');">Remove Category</a>
+
+                        <div class="form-group">
+                            <label for="price" class="font-weight-bold">Price</label>
+                            <input value="{{ .Data.package.Price }}" required name="price" type="number" class="form-control form-control-alternative" placeholder="Enter package price" >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cashier" class="font-weight-bold">Maximum Cashier</label>
+                            <input value="{{ .Data.package.CashierAvailable }}" required name="cashier" type="number" class="form-control form-control-alternative" placeholder="Enter maximun cashir " >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="product" class="font-weight-bold">Maximum Product</label>
+                            <input value="{{ .Data.package.ProductAvailable }}" required name="product" type="number" class="form-control form-control-alternative" placeholder="Enter maximum product" >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="desc" class="font-weight-bold">Package Description</label>
+                            <textarea required name="desc" type="text" class="form-control form-control-alternative" placeholder="Enter package description">{{ .Data.package.Description }}</textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Add New Category</button>
+                        <a class="btn btn-danger" href="/app/package/remove/{{.Data.package.ID}}" onclick="return confirm('Are you sure you want to remove this package?');">Remove Package</a>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{{end}}
+{{ end }}

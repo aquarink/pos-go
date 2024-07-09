@@ -111,7 +111,7 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 	}))).Methods("GET")
 
 	// edit form submit
-	router.Handle("/app/package/edit", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.Handle("/app/package/update", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.PackageUpdate(w, r, client, store)
 	}))).Methods("POST")
 

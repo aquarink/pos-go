@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"pos/models"
 	"pos/services"
 	"pos/utils"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -13,9 +15,16 @@ import (
 
 func PackageList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
+
+		packages, err := client.ListPackage(os.Getenv("PACKAGES"))
+		if err != nil {
+			http.Redirect(w, r, "/app/dashboard?error=failed to load package", http.StatusSeeOther)
+			return
+		}
+		log.Println(packages)
 		data := models.PublicData{
 			Title:   "List of Packages",
-			Data:    map[string]interface{}{},
+			Data:    map[string]interface{}{"packages": packages},
 			Error:   r.URL.Query().Get("error"),
 			Msg:     r.URL.Query().Get("msg"),
 			Session: models.GlobalSessionData,
@@ -48,17 +57,42 @@ func PackageAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		product := r.FormValue("product")
 		description := r.FormValue("desc")
 
+		check, _ := client.PackageByName(os.Getenv("PACKAGES"), name)
+		if check != nil {
+			http.Redirect(w, r, "/app/package/add?error=nama paket sudah ada", http.StatusSeeOther)
+			return
+		}
+
+		priceInt, err := strconv.Atoi(price)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/add?error=invalid price", http.StatusSeeOther)
+			return
+		}
+
+		cashierInt, err := strconv.Atoi(cashier)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/add?error=invalid cashier available", http.StatusSeeOther)
+			return
+		}
+
+		productInt, err := strconv.Atoi(product)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/add?error=invalid product available", http.StatusSeeOther)
+			return
+		}
+
 		packageData := models.Packages{
 			Name:             name,
-			Price:            price,
-			CashierAvailable: cashier,
-			ProductAvailable: product,
+			Price:            priceInt,
+			CashierAvailable: cashierInt,
+			ProductAvailable: productInt,
 			Description:      description,
 		}
 
-		err := client.CreatePackage(os.Getenv("PACKAGES"), packageData)
+		err = client.CreatePackage(os.Getenv("PACKAGES"), packageData)
 		if err != nil {
-			http.Redirect(w, r, "/app/package/list?error=kesalahan data, harap coba kembali", http.StatusSeeOther)
+			log.Println(err.Error())
+			http.Redirect(w, r, "/app/package/add?error=kesalahan data, harap coba kembali", http.StatusSeeOther)
 			return
 		}
 
@@ -109,21 +143,45 @@ func PackageUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 			return
 		}
 
-		packageData := models.Packages{
-			Name:             name,
-			Price:            price,
-			CashierAvailable: cashier,
-			ProductAvailable: product,
-			Description:      description,
-		}
-
-		_, err := client.UpdatePackage(os.Getenv("PACKAGES"), id, packageData)
+		priceInt, err := strconv.Atoi(price)
 		if err != nil {
-			http.Redirect(w, r, "/app/package/list?error=gagal edit kategori", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/package/list?error=invalid price", http.StatusSeeOther)
 			return
 		}
 
-		http.Redirect(w, r, "/app/package/list?msg=kategori berhasil di update", http.StatusSeeOther)
+		cashierInt, err := strconv.Atoi(cashier)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/list?error=invalid cashier available", http.StatusSeeOther)
+			return
+		}
+
+		productInt, err := strconv.Atoi(product)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/list?error=invalid product available", http.StatusSeeOther)
+			return
+		}
+
+		_, err = client.PackageById(os.Getenv("PACKAGES"), id)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/list?error=data tidak ditemukan", http.StatusSeeOther)
+			return
+		}
+
+		packageData := models.Packages{
+			Name:             name,
+			Price:            priceInt,
+			CashierAvailable: cashierInt,
+			ProductAvailable: productInt,
+			Description:      description,
+		}
+
+		_, err = client.UpdatePackage(os.Getenv("PACKAGES"), id, packageData)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/list?error=gagal edit paket", http.StatusSeeOther)
+			return
+		}
+
+		http.Redirect(w, r, "/app/package/list?msg=paket berhasil di update", http.StatusSeeOther)
 	}
 }
 
@@ -139,10 +197,10 @@ func PackageDelete(w http.ResponseWriter, r *http.Request, client *services.Appw
 
 		err := client.DeletePackage(os.Getenv("PACKAGES"), id)
 		if err != nil {
-			http.Redirect(w, r, "/app/package/list?error=kategori tidak ditemukan", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/package/list?error=paket tidak ditemukan", http.StatusSeeOther)
 			return
 		}
 
-		http.Redirect(w, r, "/app/package/list?msg=berhasil menghapus kategori", http.StatusSeeOther)
+		http.Redirect(w, r, "/app/package/list?msg=berhasil menghapus paket", http.StatusSeeOther)
 	}
 }
