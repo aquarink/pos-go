@@ -1,0 +1,49 @@
+{{ define "content" }}
+<div class="row mt-4">
+    <div class="col-lg-12 mb-lg-0 mb-4">
+        <div class="card">
+            <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
+                <div class="p-4" style="background-color: #f8f9fa;">
+                    {{if .Error}}
+                        <p class="text-danger">{{.Error | ucwords}}</p>
+                    {{end}}
+                    {{if .Msg}}
+                        <p class="text-info">{{.Msg | ucwords}}</p>
+                    {{end}}
+                    <form method="post" action="/app/store/update" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="name" class="font-weight-bold">Name</label>
+                            <input value="{{ with .Data.store }}{{ .Name }}{{ end }}" required name="name" type="text" class="form-control form-control-alternative" placeholder="Enter store name">
+                            {{.CSRFToken}}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city" class="font-weight-bold">City</label>
+                            <input value="{{ with .Data.store }}{{ index .Address 0 }}{{ end }}" required name="city" type="text" class="form-control form-control-alternative" placeholder="Enter city">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address" class="font-weight-bold">Address</label>
+                            <input value="{{ with .Data.store }}{{ index .Address 1 }}{{ end }}" required name="address" type="text" class="form-control form-control-alternative" placeholder="Enter address">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="photo" class="font-weight-bold">Store Logo</label>
+                            <input name="photo" type="file" class="form-control form-control-alternative" accept=".png, .jpeg, .jpg">
+                        </div>
+
+                        {{ if .Data.store.Logo }}
+                        <div class="form-group">
+                            <label for="existingPhoto" class="font-weight-bold">Existing Store Logo</label>
+                            <img src="{{ index .Data.store.Logo 0 }}?project={{ index .Data.store.Logo 1 }}" alt="{{ .Data.store.Name }}" style="max-width: 100px;">
+                        </div>
+                        {{ end }}
+
+                        <button type="submit" class="btn btn-primary">{{ if .Data.store }}Update Store{{ else }}Create Store{{ end }}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

@@ -41,23 +41,23 @@ func (c *AppwriteClient) ListCategory(collectionID string) ([]models.Categories,
 func (c *AppwriteClient) CreateCategory(collectionID string, category models.Categories) error {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	catData := map[string]interface{}{
+	dt := map[string]interface{}{
 		"name":    category.Name,
 		"slug":    category.Slug,
 		"user_id": category.UserID,
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",
-		"data":        catData,
+		"data":        dt,
 		"permissions": []string{"read(\"any\")"},
 	}
 
-	categoryJSON, err := json.Marshal(documentData)
+	jsons, err := json.Marshal(documentData)
 	if err != nil {
 		return err
 	}
 
-	req, err := c.newRequest("POST", url, categoryJSON)
+	req, err := c.newRequest("POST", url, jsons)
 	if err != nil {
 		return err
 	}
@@ -95,13 +95,13 @@ func (c *AppwriteClient) CategoryById(collectionID, id string) (*models.Categori
 		return nil, err
 	}
 
-	var category models.Categories
-	err = json.Unmarshal(body, &category)
+	var mdl models.Categories
+	err = json.Unmarshal(body, &mdl)
 	if err != nil {
 		return nil, err
 	}
 
-	return &category, nil
+	return &mdl, nil
 }
 
 func (c *AppwriteClient) CategoryByName(collectionID, name string) (*models.Categories, error) {
@@ -137,7 +137,7 @@ func (c *AppwriteClient) CategoryByName(collectionID, name string) (*models.Cate
 		}
 	}
 
-	return nil, fmt.Errorf("category not found")
+	return nil, fmt.Errorf("not found")
 }
 
 func (c *AppwriteClient) CategoryByNameAndUserId(collectionID, name, id string) (*models.Categories, error) {
@@ -173,7 +173,7 @@ func (c *AppwriteClient) CategoryByNameAndUserId(collectionID, name, id string) 
 		}
 	}
 
-	return nil, fmt.Errorf("category not found")
+	return nil, fmt.Errorf("not found")
 }
 
 func (c *AppwriteClient) CategoryByUserId(collectionID, userID string) ([]models.Categories, error) {
@@ -203,14 +203,14 @@ func (c *AppwriteClient) CategoryByUserId(collectionID, userID string) ([]models
 		return nil, err
 	}
 
-	var categories []models.Categories
+	var mdl []models.Categories
 	for _, doc := range response.Documents {
 		if doc.UserID == userID {
-			categories = append(categories, doc)
+			mdl = append(mdl, doc)
 		}
 	}
 
-	return categories, nil
+	return mdl, nil
 }
 
 func (c *AppwriteClient) UpdateCategory(collectionID, id string, category models.Categories) (*models.Categories, error) {
@@ -243,7 +243,7 @@ func (c *AppwriteClient) UpdateCategory(collectionID, id string, category models
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("failed to update category: %s", string(body))
+		return nil, fmt.Errorf("failed to update: %s", string(body))
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -251,13 +251,13 @@ func (c *AppwriteClient) UpdateCategory(collectionID, id string, category models
 		return nil, err
 	}
 
-	var updatedCategory models.Categories
-	err = json.Unmarshal(body, &updatedCategory)
+	var mdl models.Categories
+	err = json.Unmarshal(body, &mdl)
 	if err != nil {
 		return nil, err
 	}
 
-	return &updatedCategory, nil
+	return &mdl, nil
 }
 
 func (c *AppwriteClient) DeleteCategory(collectionID, id string) error {
@@ -276,7 +276,7 @@ func (c *AppwriteClient) DeleteCategory(collectionID, id string) error {
 
 	if resp.StatusCode != http.StatusNoContent {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to delete category: %s", string(body))
+		return fmt.Errorf("failed to delete: %s", string(body))
 	}
 
 	return nil

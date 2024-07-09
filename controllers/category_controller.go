@@ -53,7 +53,12 @@ func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		name := r.FormValue("categoryName")
 		user_id := models.GlobalSessionData.UserId
 
-		if name == "" || user_id == "" {
+		if user_id == "" {
+			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+			return
+		}
+
+		if name == "" {
 			http.Redirect(w, r, "/app/category/add?error=form tidak lengkap", http.StatusSeeOther)
 			return
 		}
@@ -116,7 +121,12 @@ func CategoryUpdate(w http.ResponseWriter, r *http.Request, client *services.App
 		name := r.FormValue("categoryName")
 		user_id := models.GlobalSessionData.UserId
 
-		if id == "" || name == "" || user_id == "" {
+		if user_id == "" {
+			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+			return
+		}
+
+		if id == "" || name == "" {
 			http.Redirect(w, r, "/app/category/list?error=form tidak lengkap", http.StatusSeeOther)
 			return
 		}

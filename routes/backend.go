@@ -119,6 +119,15 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 		controllers.PackageDelete(w, r, client, store)
 	}))).Methods("GET")
 
+	// STORE
+
+	router.Handle("/app/store", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.StoreEdit(w, r, client, store)
+	}))).Methods("GET")
+
+	router.Handle("/app/store/update", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.StoreUpdate(w, r, client, store)
+	}))).Methods("POST")
 	// USER
 
 	router.Handle("/app/password", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

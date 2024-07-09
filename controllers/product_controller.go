@@ -68,7 +68,12 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		price := r.FormValue("price")
 		user_id := models.GlobalSessionData.UserId
 
-		if name == "" || category == "" || price == "" || user_id == "" {
+		if user_id == "" {
+			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+			return
+		}
+
+		if name == "" || category == "" || price == "" {
 			http.Redirect(w, r, "/app/product/add?error=form tidak lengkap", http.StatusSeeOther)
 			return
 		}
@@ -193,7 +198,12 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 		productId := r.FormValue("productId")
 		user_id := models.GlobalSessionData.UserId
 
-		if name == "" || category == "" || price == "" || productId == "" || user_id == "" {
+		if user_id == "" {
+			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+			return
+		}
+
+		if name == "" || category == "" || price == "" || productId == "" {
 			http.Redirect(w, r, "/app/product/list?error=form tidak lengkap", http.StatusSeeOther)
 			return
 		}

@@ -12,8 +12,11 @@ import (
 	"pos/models"
 )
 
-func (c *AppwriteClient) ListProducts(collectionID string) ([]models.Products, error) {
+func (c *AppwriteClient) GetStoreByUserID(collectionID, userID string) (*models.Store, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
+
+	query := fmt.Sprintf("?queries[]=user=%s", userID)
+	url = url + query
 
 	req, err := c.newRequest("GET", url, nil)
 	if err != nil {
@@ -32,58 +35,21 @@ func (c *AppwriteClient) ListProducts(collectionID string) ([]models.Products, e
 	}
 
 	var response struct {
-		Documents []models.Products `json:"documents"`
+		Documents []models.Store `json:"documents"`
 	}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Documents, nil
+	if len(response.Documents) == 0 {
+		return nil, fmt.Errorf("store not found for user_id: %s", userID)
+	}
+
+	return &response.Documents[0], nil
 }
 
-func (c *AppwriteClient) CreateProduct(collectionID string, product models.Products) error {
-	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
-
-	dt := map[string]interface{}{
-		"name":     product.Name,
-		"category": product.Category,
-		"price":    product.Price,
-		"user_id":  product.UserID,
-		"photo":    product.Photo,
-		"slug":     product.Slug,
-	}
-	documentData := map[string]interface{}{
-		"documentId":  "unique()",
-		"data":        dt,
-		"permissions": []string{"read(\"any\")"},
-	}
-
-	productJSON, err := json.Marshal(documentData)
-	if err != nil {
-		return err
-	}
-
-	req, err := c.newRequest("POST", url, productJSON)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to create: %s", string(body))
-	}
-
-	return nil
-}
-
-func (c *AppwriteClient) GetProductByID(collectionID, id string) (*models.Products, error) {
+func (c *AppwriteClient) GetStoreByID(collectionID, id string) (*models.Store, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
 	req, err := c.newRequest("GET", url, nil)
@@ -102,7 +68,7 @@ func (c *AppwriteClient) GetProductByID(collectionID, id string) (*models.Produc
 		return nil, err
 	}
 
-	var mdl models.Products
+	var mdl models.Store
 	err = json.Unmarshal(body, &mdl)
 	if err != nil {
 		return nil, err
@@ -111,16 +77,59 @@ func (c *AppwriteClient) GetProductByID(collectionID, id string) (*models.Produc
 	return &mdl, nil
 }
 
-func (c *AppwriteClient) UpdateProduct(collectionID, id string, product models.Products) (*models.Products, error) {
-	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
+func (c *AppwriteClient) CreateStore(collectionID string, stores models.Store) error {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	dt := map[string]interface{}{
-		"name":     product.Name,
-		"category": product.Category,
-		"price":    product.Price,
-		"user_id":  product.UserID,
-		"photo":    product.Photo,
-		"slug":     product.Slug,
+		"user":    []string{stores.User[0], stores.User[1]},
+		"name":    stores.Name,
+		"address": []string{stores.Address[0], stores.Address[1]},
+		"logo":    []string{stores.Logo[0], stores.Logo[1]},
+	}
+	documentData := map[string]interface{}{
+		"documentId":  "unique()",
+		"data":        dt,
+		"permissions": []string{"read(\"any\")"},
+	}
+
+	jsons, err := json.Marshal(documentData)
+	if err != nil {
+		return err
+	}
+
+	req, err := c.newRequest("POST", url, jsons)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to create: %s", string(body))
+	}
+
+	return nil
+}
+
+func (c *AppwriteClient) UpdateStore(collectionID, userID string, stores models.Store) (*models.Store, error) {
+	store, err := c.GetStoreByUserID(collectionID, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find store: %v", err)
+	}
+
+	docID := store.ID
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, docID)
+
+	dt := map[string]interface{}{
+		"user":    []string{stores.User[0], stores.User[1]},
+		"name":    stores.Name,
+		"address": []string{stores.Address[0], stores.Address[1]},
+		"logo":    []string{stores.Logo[0], stores.Logo[1]},
 	}
 	updateData := map[string]interface{}{
 		"data": dt,
@@ -152,7 +161,7 @@ func (c *AppwriteClient) UpdateProduct(collectionID, id string, product models.P
 		return nil, err
 	}
 
-	var mdl models.Products
+	var mdl models.Store
 	err = json.Unmarshal(body, &mdl)
 	if err != nil {
 		return nil, err
@@ -161,29 +170,7 @@ func (c *AppwriteClient) UpdateProduct(collectionID, id string, product models.P
 	return &mdl, nil
 }
 
-func (c *AppwriteClient) DeleteProduct(collectionID, id string) error {
-	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
-
-	req, err := c.newRequest("DELETE", url, nil)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to delete: %s", string(body))
-	}
-
-	return nil
-}
-
-func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (string, error) {
+func (c *AppwriteClient) UploadLogo(bucketID, fileID string, filePath string) (string, error) {
 	url := fmt.Sprintf("%s/storage/buckets/%s/files", c.Endpoint, bucketID)
 
 	file, err := os.Open(filePath)

@@ -41,7 +41,7 @@ func (c *AppwriteClient) ListPackage(collectionID string) ([]models.Packages, er
 func (c *AppwriteClient) CreatePackage(collectionID string, category models.Packages) error {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	catData := map[string]interface{}{
+	dt := map[string]interface{}{
 		"name":        category.Name,
 		"price":       category.Price,
 		"cashier":     category.CashierAvailable,
@@ -50,16 +50,16 @@ func (c *AppwriteClient) CreatePackage(collectionID string, category models.Pack
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",
-		"data":        catData,
+		"data":        dt,
 		"permissions": []string{"read(\"any\")"},
 	}
 
-	categoryJSON, err := json.Marshal(documentData)
+	jsons, err := json.Marshal(documentData)
 	if err != nil {
 		return err
 	}
 
-	req, err := c.newRequest("POST", url, categoryJSON)
+	req, err := c.newRequest("POST", url, jsons)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (c *AppwriteClient) CreatePackage(collectionID string, category models.Pack
 
 	if resp.StatusCode != http.StatusCreated {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to create user: %s", string(body))
+		return fmt.Errorf("failed to create: %s", string(body))
 	}
 
 	return nil
@@ -97,13 +97,13 @@ func (c *AppwriteClient) PackageById(collectionID, id string) (*models.Packages,
 		return nil, err
 	}
 
-	var category models.Packages
-	err = json.Unmarshal(body, &category)
+	var mdl models.Packages
+	err = json.Unmarshal(body, &mdl)
 	if err != nil {
 		return nil, err
 	}
 
-	return &category, nil
+	return &mdl, nil
 }
 
 func (c *AppwriteClient) PackageByName(collectionID, name string) (*models.Packages, error) {
@@ -139,13 +139,13 @@ func (c *AppwriteClient) PackageByName(collectionID, name string) (*models.Packa
 		}
 	}
 
-	return nil, fmt.Errorf("category not found")
+	return nil, fmt.Errorf("not found")
 }
 
 func (c *AppwriteClient) UpdatePackage(collectionID, id string, category models.Packages) (*models.Packages, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
-	catData := map[string]interface{}{
+	dt := map[string]interface{}{
 		"name":        category.Name,
 		"price":       category.Price,
 		"cashier":     category.CashierAvailable,
@@ -153,15 +153,15 @@ func (c *AppwriteClient) UpdatePackage(collectionID, id string, category models.
 		"description": category.Description,
 	}
 	updateData := map[string]interface{}{
-		"data": catData,
+		"data": dt,
 	}
 
-	categoryJSON, err := json.Marshal(updateData)
+	jsons, err := json.Marshal(updateData)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := c.newRequest("PATCH", url, categoryJSON)
+	req, err := c.newRequest("PATCH", url, jsons)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +174,7 @@ func (c *AppwriteClient) UpdatePackage(collectionID, id string, category models.
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("failed to update category: %s", string(body))
+		return nil, fmt.Errorf("failed to update: %s", string(body))
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -182,13 +182,13 @@ func (c *AppwriteClient) UpdatePackage(collectionID, id string, category models.
 		return nil, err
 	}
 
-	var updatedCategory models.Packages
-	err = json.Unmarshal(body, &updatedCategory)
+	var mdl models.Packages
+	err = json.Unmarshal(body, &mdl)
 	if err != nil {
 		return nil, err
 	}
 
-	return &updatedCategory, nil
+	return &mdl, nil
 }
 
 func (c *AppwriteClient) DeletePackage(collectionID, id string) error {
@@ -207,7 +207,7 @@ func (c *AppwriteClient) DeletePackage(collectionID, id string) error {
 
 	if resp.StatusCode != http.StatusNoContent {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to delete category: %s", string(body))
+		return fmt.Errorf("failed to delete: %s", string(body))
 	}
 
 	return nil
