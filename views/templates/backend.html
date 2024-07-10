@@ -230,6 +230,21 @@
             updateHiddenInputs();
         }
 
+        function removeProduct(id) {
+            const existingProductIndex = products.findIndex(product => product.id === id);
+
+            if (existingProductIndex !== -1) {
+                if (products[existingProductIndex].qty > 1) {
+                    products[existingProductIndex].qty -= 1;
+                } else {
+                    products.splice(existingProductIndex, 1);
+                }
+            }
+
+            updateOrderList();
+            updateHiddenInputs();
+        }
+
         function updateOrderList() {
             const orderListElem = document.getElementById('orderList');
             
@@ -249,6 +264,7 @@
                     <td><p class="text-sm font-weight-bold mb-0">${product.name}</p></td>
                     <td><p class="text-sm font-weight-bold mb-0">${product.qty}</p></td>
                     <td><p class="text-sm font-weight-bold mb-0">Rp.${product.price}</p></td>
+                    <td><button type="button" onclick="removeProduct('${product.id}')">-</button></td>
                 `;
                 orderList.appendChild(row);
 
