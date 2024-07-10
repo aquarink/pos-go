@@ -207,7 +207,7 @@
             if (type === 'takeaway') {
                 document.getElementById('dineType').value = "takeaway";
                 document.getElementById('dineInButton').textContent = "Dine In";
-                document.getElementById('tableNumberGroup').style.display = 'none';
+                // document.getElementById('tableNumberGroup').style.display = 'none';
             } else if (type === 'dinein') {
                 document.getElementById('dineType').value = "dinein";
                 $('#tableModal').modal('show');
@@ -288,6 +288,14 @@
                 return;
             }
 
+            // buat prevent kepencet
+            const paymentBtn = document.getElementById('payment');
+            if (totalItems > 0) {
+                paymentBtn.disabled = false;
+            } else {
+                paymentBtn.disabled = true;
+            }
+
             totalItemsElement.textContent = totalItems;
             totalCostElement.textContent = `Rp.${formatNumber(totalCost)}`;
 
@@ -312,7 +320,7 @@
             document.getElementById('productQtys').value = productQtys.join(',');
         }
 
-        function checkout() {
+        function payment() {
             document.getElementById('paymentSection').style.display = 'block';
         }
     </script>
