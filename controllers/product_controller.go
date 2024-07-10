@@ -224,6 +224,10 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 		if err == nil {
 			defer file.Close()
 
+			if product != nil && len(product.Photo) > 0 {
+				_ = client.FileRemove(os.Getenv("PRODUCTS_BUCKET"), product.Photo[1])
+			}
+
 			tempFile, err := os.CreateTemp("", "")
 			if err != nil {
 				http.Redirect(w, r, "/app/product/add?error=failed to create temp file", http.StatusSeeOther)

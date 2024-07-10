@@ -86,10 +86,7 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			defer file.Close()
 
 			if stores != nil && len(stores.Logo) > 0 {
-				err = client.FileRemove(os.Getenv("STORES_LOGO_BUCKET"), stores.Logo[1])
-				if err != nil {
-					log.Println(err.Error())
-				}
+				_ = client.FileRemove(os.Getenv("STORES_LOGO_BUCKET"), stores.Logo[1])
 			}
 
 			tempFile, err := os.CreateTemp("", "")
