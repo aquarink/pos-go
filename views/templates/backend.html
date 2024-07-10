@@ -193,6 +193,10 @@
     <script>
         let products = [];
 
+        function formatNumber(num) {
+            return num.toLocaleString('id-ID');
+        }
+
         function selectDineType(type) {
             const productButtons = document.querySelectorAll('.product-button');
             productButtons.forEach(button => {
@@ -263,7 +267,7 @@
                 row.innerHTML = `
                     <td><p class="text-sm font-weight-bold mb-0">${product.name}</p></td>
                     <td><p class="text-sm font-weight-bold mb-0">${product.qty}</p></td>
-                    <td><p class="text-sm font-weight-bold mb-0">Rp.${product.price}</p></td>
+                    <td><p class="text-sm font-weight-bold mb-0">Rp.${product.price.toLocaleString()}</p></td>
                     <td><button type="button" onclick="removeProduct('${product.id}')">-</button></td>
                 `;
                 orderList.appendChild(row);
@@ -284,11 +288,11 @@
             }
 
             totalItemsElement.textContent = totalItems;
-            totalCostElement.textContent = `Rp.${totalCost}`;
+            totalCostElement.textContent = `Rp.${formatNumber(totalCost)}`;
 
             const tax = totalCost * 0.11;
-            totalTaxElement.textContent = `Rp.${tax}`;
-            totalPaymentDisplayElement.textContent = `Rp.${totalCost + tax}`;
+            totalTaxElement.textContent = `Rp.${formatNumber(tax)}`;
+            totalPaymentDisplayElement.textContent = `Rp.${formatNumber(totalCost + tax)}`;
 
             document.getElementById('tax').value = tax;
             document.getElementById('taxTotal').value = totalCost + tax;
