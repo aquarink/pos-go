@@ -17,6 +17,8 @@
                     <span class="nav-link-text ms-1">Dashboard</span>
                 </a>
             </li>
+
+            {{ if eq .Session.Role "Merchant" }}
             <li class="nav-item">
                 <a class="nav-link" href="/app/cashier">
                     <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -25,6 +27,9 @@
                     <span class="nav-link-text ms-1">Cashier</span>
                 </a>
             </li>
+            {{ end }}
+
+            {{ if eq .Session.Role "Merchant" }}
             <li class="nav-item">
                 <a class="nav-link" href="/app/kitchen">
                     <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -33,11 +38,13 @@
                     <span class="nav-link-text ms-1">Kitchen</span>
                 </a>
             </li>
+            {{ end }}
 
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Merchant</h6>
             </li>
 
+            {{ if eq .Session.Role "Merchant" }}
             <li class="nav-item">
                 <a class="nav-link" href="/app/transaction">
                     <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -46,7 +53,9 @@
                     <span class="nav-link-text ms-1">Transactions</span>
                 </a>
             </li>
+            {{ end }}
 
+            {{ if eq .Session.Role "Admin" }}
             <li class="nav-item">
                 <a class="nav-link" href="/app/merchant">
                     <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -55,7 +64,9 @@
                     <span class="nav-link-text ms-1">Merchant</span>
                 </a>
             </li>
+            {{ end }}
 
+            {{ if eq .Session.Role "Merchant" }}
             <li class="nav-item">
                 <a class="nav-link" href="/app/store">
                     <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -64,7 +75,9 @@
                     <span class="nav-link-text ms-1">Store</span>
                 </a>
             </li>
+            {{ end }}
 
+            {{ if eq .Session.Role "Admin" }}
             <li class="nav-item">
                 <a class="nav-link" href="/app/package">
                     <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -73,7 +86,9 @@
                     <span class="nav-link-text ms-1">Package</span>
                 </a>
             </li>
+            {{ end }}
 
+            {{ if eq .Session.Role "Merchant" }}
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Products</h6>
             </li>
@@ -95,6 +110,7 @@
                     <span class="nav-link-text ms-1">Products</span>
                 </a>
             </li>
+            {{ end }}
 
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Account</h6>
