@@ -102,8 +102,8 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		countPaket, _ := client.StoreByUserID(os.Getenv("STORES"), user_id)
-		if check != nil {
+		countPaket, err := client.StoreByUserID(os.Getenv("STORES"), user_id)
+		if err != nil {
 			http.Redirect(w, r, "/app/product/add?error=paket produk invalid", http.StatusSeeOther)
 			return
 		}
@@ -114,8 +114,8 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		prods, _ := client.ProductByUserID(os.Getenv("PRODUCTS"), user_id)
-		if check != nil {
+		prods, err := client.ProductByUserID(os.Getenv("PRODUCTS"), user_id)
+		if err != nil {
 			http.Redirect(w, r, "/app/product/add?error=data produk invalid", http.StatusSeeOther)
 			return
 		}
