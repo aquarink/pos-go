@@ -43,9 +43,23 @@
                                 {{range .Data.products}}
                                     <tr>
                                         <td><p class="text-sm font-weight-bold mb-0">{{.Name | ucwords}}</p></td>
-                                        <td><p class="text-sm font-weight-bold mb-0">{{index .Category 1 | ucwords}}</p></td>
+
+                                        <td>
+                                            {{if gt (len .Category) 1}}
+                                                <p class="text-sm font-weight-bold mb-0">{{index .Category 1 | ucwords}}</p>
+                                            {{else}}
+                                                <p class="text-sm font-weight-bold mb-0">No category</p>
+                                            {{end}}
+                                        </td>
+
                                         <td><p class="text-sm font-weight-bold mb-0">Rp.{{.Price | coma}}</p></td>
-                                        <td><img src="{{index .Photo 0}}?project={{index .Photo 1}}" alt="{{.Name}}" style="max-width: 50px;"></td>
+
+                                        {{if and (ne .Photo nil) (gt (len .Photo) 3)}}
+                                            <td><img src="{{index .Photo 0}}?project={{index .Photo 3}}" alt="{{.Name}}" style="max-width: 50px;"></td>
+                                        {{else}}
+                                            <td>no preview</td>
+                                        {{end}}
+
                                         <td class="align-middle">
                                             <a href="/app/product/edit/{{.ID}}" class="text-secondary font-weight-bold text-xs">Edit</a>
                                         </td>

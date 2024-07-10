@@ -5,11 +5,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"pos/models"
 	"pos/services"
 	"pos/utils"
-	"strings"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -25,6 +23,7 @@ func StoreEdit(w http.ResponseWriter, r *http.Request, client *services.Appwrite
 		}
 
 		stores, _ := client.GetStoreByUserID(os.Getenv("STORES"), user_id)
+
 		if stores == nil {
 			stores = &models.Store{}
 		}
@@ -69,23 +68,31 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
-		var logoURL string
+		var fileURL string
+		var fileID string
+		var fileNAME string
 		var projectID string
+
+		// uniqueFileNameBytes, err := exec.Command("uuidgen").Output()
+		// if err != nil {
+		// 	http.Redirect(w, r, "/app/store?error=failed to generate unique file name", http.StatusSeeOther)
+		// 	return
+		// }
+
+		// uniqueFileName := strings.TrimSpace(string(uniqueFileNameBytes))
 
 		file, _, err := r.FormFile("logo")
 		if err == nil {
 			defer file.Close()
 
-			// RENAME
-			uniqueFileNameBytes, err := exec.Command("uuidgen").Output()
-			if err != nil {
-				http.Redirect(w, r, "/app/store?error=failed to generate unique file name", http.StatusSeeOther)
-				return
+			if stores != nil && len(stores.Logo) > 0 {
+				err = client.FileRemove(os.Getenv("STORES_LOGO_BUCKET"), stores.Logo[1])
+				if err != nil {
+					log.Println(err.Error())
+				}
 			}
 
-			uniqueFileName := strings.TrimSpace(string(uniqueFileNameBytes))
-
-			tempFile, err := os.CreateTemp("", uniqueFileName)
+			tempFile, err := os.CreateTemp("", "")
 			if err != nil {
 				http.Redirect(w, r, "/app/store?error=failed to create temp file", http.StatusSeeOther)
 				return
@@ -99,16 +106,23 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 				return
 			}
 
-			logoURL, err = client.UploadFile(os.Getenv("STORES_LOGO_BUCKET"), uniqueFileName, tempFile.Name())
+			fileURL, fileID, fileNAME, err = client.FileUpload(os.Getenv("STORES_LOGO_BUCKET"), tempFile.Name())
 			if err != nil {
+				log.Println(err.Error())
 				http.Redirect(w, r, "/app/store?error=failed to upload file", http.StatusSeeOther)
 				return
 			}
 
+			log.Println(fileURL)
+			log.Println(fileID)
+			log.Println(fileNAME)
+
 			projectID = os.Getenv("APPWRITE_PROJECT_ID")
 		} else {
-			logoURL = stores.Logo[0]
-			projectID = stores.Logo[1]
+			fileURL = stores.Logo[0]
+			fileID = stores.Logo[1]
+			fileNAME = stores.Logo[2]
+			projectID = stores.Logo[3]
 		}
 
 		slug := utils.CreateSlug(name)
@@ -123,14 +137,13 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			User:      []string{user.ID, user.Name},
 			Name:      name,
 			Address:   []string{city, address},
-			Logo:      []string{logoURL, projectID},
+			Logo:      []string{fileURL, fileID, fileNAME, projectID},
 			Slug:      slug,
 			CreatedAt: created,
 			UpdatedAt: now,
 		}
 
 		if stores != nil && stores.ID != "" {
-			log.Println("UPDATE ------------")
 			// UPDATE
 			_, err = client.UpdateStore(os.Getenv("STORES"), user_id, updates)
 			if err != nil {
@@ -138,7 +151,6 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 				return
 			}
 		} else {
-			log.Println("CREATE ------------")
 			// ADD
 			err = client.CreateStore(os.Getenv("STORES"), updates)
 			if err != nil {

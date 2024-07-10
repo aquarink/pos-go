@@ -5,12 +5,10 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"pos/models"
 	"pos/services"
 	"pos/utils"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -98,16 +96,7 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		}
 		defer file.Close()
 
-		// BIKIN UUID
-		uniqueFileNameBytes, err := exec.Command("uuidgen").Output()
-		if err != nil {
-			http.Redirect(w, r, "/app/product/add?error=failed to generate unique file name", http.StatusSeeOther)
-			return
-		}
-
-		uniqueFileName := strings.TrimSpace(string(uniqueFileNameBytes))
-
-		tempFile, err := os.CreateTemp("", uniqueFileName)
+		tempFile, err := os.CreateTemp("", "")
 		if err != nil {
 			http.Redirect(w, r, "/app/product/add?error=failed to create temp file", http.StatusSeeOther)
 			return
@@ -121,7 +110,7 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		photoURL, err := client.UploadFile(os.Getenv("PRODUCTS_BUCKET"), uniqueFileName, tempFile.Name())
+		fileURL, fileID, fileNAME, err := client.FileUpload(os.Getenv("PRODUCTS_BUCKET"), tempFile.Name())
 		if err != nil {
 			http.Redirect(w, r, "/app/product/add?error=failed to upload photo to server", http.StatusSeeOther)
 			return
@@ -136,7 +125,7 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			Category:  []string{categoriesData.ID, categoriesData.Name},
 			Price:     priceInt,
 			UserID:    user_id,
-			Photo:     []string{photoURL, os.Getenv("APPWRITE_PROJECT_ID")},
+			Photo:     []string{fileURL, fileID, fileNAME, os.Getenv("APPWRITE_PROJECT_ID")},
 			Slug:      slug,
 			CreatedAt: now,
 			UpdatedAt: now,
@@ -226,23 +215,16 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 			return
 		}
 
-		var photoURL string
+		var fileURL string
+		var fileID string
+		var fileNAME string
 		var projectID string
 
 		file, _, err := r.FormFile("photo")
 		if err == nil {
 			defer file.Close()
 
-			// RENAME
-			uniqueFileNameBytes, err := exec.Command("uuidgen").Output()
-			if err != nil {
-				http.Redirect(w, r, fmt.Sprintf("/app/product/edit/%s?error=failed to generate unique file name", productId), http.StatusSeeOther)
-				return
-			}
-
-			uniqueFileName := strings.TrimSpace(string(uniqueFileNameBytes))
-
-			tempFile, err := os.CreateTemp("", uniqueFileName)
+			tempFile, err := os.CreateTemp("", "")
 			if err != nil {
 				http.Redirect(w, r, "/app/product/add?error=failed to create temp file", http.StatusSeeOther)
 				return
@@ -256,7 +238,7 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 				return
 			}
 
-			photoURL, err = client.UploadFile(os.Getenv("PRODUCTS_BUCKET"), uniqueFileName, tempFile.Name())
+			fileURL, fileID, fileNAME, err = client.FileUpload(os.Getenv("PRODUCTS_BUCKET"), tempFile.Name())
 			if err != nil {
 				http.Redirect(w, r, fmt.Sprintf("/app/product/edit/%s?error=failed to upload file", productId), http.StatusSeeOther)
 				return
@@ -264,7 +246,9 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 
 			projectID = os.Getenv("APPWRITE_PROJECT_ID")
 		} else {
-			photoURL = product.Photo[0]
+			fileURL = product.Photo[0]
+			fileID = product.Photo[1]
+			fileNAME = product.Photo[2]
 			projectID = product.Photo[1]
 		}
 
@@ -277,7 +261,7 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 			Category:  []string{categoriesData.ID, categoriesData.Name},
 			Price:     priceInt,
 			UserID:    user_id,
-			Photo:     []string{photoURL, projectID},
+			Photo:     []string{fileURL, fileID, fileNAME, projectID},
 			Slug:      slug,
 			CreatedAt: now,
 			UpdatedAt: now,

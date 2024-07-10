@@ -1,21 +1,17 @@
 package services
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
-	"os"
-	"path/filepath"
 	"pos/models"
 )
 
 func (c *AppwriteClient) GetStoreByUserID(collectionID, userID string) (*models.Store, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	query := fmt.Sprintf("?queries[]=user=%s", userID)
+	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"user\",\"values\":[\"%s\"]}", userID)
 	url = url + query
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
@@ -81,10 +77,10 @@ func (c *AppwriteClient) CreateStore(collectionID string, stores models.Store) e
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	dt := map[string]interface{}{
-		"user":    []string{stores.User[0], stores.User[1]},
+		"user":    stores.User,
 		"name":    stores.Name,
-		"address": []string{stores.Address[0], stores.Address[1]},
-		"logo":    []string{stores.Logo[0], stores.Logo[1]},
+		"address": stores.Address,
+		"logo":    stores.Logo,
 		"slug":    stores.Slug,
 	}
 	documentData := map[string]interface{}{
@@ -127,10 +123,10 @@ func (c *AppwriteClient) UpdateStore(collectionID, userID string, stores models.
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, docID)
 
 	dt := map[string]interface{}{
-		"user":    []string{stores.User[0], stores.User[1]},
+		"user":    stores.User,
 		"name":    stores.Name,
-		"address": []string{stores.Address[0], stores.Address[1]},
-		"logo":    []string{stores.Logo[0], stores.Logo[1]},
+		"address": stores.Address,
+		"logo":    stores.Logo,
 		"slug":    stores.Slug,
 	}
 	updateData := map[string]interface{}{
@@ -170,71 +166,4 @@ func (c *AppwriteClient) UpdateStore(collectionID, userID string, stores models.
 	}
 
 	return &mdl, nil
-}
-
-func (c *AppwriteClient) UploadLogo(bucketID, fileID string, filePath string) (string, error) {
-	url := fmt.Sprintf("%s/storage/buckets/%s/files", c.Endpoint, bucketID)
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	var b bytes.Buffer
-	w := multipart.NewWriter(&b)
-
-	// pake file ID
-	fw, err := w.CreateFormField("fileId")
-	if err != nil {
-		return "", fmt.Errorf("failed to create form field for file ID: %w", err)
-	}
-
-	// bikin file data
-	fw, err = w.CreateFormFile("file", filepath.Base(filePath))
-	if err != nil {
-		return "", fmt.Errorf("failed to create form file: %w", err)
-	}
-	_, err = io.Copy(fw, file)
-	if err != nil {
-		return "", fmt.Errorf("failed to copy file data: %w", err)
-	}
-
-	w.Close()
-
-	req, err := http.NewRequest("POST", url, &b)
-	if err != nil {
-		return "", fmt.Errorf("failed to create HTTP request: %w", err)
-	}
-	req.Header.Set("Content-Type", w.FormDataContentType())
-	req.Header.Set("X-Appwrite-Project", c.ProjectID)
-	req.Header.Set("X-Appwrite-Key", c.APIKey)
-
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to execute HTTP request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("failed to upload file, status code: %d, response: %s", resp.StatusCode, string(body))
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	var fileResponse struct {
-		FileID string `json:"$id"`
-	}
-
-	err = json.Unmarshal(body, &fileResponse)
-	if err != nil {
-		return "", fmt.Errorf("failed to unmarshal response: %w", err)
-	}
-
-	fileURL := fmt.Sprintf("%s/storage/buckets/%s/files/%s/view", c.Endpoint, bucketID, fileResponse.FileID)
-	return fileURL, nil
 }

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"pos/models"
@@ -21,7 +20,7 @@ func PackageList(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			http.Redirect(w, r, "/app/dashboard?error=failed to load package", http.StatusSeeOther)
 			return
 		}
-		log.Println(packages)
+
 		data := models.PublicData{
 			Title:   "List of Packages",
 			Data:    map[string]interface{}{"packages": packages},
@@ -91,7 +90,6 @@ func PackageAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 
 		err = client.CreatePackage(os.Getenv("PACKAGES"), packageData)
 		if err != nil {
-			log.Println(err.Error())
 			http.Redirect(w, r, "/app/package/add?error=kesalahan data, harap coba kembali", http.StatusSeeOther)
 			return
 		}

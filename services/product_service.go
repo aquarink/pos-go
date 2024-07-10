@@ -1,14 +1,10 @@
 package services
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
-	"os"
-	"path/filepath"
 	"pos/models"
 )
 
@@ -181,75 +177,4 @@ func (c *AppwriteClient) DeleteProduct(collectionID, id string) error {
 	}
 
 	return nil
-}
-
-func (c *AppwriteClient) UploadFile(bucketID, fileID string, filePath string) (string, error) {
-	url := fmt.Sprintf("%s/storage/buckets/%s/files", c.Endpoint, bucketID)
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	var b bytes.Buffer
-	w := multipart.NewWriter(&b)
-
-	// pake file ID
-	fw, err := w.CreateFormField("fileId")
-	if err != nil {
-		return "", fmt.Errorf("failed to create form field for file ID: %w", err)
-	}
-	_, err = fw.Write([]byte(fileID))
-	if err != nil {
-		return "", fmt.Errorf("failed to write file ID: %w", err)
-	}
-
-	// bikin file data
-	fw, err = w.CreateFormFile("file", filepath.Base(filePath))
-	if err != nil {
-		return "", fmt.Errorf("failed to create form file: %w", err)
-	}
-	_, err = io.Copy(fw, file)
-	if err != nil {
-		return "", fmt.Errorf("failed to copy file data: %w", err)
-	}
-
-	w.Close()
-
-	req, err := http.NewRequest("POST", url, &b)
-	if err != nil {
-		return "", fmt.Errorf("failed to create HTTP request: %w", err)
-	}
-	req.Header.Set("Content-Type", w.FormDataContentType())
-	req.Header.Set("X-Appwrite-Project", c.ProjectID)
-	req.Header.Set("X-Appwrite-Key", c.APIKey)
-
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to execute HTTP request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("failed to upload file, status code: %d, response: %s", resp.StatusCode, string(body))
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	var fileResponse struct {
-		FileID string `json:"$id"`
-	}
-
-	err = json.Unmarshal(body, &fileResponse)
-	if err != nil {
-		return "", fmt.Errorf("failed to unmarshal response: %w", err)
-	}
-
-	fileURL := fmt.Sprintf("%s/storage/buckets/%s/files/%s/view", c.Endpoint, bucketID, fileResponse.FileID)
-	return fileURL, nil
 }
