@@ -191,20 +191,16 @@
     </script>
 
     <script>
-        let products = [];
+        let productIDs = [];
+        let productNames = [];
+        let productPrices = [];
+        let productQtys = [];
 
         function selectDineType(type) {
-            const productButtons = document.querySelectorAll('.product-button');
-            productButtons.forEach(button => {
-                button.disabled = false;
-            });
-
             if (type === 'takeaway') {
-                document.getElementById('dineType').value = "takeaway";
                 document.getElementById('dineInButton').textContent = "Dine In";
                 document.getElementById('tableNumberGroup').style.display = 'none';
             } else if (type === 'dinein') {
-                document.getElementById('dineType').value = "dinein";
                 $('#tableModal').modal('show');
             }
         }
@@ -218,73 +214,65 @@
         function addProduct(id, name, price) {
             price = parseInt(price.replace(/,/g, ''), 10);
 
-            const existingProductIndex = products.findIndex(product => product.id === id);
-
-            if (existingProductIndex !== -1) {
-                products[existingProductIndex].qty += 1;
-            } else {
-                products.push({ id, name, price, qty: 1 });
-            }
-
+            productIDs.push(id);
+            productNames.push(name);
+            productPrices.push(price);
+            productQtys.push(1);
+            
             updateOrderList();
             updateHiddenInputs();
         }
 
         function updateOrderList() {
             const orderListElem = document.getElementById('orderList');
-            
-            if (!orderList) {
-                console.error('orderList element not found');
-                return;
-            }
-
             orderListElem.innerHTML = '';
 
             let totalItems = 0;
             let totalCost = 0;
 
-            products.forEach(product => {
+            for (let i = 0; i < productIDs.length; i++) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><p class="text-sm font-weight-bold mb-0">${product.name}</p></td>
-                    <td><p class="text-sm font-weight-bold mb-0">${product.qty}</p></td>
-                    <td><p class="text-sm font-weight-bold mb-0">Rp.${product.price}</p></td>
+                    <td><p class="text-sm font-weight-bold mb-0">${productNames[i]}</p></td>
+                    <td><p class="text-sm font-weight-bold mb-0">${productQtys[i]}</p></td>
+                    <td><p class="text-sm font-weight-bold mb-0">Rp.${productPrices[i]}</p></td>
                 `;
                 orderList.appendChild(row);
 
-                totalItems += product.qty;
-                totalCost += product.price * product.qty;
-            });
-
-            const totalItemsElement = document.getElementById('totalItems');
-            const totalCostElement = document.getElementById('totalCost');
-            const totalTaxElement = document.getElementById('totalTax');
-            const totalPaymentDisplayElement = document.getElementById('totalPaymentDisplay');
-
-            // Check if elements are found
-            if (!totalItemsElement || !totalCostElement || !totalTaxElement || !totalPaymentDisplayElement) {
-                console.error('One or more total elements not found');
-                return;
+                totalItems += productQtys[i];
+                totalCost += productPrices[i] * productQtys[i];
             }
 
-            totalItemsElement.textContent = totalItems;
-            totalCostElement.textContent = `Rp.${totalCost}`;
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('totalCost').textContent = `Rp.${totalCost}`;
 
             const tax = totalCost * 0.11;
-            totalTaxElement.textContent = `Rp.${tax}`;
-            totalPaymentDisplayElement.textContent = `Rp.${totalCost + tax}`;
+            document.getElementById('totalTax').textContent = `Rp.${tax}`;
+            document.getElementById('totalPaymentDisplay').textContent = `Rp.${totalCost + tax}`;
 
             document.getElementById('tax').value = tax;
             document.getElementById('taxTotal').value = totalCost + tax;
             document.getElementById('totalPayment').value = totalCost + tax;
+
+            // orderList.forEach(product => {
+            //     totalItems += product.qty;
+            //     totalCost += product.totalPrice;
+
+            //     const row = document.createElement('tr');
+            //     row.innerHTML = `<td><p class="text-sm font-weight-bold mb-0">${product.name}</p></td><td><p class="text-sm font-weight-bold mb-0">${product.qty}</p></td><td><p class="text-sm font-weight-bold mb-0">Rp.${product.totalPrice.toLocaleString()}</p></td>`;
+            //     orderListElem.appendChild(row);
+            // });
+
+            // const tax = totalCost * 0.11;
+            // const totalPayment = totalCost + tax;
+
+            // document.getElementById('totalItems').textContent = totalItems;
+            // document.getElementById('totalCost').textContent = `Rp.${totalCost.toLocaleString()}`;
+            // document.getElementById('totalTax').textContent = `Rp.${tax.toLocaleString()}`;
+            // document.getElementById('totalPayment').textContent = `Rp.${totalPayment.toLocaleString()}`;
         }
 
         function updateHiddenInputs() {
-            const productIDs = products.map(product => product.id);
-            const productNames = products.map(product => product.name);
-            const productPrices = products.map(product => product.price);
-            const productQtys = products.map(product => product.qty);
-
             document.getElementById('productIDs').value = productIDs.join(',');
             document.getElementById('productNames').value = productNames.join(',');
             document.getElementById('productPrices').value = productPrices.join(',');

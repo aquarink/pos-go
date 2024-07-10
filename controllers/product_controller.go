@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"pos/models"
@@ -17,9 +18,16 @@ import (
 
 func ProductList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
-		prods, err := client.ListProducts(os.Getenv("PRODUCTS"))
+		prods, err := client.ProductByUserID(os.Getenv("PRODUCTS"), models.GlobalSessionData.UserId)
 		if err != nil {
 			http.Redirect(w, r, "/app/dashboard?error=failed to load products", http.StatusSeeOther)
+			return
+		}
+
+		_, err = client.StoreByUserID(os.Getenv("STORES"), models.GlobalSessionData.UserId)
+		if err != nil {
+			log.Println(err.Error())
+			http.Redirect(w, r, "/app/store?error=harap lengkapi profile toko anda terlebih dahulu", http.StatusSeeOther)
 			return
 		}
 
@@ -85,6 +93,35 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		priceInt, err := strconv.Atoi(price)
 		if err != nil {
 			http.Redirect(w, r, "/app/product/add?error=invalid price", http.StatusSeeOther)
+			return
+		}
+
+		check, _ := client.ProductByName(os.Getenv("PRODUCTS"), name, user_id)
+		if check != nil {
+			http.Redirect(w, r, "/app/product/add?error=nama produk sudah ada", http.StatusSeeOther)
+			return
+		}
+
+		countPaket, _ := client.StoreByUserID(os.Getenv("STORES"), user_id)
+		if check != nil {
+			http.Redirect(w, r, "/app/product/add?error=paket produk invalid", http.StatusSeeOther)
+			return
+		}
+
+		maxProducts, err := strconv.Atoi(countPaket.Package[2])
+		if err != nil {
+			http.Redirect(w, r, "/app/product/add?error=invalid package limit", http.StatusSeeOther)
+			return
+		}
+
+		prods, _ := client.ProductByUserID(os.Getenv("PRODUCTS"), user_id)
+		if check != nil {
+			http.Redirect(w, r, "/app/product/add?error=data produk invalid", http.StatusSeeOther)
+			return
+		}
+
+		if len(prods) >= maxProducts {
+			http.Redirect(w, r, "/app/product/add?error=anda tidak dapat menambah produk, harap upgrade paket", http.StatusSeeOther)
 			return
 		}
 

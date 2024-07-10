@@ -23,7 +23,7 @@ func StoreEdit(w http.ResponseWriter, r *http.Request, client *services.Appwrite
 			return
 		}
 
-		stores, _ := client.GetStoreByUserID(os.Getenv("STORES"), user_id)
+		stores, _ := client.StoreByUserID(os.Getenv("STORES"), user_id)
 
 		if stores == nil {
 			stores = &models.Store{}
@@ -61,7 +61,7 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
-		stores, _ := client.GetStoreByUserID(os.Getenv("STORES"), user_id)
+		stores, _ := client.StoreByUserID(os.Getenv("STORES"), user_id)
 
 		user, err := client.GetUserByID(os.Getenv("USERS"), user_id)
 		if err != nil {

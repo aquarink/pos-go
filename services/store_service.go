@@ -8,7 +8,7 @@ import (
 	"pos/models"
 )
 
-func (c *AppwriteClient) GetStoreByUserID(collectionID, userID string) (*models.Store, error) {
+func (c *AppwriteClient) StoreByUserID(collectionID, userID string) (*models.Store, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"user\",\"values\":[\"%s\"]}", userID)
@@ -45,7 +45,7 @@ func (c *AppwriteClient) GetStoreByUserID(collectionID, userID string) (*models.
 	return &response.Documents[0], nil
 }
 
-func (c *AppwriteClient) GetStoreByID(collectionID, id string) (*models.Store, error) {
+func (c *AppwriteClient) StoreByID(collectionID, id string) (*models.Store, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
@@ -115,7 +115,7 @@ func (c *AppwriteClient) CreateStore(collectionID string, stores models.Store) e
 }
 
 func (c *AppwriteClient) UpdateStore(collectionID, userID string, stores models.Store) (*models.Store, error) {
-	store, err := c.GetStoreByUserID(collectionID, userID)
+	store, err := c.StoreByUserID(collectionID, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find store: %v", err)
 	}

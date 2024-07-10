@@ -1,7 +1,11 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
 	"html/template"
+	"math/big"
 	"regexp"
 	"strings"
 	"time"
@@ -58,4 +62,22 @@ func CreateSlug(input string) string {
 
 func Comma(x int) string {
 	return humanize.Comma(int64(x))
+}
+
+func Uniqid(moreEntropy bool) string {
+	sec := time.Now().Unix()
+	uniqid := fmt.Sprintf("%x", sec)
+
+	randBytes := make([]byte, 8)
+	if _, err := rand.Read(randBytes); err != nil {
+		panic(err)
+	}
+	uniqid += hex.EncodeToString(randBytes)
+
+	if moreEntropy {
+		extra, _ := rand.Int(rand.Reader, big.NewInt(100000))
+		uniqid += fmt.Sprintf("%08d", extra)
+	}
+
+	return uniqid
 }

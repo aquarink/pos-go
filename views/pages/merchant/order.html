@@ -1,0 +1,136 @@
+{{ define "content" }}
+<!-- Modal -->
+<div class="modal fade" id="tableModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-20" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="width: 100%;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Select Table Number</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    {{ range $val := .Data.meja }}
+                    <div class="col-md-2 mb-2">
+                        <button type="button" class="btn btn-outline-secondary btn-block" onclick="selectTableNumber('{{ $val }}')">{{ $val }}</button>
+                    </div>
+                    {{ end }}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-12 mb-lg-0 mb-4">
+        <div class="card">
+            <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
+                <div class="p-4" style="background-color: #f8f9fa;">
+                    {{if .Error}}
+                        <p class="text-danger">{{.Error | ucwords}}</p>
+                    {{end}}
+                    {{if .Msg}}
+                        <p class="text-info">{{.Msg | ucwords}}</p>
+                    {{end}}
+                    <form action="/app/order" method="post">
+                        {{.CSRFToken}}
+                        <!-- input -->
+                        <input required id="trxID" name="trxID" type="hiddens" value="{{ .Data.unique }}">
+                        <input required id="dineType" name="dineType" type="hiddens">
+                        <input id="nomorMeja" name="tableNumber" type="hiddens">
+                        <input required id="productIDs" name="productIDs[]" type="hiddens">
+                        <input required id="productNames" name="productNames[]" type="hiddens">
+                        <input required id="productPrices" name="productPrices[]" type="hiddens">
+                        <input required id="productQtys" name="productQtys[]" type="hiddens">
+                        <input required id="tax" name="tax" type="hiddens">
+                        <input required id="taxTotal" name="taxTotal" type="hiddens">
+                        <input required id="totalPayment" name="totalPayment" type="hiddens">
+
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Order List</label>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Qty</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="orderList"></tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Total Items</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" id="totalItems">0</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" id="totalCost">Rp.0</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" colspan="2">Tax (11%)</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" id="totalTax">Rp.0</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder" colspan="2">Total Payment</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder" id="totalPaymentDisplay">Rp.0</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+        
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary" onclick="checkout()">Checkout</button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dineType" class="font-weight-bold">Dine Type</label>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <button type="button" class="btn btn-outline-primary" onclick="selectDineType('takeaway')">Take Away</button>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button id="dineInButton" type="button" class="btn btn-outline-primary" onclick="selectDineType('dinein')">Dine In</button>
+                                        </div>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Products</label>
+                                    <div class="row" id="productList">
+                                        {{range .Data.products}}
+                                            <div class="col-md-4">
+                                                <button disabled type="button" class="btn btn-outline-primary m-1 product-button" onclick="addProduct('{{.ID}}', '{{.Name}}', '{{.Price}}')">
+                                                    <img src="{{index .Photo 0}}?project={{index .Photo 3}}" alt="{{.Name}}" style="max-width: 100px;"><br>
+                                                    {{.Name}}<br>
+                                                    Rp.{{.Price | coma}}
+                                                </button>
+                                            </div>
+                                        {{end}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div id="paymentSection" style="display: none;">
+                        <h5 class="font-weight-bold">Payment</h5>
+                        <div class="form-group">
+                            <label for="paymentMethod" class="font-weight-bold">Payment Method</label>
+                            <select id="paymentMethod" required name="paymentMethod" class="form-control form-control-alternative">
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                                <option value="digital">Digital Payment</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">Confirm Payment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

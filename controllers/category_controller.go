@@ -13,7 +13,7 @@ import (
 
 func CategoryList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
-		cat, err := client.ListCategory(os.Getenv("CATEGORIES"))
+		cat, err := client.CategoryByUserId(os.Getenv("CATEGORIES"), models.GlobalSessionData.UserId)
 		if err != nil {
 			http.Redirect(w, r, "/app/dashboard?error=email atau password salah", http.StatusSeeOther)
 			return
