@@ -8,6 +8,7 @@ import (
 	"pos/models"
 	"pos/services"
 	"pos/utils"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -73,14 +74,6 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		var fileNAME string
 		var projectID string
 
-		// uniqueFileNameBytes, err := exec.Command("uuidgen").Output()
-		// if err != nil {
-		// 	http.Redirect(w, r, "/app/store?error=failed to generate unique file name", http.StatusSeeOther)
-		// 	return
-		// }
-
-		// uniqueFileName := strings.TrimSpace(string(uniqueFileNameBytes))
-
 		file, _, err := r.FormFile("logo")
 		if err == nil {
 			defer file.Close()
@@ -105,14 +98,9 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 
 			fileURL, fileID, fileNAME, err = client.FileUpload(os.Getenv("STORES_LOGO_BUCKET"), tempFile.Name())
 			if err != nil {
-				log.Println(err.Error())
 				http.Redirect(w, r, "/app/store?error=failed to upload file", http.StatusSeeOther)
 				return
 			}
-
-			log.Println(fileURL)
-			log.Println(fileID)
-			log.Println(fileNAME)
 
 			projectID = os.Getenv("APPWRITE_PROJECT_ID")
 		} else {
@@ -126,8 +114,32 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		now := time.Now().Format(time.RFC3339)
 		created := now
 
+		// PACKAGE
+		packageName := "free"
+		packageCashier := 1
+		packageProduct := 2
+
 		if stores != nil {
 			created = stores.CreatedAt
+
+			// package
+			if len(stores.Package) >= 3 {
+				if stores.Package[0] != "" {
+					packageName = stores.Package[0]
+				}
+				if stores.Package[1] != "" {
+					packageCashier, err = strconv.Atoi(stores.Package[1])
+					if err != nil {
+						log.Println(err.Error())
+					}
+				}
+				if stores.Package[2] != "" {
+					packageProduct, err = strconv.Atoi(stores.Package[2])
+					if err != nil {
+						log.Println(err.Error())
+					}
+				}
+			}
 		}
 
 		updates := models.Store{
@@ -136,6 +148,7 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			Address:   []string{city, address},
 			Logo:      []string{fileURL, fileID, fileNAME, projectID},
 			Slug:      slug,
+			Package:   []string{packageName, strconv.Itoa(packageCashier), strconv.Itoa(packageProduct)},
 			CreatedAt: created,
 			UpdatedAt: now,
 		}

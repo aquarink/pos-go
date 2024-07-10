@@ -1,0 +1,79 @@
+{{define "content"}}
+<div class="row mt-4">
+    <div class="col-lg-12 mb-lg-0 mb-4">
+        <div class="card">
+            <div class="card-header pb-0 p-3">
+                <div class="d-flex justify-content-between">
+                    <form action="/app/product" method="get">
+                        <div class="form-group">
+                            <div class="input-group mb-4">
+                              <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span>
+                              <input name="search" class="form-control" placeholder="Search" type="text" autocomplete="off">
+                            </div>
+                          </div>
+                    </form>
+                </div>
+            </div>
+            <div class="ct-example" style="position: relative;border: 2px solid #f5f7ff !important;border-bottom: none !important;padding: 1rem 1rem 2rem 1rem;margin-bottom: -1.25rem;">
+                <div class="p-4">
+                    <div class="table-responsive">
+                        <table id="dtTable" class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Store Name</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Owner</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Address</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Package</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Logo</th>
+                                    <!-- <th class="text-secondary opacity-7"></th> -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Data.merchant}}
+                                    <tr>
+                                        <td><p class="text-sm font-weight-bold mb-0">{{.Name | ucwords}}</p></td>
+
+                                        <td>
+                                            {{if gt (len .User) 1}}
+                                                <p class="text-sm font-weight-bold mb-0">{{index .User 1 | ucwords}}</p>
+                                            {{else}}
+                                                <p class="text-sm font-weight-bold mb-0">No owner</p>
+                                            {{end}}
+                                        </td>
+
+                                        <td>
+                                            {{if gt (len .Address) 1}}
+                                                <p class="text-sm font-weight-bold mb-0">
+                                                    {{index .Address 0 | ucwords}} - {{index .Address 1 | ucwords}}
+                                                </p>
+                                            {{else}}
+                                                <p class="text-sm font-weight-bold mb-0">No address</p>
+                                            {{end}}
+                                        </td>
+
+                                        <td>
+                                            {{if gt (len .Package) 1}}
+                                                <p class="text-sm font-weight-bold mb-0">
+                                                    {{index .Package 0 | ucwords}} ( {{index .Package 1 }} kasir dan {{index .Package 2 }} produk)
+                                                </p>
+                                            {{else}}
+                                                <p class="text-sm font-weight-bold mb-0">No address</p>
+                                            {{end}}
+                                        </td>
+
+                                        {{if and (ne .Logo nil) (gt (len .Logo) 3)}}
+                                            <td><img src="{{index .Logo 0}}?project={{index .Logo 3}}" alt="{{.Name}}" style="max-width: 50px;"></td>
+                                        {{else}}
+                                            <td>no preview</td>
+                                        {{end}}
+                                    </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

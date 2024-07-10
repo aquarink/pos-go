@@ -7,6 +7,7 @@ type Store struct {
 	Address   []string `json:"address"` // city, address
 	Logo      []string `json:"logo"`    // url, project_id
 	Slug      string   `json:"slug"`
+	Package   []string `json:"package"`
 	CreatedAt string   `json:"$createdAt"`
 	UpdatedAt string   `json:"$updatedAt"`
 }

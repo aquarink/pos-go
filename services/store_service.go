@@ -82,6 +82,7 @@ func (c *AppwriteClient) CreateStore(collectionID string, stores models.Store) e
 		"address": stores.Address,
 		"logo":    stores.Logo,
 		"slug":    stores.Slug,
+		"package": stores.Package,
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",
@@ -128,6 +129,7 @@ func (c *AppwriteClient) UpdateStore(collectionID, userID string, stores models.
 		"address": stores.Address,
 		"logo":    stores.Logo,
 		"slug":    stores.Slug,
+		"package": stores.Package,
 	}
 	updateData := map[string]interface{}{
 		"data": dt,
