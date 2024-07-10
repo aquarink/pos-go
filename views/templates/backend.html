@@ -190,6 +190,7 @@
         });
     </script>
 
+    {{ if eq .Title "Order" }}
     <script>
         let products = [];
 
@@ -315,6 +316,7 @@
             document.getElementById('paymentSection').style.display = 'block';
         }
     </script>
+    {{ end }}
 </body>
 </html>
 {{end}}
