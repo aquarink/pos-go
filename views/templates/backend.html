@@ -417,8 +417,47 @@
         });
 
         function printReceipt() {
-            // Implement print logic here
-            console.log("Printing receipt...");
+            const storeName = document.getElementById('storeName').innerText = 'NAMA TOKO';
+            const queueNumber = document.getElementById('queueNumber').innerText = 'Nomor Antri';
+            const cashierInfo = document.getElementById('cashierInfo').innerText = `Nama kasir - ${new Date().toLocaleString()}`;
+
+            const receiptItems = document.getElementById('receiptItems');
+            receiptItems.innerHTML = ''; // Clear previous items
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.qty}</td>
+                    <td>Rp.${formatNumber(product.price)}</td>
+                `;
+                receiptItems.appendChild(row);
+            });
+
+            const totalItemsElement = document.getElementById('totalItems');
+            const totalCostElement = document.getElementById('totalPayment');
+            const taxElement = document.getElementById('tax');
+            const paidElement = document.getElementById('paid');
+            const changeElement = document.getElementById('change');
+            const transactionCodeElement = document.getElementById('transactionCode');
+
+            totalItemsElement.innerText = `TOTAL ITEMS: ${products.reduce((sum, product) => sum + product.qty, 0)}`;
+            const totalPayment = parseFloat(document.getElementById('totalPayment').value);
+            const tax = totalPayment * 0.11;
+            taxElement.innerText = `TAX (11%): RP.${formatNumber(tax)}`;
+            totalCostElement.innerText = `TOTAL PAYMENT: RP.${formatNumber(totalPayment)}`;
+            paidElement.innerText = `PAID METHOD: RP.${formatNumber(totalPayment)}`;
+            changeElement.innerText = `CHANGE: RP.${formatNumber(0)}`; // Adjust as necessary
+            transactionCodeElement.innerText = 'Kode Transaksi';
+
+            const receiptContent = document.getElementById('receiptContent').innerHTML;
+
+            const newWindow = window.open('', '', 'width=600,height=400');
+            newWindow.document.write('<html><head><title>Receipt</title>');
+            newWindow.document.write('</head><body>');
+            newWindow.document.write(receiptContent);
+            newWindow.document.write('</body></html>');
+            newWindow.document.close();
+            newWindow.print();
         }
     </script>
     {{ end }}

@@ -213,4 +213,33 @@
         </div>
     </div>
 </div>
+
+<!-- Receipt Content -->
+<div id="receiptContent" style="display: none;">
+    <h2 id="storeName">NAMA TOKO</h2>
+    <p id="queueNumber">Nomor Antri</p>
+    <p id="cashierInfo">Nama kasir - tanggal jam</p>
+    <hr>
+    <table>
+        <thead>
+            <tr>
+                <th>PRODUCT</th>
+                <th>QTY</th>
+                <th>PRICE</th>
+            </tr>
+        </thead>
+        <tbody id="receiptItems">
+            <!-- Items will be populated by JavaScript -->
+        </tbody>
+    </table>
+    <hr>
+    <p id="totalItems">TOTAL ITEMS: 0</p>
+    <p id="tax">TAX (11%): RP.0</p>
+    <p id="totalPayment">TOTAL PAYMENT: RP.0</p>
+    <p id="paid">PAID METHOD: RP.0</p>
+    <p id="change">CHANGE: RP.0</p>
+    <hr>
+    <p>Terima kasih</p>
+    <p id="transactionCode">Kode Transaksi</p>
+</div>
 {{ end }}
