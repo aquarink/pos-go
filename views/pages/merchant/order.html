@@ -23,6 +23,73 @@
     </div>
 </div>
 
+<!-- Modal Payment -->
+<div class="modal fade" id="paymentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-20" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="width: 100%;">
+            <div class="modal-header">
+                <h5 class="modal-title w-100 text-center" id="staticBackdropLabel">Payment Method</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-around">
+                    <button type="button" class="btn btn-primary" onclick="showCashPayment()">Cash</button>
+                    <button type="button" class="btn btn-info" onclick="showDigitalPayment()">Digital</button>
+                </div>
+                <div id="cashPayment" style="display:none; margin-top: 20px;">
+                    <h5>Cash Payment</h5>
+                    <div class="form-group">
+                        <label for="receivedAmount">Amount Received:</label>
+                        <input type="number" class="form-control" id="receivedAmount" onkeyup="doCashPayment()" placeholder="Enter amount received">
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button style="width: 100%;" disabled type="button" class="btn btn-outline-primary m-1">
+                                    Total: <span id="totalAmt"></span>
+                                </button>
+                            </div>
+
+                            <div class="col-md-4">
+                                <button style="width: 100%;" disabled type="button" class="btn btn-outline-success m-1">
+                                    Paid: <span id="payAmt"></span>
+                                </button>
+                            </div>
+
+                            <div class="col-md-4">
+                                <button style="width: 100%;" disabled type="button" class="btn btn-outline-danger m-1">
+                                    Change: <span id="changeAmt"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button style="width: 100%;" type="button" class="btn btn-primary mt-2" onclick="doPaid()">Pay</button>
+                    
+                </div>
+
+
+                <div id="digitalPayment" style="display:none; margin-top: 20px;">
+                    <h5>Digital Payment</h5>
+                    <div class="form-group">
+                        <label for="paymentMethod">Payment Method:</label>
+                        <input type="text" class="form-control" id="paymentMethod" placeholder="Enter payment method">
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="transactionCode">Transaction Code:</label>
+                        <input type="text" class="form-control" id="transactionCode" placeholder="Enter transaction code">
+                    </div>
+                    <button style="width: 100%;" type="button" class="btn btn-info mt-2" onclick="doDigitalPayment()">Pay</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button style="width: 100%;" type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row mt-4">
     <div class="col-lg-12 mb-lg-0 mb-4">
         <div class="card">
@@ -76,12 +143,23 @@
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder" colspan="2">Total Payment</th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder" id="totalPaymentDisplay">Rp.0</th>
                                             </tr>
+
+                                            <!-- paid -->
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Paid</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder" id="paidMethod">Method</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder" id="paidDisplay">Rp.0</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder" colspan="2">Change</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder" id="changeDisplay">Rp.0</th>
+                                            </tr>
                                         </tfoot>
                                     </table>
                                 </div>
         
                                 <div class="form-group">
-                                    <button disabled id="payment" style="width: 100%;" type="button" class="btn btn-primary" onclick="payment()">
+                                    <button disabled id="payment" style="width: 100%;" type="button" class="btn btn-primary" onclick="doPayment()">
                                         <i class="ni ni-cart"></i> Payment
                                     </button>
                                 </div>
@@ -92,7 +170,7 @@
                                     <label for="dineType" class="font-weight-bold">Dine Type</label>
                                     <div class="row">
                                         <div class="col-md-4">
-                                            <button type="button" class="btn btn-outline-primary" onclick="selectDineType('takeaway')">Take Away</button>
+                                            <button id="takeawayButton" type="button" class="btn btn-outline-primary" onclick="selectDineType('takeaway')">Take Away</button>
                                         </div>
                                         <div class="col-md-6">
                                             <button id="dineInButton" type="button" class="btn btn-outline-primary" onclick="selectDineType('dinein')">Dine In</button>

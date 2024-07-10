@@ -208,19 +208,31 @@
         }
 
         function selectDineType(type) {
+            const takeawayButton = document.getElementById('takeawayButton');
+            const dineInButton = document.getElementById('dineInButton');
+
+            if (type === 'takeaway') {
+                document.getElementById('dineType').value = "takeaway";
+                dineInButton.textContent = "Dine In";
+
+                takeawayButton.classList.remove('btn-outline-primary');
+                takeawayButton.classList.add('btn-primary');
+                dineInButton.classList.remove('btn-primary');
+                dineInButton.classList.add('btn-outline-primary');
+            } else if (type === 'dinein') {
+                document.getElementById('dineType').value = "dinein";
+                $('#tableModal').modal('show');
+
+                dineInButton.classList.remove('btn-outline-primary');
+                dineInButton.classList.add('btn-primary');
+                takeawayButton.classList.remove('btn-primary');
+                takeawayButton.classList.add('btn-outline-primary');
+            }
+
             const productButtons = document.querySelectorAll('.product-button');
             productButtons.forEach(button => {
                 button.disabled = false;
             });
-
-            if (type === 'takeaway') {
-                document.getElementById('dineType').value = "takeaway";
-                document.getElementById('dineInButton').textContent = "Dine In";
-                // document.getElementById('tableNumberGroup').style.display = 'none';
-            } else if (type === 'dinein') {
-                document.getElementById('dineType').value = "dinein";
-                $('#tableModal').modal('show');
-            }
         }
 
         function selectTableNumber(number) {
@@ -329,8 +341,84 @@
             document.getElementById('productQtys').value = productQtys.join(',');
         }
 
-        function payment() {
-            document.getElementById('paymentSection').style.display = 'block';
+        function doPayment() {
+            // const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+            // paymentModal.show();
+
+            $('#paymentModal').modal('show');
+        }
+
+        function showCashPayment() {
+            document.getElementById('cashPayment').style.display = 'block';
+            document.getElementById('digitalPayment').style.display = 'none';
+        }
+
+        function showDigitalPayment() {
+            document.getElementById('cashPayment').style.display = 'none';
+            document.getElementById('digitalPayment').style.display = 'block';
+        }
+
+        function calculateChange() {
+            const receivedAmount = parseFloat(document.getElementById('receivedAmount').value);
+            const totalPayment = parseFloat(document.getElementById('totalPayment').value);
+            const changeAmount = receivedAmount - totalPayment;
+
+            document.getElementById('paidAmount').textContent = `Rp.${formatNumber(receivedAmount)}`;
+            document.getElementById('changeAmount').textContent = `Rp.${formatNumber(changeAmount)}`;
+            document.getElementById('changeInfo').style.display = 'block';
+        }
+
+        function confirmDigitalPayment() {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const transactionCode = document.getElementById('transactionCode').value;
+
+            document.getElementById('paidAmount').textContent = `Rp.${formatNumber(totalPayment)}`;
+            document.getElementById('changeAmount').textContent = `Rp.0`;
+            document.getElementById('changeInfo').style.display = 'block';
+        }
+
+
+        function doCashPayment() {
+            const totalPayment = parseFloat(document.getElementById('totalPayment').value);
+            const receivedAmount = parseFloat(document.getElementById('receivedAmount').value);
+            const changeAmount = receivedAmount - totalPayment;
+            // 
+            document.getElementById('totalAmt').textContent = `Rp.${formatNumber(totalPayment)}`;
+            document.getElementById('payAmt').textContent = `Rp.${formatNumber(receivedAmount)}`;
+            document.getElementById('changeAmt').textContent = `Rp.${formatNumber(changeAmount)}`;
+        }
+
+        // do paid
+        function doPaid() {
+            const totalPayment = parseFloat(document.getElementById('totalPayment').value);
+            const receivedAmount = parseFloat(document.getElementById('receivedAmount').value);
+            const changeAmount = receivedAmount - totalPayment;
+
+            document.getElementById('paidDisplay').textContent = `Rp.${formatNumber(receivedAmount)}`;
+            document.getElementById('paidMethod').textContent = `Cash`;
+            document.getElementById('changeDisplay').textContent = `Rp.${formatNumber(changeAmount)}`;
+            
+            $('#paymentModal').modal('hide');
+
+            document.getElementById('receivedAmount').value = "";
+            document.getElementById('totalAmt').textContent = "";
+            document.getElementById('payAmt').textContent = "";
+            document.getElementById('changeAmt').textContent = "";
+
+            printReceipt();
+        }
+
+        const paymentModal = document.getElementById('paymentModal');
+        paymentModal.addEventListener('hidden.bs.modal', event => {
+            document.getElementById('receivedAmount').value = "";
+            document.getElementById('totalAmt').textContent = "";
+            document.getElementById('payAmt').textContent = "";
+            document.getElementById('changeAmt').textContent = "";
+        });
+
+        function printReceipt() {
+            // Implement print logic here
+            console.log("Printing receipt...");
         }
     </script>
     {{ end }}
