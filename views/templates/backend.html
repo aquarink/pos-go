@@ -202,6 +202,7 @@
     {{ if eq .Title "Order" }}
     <script>
         let products = [];
+        let orderList = [];
 
         function formatNumber(num) {
             return num.toLocaleString('id-ID');
@@ -239,6 +240,45 @@
             document.getElementById('dineInButton').textContent = `Dine In - Table ${number}`;
             document.getElementById('nomorMeja').value = number;
             $('#tableModal').modal('hide');
+        }
+
+        function openProductModal(id, name, price) {
+            $('#productModal').modal('show');
+            currentProduct = { id, name, price: parseInt(price.replace(/,/g, ''), 10) };
+            document.getElementById('modalProductName').textContent = name;
+            document.getElementById('modalProductPrice').textContent = `Rp.${price}`;
+            document.getElementById('quantity').value = 1;
+            document.getElementById('notes').value = '';
+        }
+
+        function increaseQuantity() {
+            const quantityElem = document.getElementById('quantity');
+            quantityElem.value = parseInt(quantityElem.value) + 1;
+        }
+
+        function decreaseQuantity() {
+            const quantityElem = document.getElementById('quantity');
+            if (parseInt(quantityElem.value) > 1) {
+                quantityElem.value = parseInt(quantityElem.value) - 1;
+            }
+        }
+
+        function addProductToList() {
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const notes = document.getElementById('notes').value;
+            const product = { ...currentProduct, qty: quantity, notes, totalPrice: currentProduct.price * quantity };
+
+            const existingProduct = orderList.find(p => p.id === product.id && p.notes === product.notes);
+            if (existingProduct) {
+                existingProduct.qty += quantity;
+                existingProduct.totalPrice += product.totalPrice;
+            } else {
+                orderList.push(product);
+            }
+
+            updateOrderList();
+            updateHiddenInputs();
+            $('#productModal').modal('hide');
         }
 
         function addProduct(id, name, price) {
@@ -284,15 +324,17 @@
             let totalItems = 0;
             let totalCost = 0;
 
-            products.forEach(product => {
+            orderList.forEach(product => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><p class="text-sm font-weight-bold mb-0">${product.name}</p></td>
                     <td><p class="text-sm font-weight-bold mb-0">${product.qty}</p></td>
                     <td><p class="text-sm font-weight-bold mb-0">Rp.${product.price.toLocaleString()}</p></td>
+                    <td><p class="text-sm font-weight-bold mb-0">${product.notes}</td>
                     <td><button type="button" onclick="removeProduct('${product.id}')">-</button></td>
                 `;
-                orderList.appendChild(row);
+                // orderList.appendChild(row);
+                orderListElem.appendChild(row);
 
                 totalItems += product.qty;
                 totalCost += product.price * product.qty;
@@ -330,10 +372,15 @@
         }
 
         function updateHiddenInputs() {
-            const productIDs = products.map(product => product.id);
-            const productNames = products.map(product => product.name);
-            const productPrices = products.map(product => product.price);
-            const productQtys = products.map(product => product.qty);
+            // const productIDs = products.map(product => product.id);
+            // const productNames = products.map(product => product.name);
+            // const productPrices = products.map(product => product.price);
+            // const productQtys = products.map(product => product.qty);
+
+            const productIDs = orderList.map(product => product.id);
+            const productNames = orderList.map(product => product.name);
+            const productPrices = orderList.map(product => product.price);
+            const productQtys = orderList.map(product => product.qty);
 
             document.getElementById('productIDs').value = productIDs.join(',');
             document.getElementById('productNames').value = productNames.join(',');
@@ -389,7 +436,7 @@
         }
 
         // do paid
-        function doPaid() {
+        function doCashPaid() {
             const totalPayment = parseFloat(document.getElementById('totalPayment').value);
             const receivedAmount = parseFloat(document.getElementById('receivedAmount').value);
             const changeAmount = receivedAmount - totalPayment;
@@ -404,6 +451,33 @@
             document.getElementById('totalAmt').textContent = "";
             document.getElementById('payAmt').textContent = "";
             document.getElementById('changeAmt').textContent = "";
+
+            // DIGITAL
+            document.getElementById('paymentMethod').value = "";
+            document.getElementById('transactionCode').value = "";
+
+            printReceipt();
+        }
+
+        // do digital paid
+        function doDigitalPaid() {
+            const totalPayment = parseFloat(document.getElementById('totalPayment').value);
+            const paymentMethod = document.getElementById('paymentMethod').value;
+
+            document.getElementById('paidDisplay').textContent = `Rp.${formatNumber(totalPayment)}`;
+            document.getElementById('paidMethod').textContent = paymentMethod;
+            document.getElementById('changeDisplay').textContent = `Rp.0`;
+            
+            $('#paymentModal').modal('hide');
+
+            document.getElementById('receivedAmount').value = "";
+            document.getElementById('totalAmt').textContent = "";
+            document.getElementById('payAmt').textContent = "";
+            document.getElementById('changeAmt').textContent = "";
+
+            // DIGITAL
+            document.getElementById('paymentMethod').value = "";
+            document.getElementById('transactionCode').value = "";
 
             printReceipt();
         }

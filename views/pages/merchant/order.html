@@ -23,6 +23,44 @@
     </div>
 </div>
 
+<!-- Modal Add Product -->
+<div class="modal fade" id="productModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-20" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content" style="width: 100%;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Add Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <h5 id="modalProductName"></h5>
+                    <p id="modalProductPrice"></p>
+                    <div class="form-group">
+                        <label for="quantity" class="font-weight-bold">Quantity</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <button type="button" class="btn btn-outline-secondary" onclick="decreaseQuantity()">-</button>
+                            </div>
+                            <input type="text" class="form-control text-center" id="quantity" value="1" readonly>
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-outline-secondary" onclick="increaseQuantity()">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes" class="font-weight-bold">Notes</label>
+                        <textarea class="form-control" id="notes" rows="3" placeholder="Add any notes..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="addProductToList()">Add to Order</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Payment -->
 <div class="modal fade" id="paymentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-20" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -65,7 +103,7 @@
                         </div>
                     </div>
 
-                    <button style="width: 100%;" type="button" class="btn btn-primary mt-2" onclick="doPaid()">Pay</button>
+                    <button style="width: 100%;" type="button" class="btn btn-primary mt-2" onclick="doCashPaid()">Pay</button>
                     
                 </div>
 
@@ -80,7 +118,7 @@
                         <label for="transactionCode">Transaction Code:</label>
                         <input type="text" class="form-control" id="transactionCode" placeholder="Enter transaction code">
                     </div>
-                    <button style="width: 100%;" type="button" class="btn btn-info mt-2" onclick="doDigitalPayment()">Pay</button>
+                    <button style="width: 100%;" type="button" class="btn btn-info mt-2" onclick="doDigitalPaid()">Pay</button>
                 </div>
             </div>
             <div class="modal-footer">
@@ -126,6 +164,7 @@
                                                 <th style="padding-left: 10px;" class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product</th>
                                                 <th style="padding-left: 0px;" class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Qty</th>
                                                 <th style="padding-left: 0px;" class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Price</th>
+                                                <th style="padding-left: 0px;" class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Notes</th>
                                             </tr>
                                         </thead>
                                         <tbody id="orderList"></tbody>
@@ -134,14 +173,17 @@
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Total Items</th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" id="totalItems">0</th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" id="totalCost">Rp.0</th>
+                                                <th></th>
                                             </tr>
                                             <tr>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" colspan="2">Tax (11%)</th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" id="totalTax">Rp.0</th>
+                                                <th></th>
                                             </tr>
                                             <tr>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder" colspan="2">Total Payment</th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder" id="totalPaymentDisplay">Rp.0</th>
+                                                <th></th>
                                             </tr>
 
                                             <!-- paid -->
@@ -153,6 +195,7 @@
                                             <tr>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder" colspan="2">Change</th>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder" id="changeDisplay">Rp.0</th>
+                                                <th></th>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -183,7 +226,8 @@
                                     <div class="row" id="productList">
                                         {{range .Data.products}}
                                             <div class="col-md-4">
-                                                <button disabled type="button" class="btn btn-outline-primary m-1 product-button" onclick="addProduct('{{.ID}}', '{{.Name}}', '{{.Price}}')">
+                                                <!-- <button disabled type="button" class="btn btn-outline-primary m-1 product-button" onclick="addProduct('{{.ID}}', '{{.Name}}', '{{.Price}}')"> -->
+                                                <button disabled type="button" class="product-button btn btn-outline-primary m-1" onclick="openProductModal('{{.ID}}', '{{.Name}}', '{{.Price}}')">
                                                     <img src="{{index .Photo 0}}?project={{index .Photo 3}}" alt="{{.Name}}" style="max-width: 100px;"><br>
                                                     {{.Name}}<br>
                                                     Rp.{{.Price | coma}}
