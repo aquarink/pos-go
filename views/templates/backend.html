@@ -381,11 +381,13 @@
             const productNames = orderList.map(product => product.name);
             const productPrices = orderList.map(product => product.price);
             const productQtys = orderList.map(product => product.qty);
+            const productNotes = orderList.map(product => product.notes);
 
             document.getElementById('productIDs').value = productIDs.join(',');
             document.getElementById('productNames').value = productNames.join(',');
             document.getElementById('productPrices').value = productPrices.join(',');
             document.getElementById('productQtys').value = productQtys.join(',');
+            document.getElementById('productNotes').value = productNotes.join(',');
         }
 
         function doPayment() {
