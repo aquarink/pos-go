@@ -139,10 +139,11 @@
                     {{if .Msg}}
                         <p class="text-info">{{.Msg | ucwords}}</p>
                     {{end}}
-                    <form action="/app/order" method="post">
+                    <form action="/app/checkout" method="post">
                         {{.CSRFToken}}
                         <!-- input -->
                         <input required id="trxID" name="trxID" type="hiddens" value="{{ .Data.unique }}">
+                        <input required id="antrian" name="antrian" type="hiddens" value="{{ .Data.antrian }}">
                         <input required id="dineType" name="dineType" type="hiddens">
                         <input id="nomorMeja" name="tableNumber" type="hiddens">
                         <input required id="productIDs" name="productIDs[]" type="hiddens">
