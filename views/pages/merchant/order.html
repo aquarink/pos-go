@@ -150,9 +150,12 @@
                         <input required id="productPrices" name="productPrices[]" type="hiddens">
                         <input required id="productQtys" name="productQtys[]" type="hiddens">
                         <input required id="productNotes" name="productNotes[]" type="hiddens">
+                        <input required id="jumlahItems" name="jumlahItems" type="hiddens">
                         <input required id="tax" name="tax" type="hiddens">
                         <input required id="taxTotal" name="taxTotal" type="hiddens">
                         <input required id="totalPayment" name="totalPayment" type="hiddens">
+                        <input required id="payMethod" name="payMethod" type="hiddens">
+                        <input required id="changes" name="changes" type="hiddens">
 
 
                         <div class="row">
@@ -260,7 +263,7 @@
 </div>
 
 <!-- Receipt Content -->
-<div id="receiptContent" style="display: none;">
+<div id="printBon" style="display: none;">
     <h2 id="storeName">NAMA TOKO</h2>
     <p id="queueNumber">Nomor Antri</p>
     <p id="cashierInfo">Nama kasir - tanggal jam</p>
@@ -268,23 +271,22 @@
     <table>
         <thead>
             <tr>
-                <th>PRODUCT</th>
-                <th>QTY</th>
-                <th>PRICE</th>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Note</th>
             </tr>
         </thead>
-        <tbody id="receiptItems">
-            <!-- Items will be populated by JavaScript -->
-        </tbody>
+        <tbody id="receiptItems"></tbody>
     </table>
     <hr>
-    <p id="totalItems">TOTAL ITEMS: 0</p>
-    <p id="tax">TAX (11%): RP.0</p>
-    <p id="totalPayment">TOTAL PAYMENT: RP.0</p>
-    <p id="paid">PAID METHOD: RP.0</p>
-    <p id="change">CHANGE: RP.0</p>
+    <p id="totalItemsLabel">Total Items: 0</p>
+    <p id="taxes">Tax (11%): RP.0</p>
+    <p id="totalsPayment">Total Payment: RP.0</p>
+    <p id="paidsMeth">Paid Method: RP.0</p>
+    <p id="theChange">Change: RP.0</p>
     <hr>
-    <p>Terima kasih</p>
-    <p id="transactionCode">Kode Transaksi</p>
+    <p>Thank you</p>
+    <p id="transactionRef">Kode Transaksi</p>
 </div>
 {{ end }}

@@ -205,6 +205,11 @@
         let orderList = [];
 
         function formatNumber(num) {
+            if (typeof num === 'string') {
+                num = parseInt(num.replace(/,/g, ''), 10);
+            } else {
+                num = parseInt(num, 10);
+            }
             return num.toLocaleString('id-ID');
         }
 
@@ -362,6 +367,8 @@
             totalItemsElement.textContent = totalItems;
             totalCostElement.textContent = `Rp.${formatNumber(totalCost)}`;
 
+            document.getElementById('jumlahItems').value = totalItems;
+
             const tax = totalCost * 0.11;
             totalTaxElement.textContent = `Rp.${formatNumber(tax)}`;
             totalPaymentDisplayElement.textContent = `Rp.${formatNumber(totalCost + tax)}`;
@@ -446,6 +453,9 @@
             document.getElementById('paidDisplay').textContent = `Rp.${formatNumber(receivedAmount)}`;
             document.getElementById('paidMethod').textContent = `Cash`;
             document.getElementById('changeDisplay').textContent = `Rp.${formatNumber(changeAmount)}`;
+
+            document.getElementById('payMethod').value = `Cash`;
+            document.getElementById('changes').value = changeAmount;
             
             $('#paymentModal').modal('hide');
 
@@ -469,6 +479,9 @@
             document.getElementById('paidDisplay').textContent = `Rp.${formatNumber(totalPayment)}`;
             document.getElementById('paidMethod').textContent = paymentMethod;
             document.getElementById('changeDisplay').textContent = `Rp.0`;
+
+            document.getElementById('payMethod').value = paymentMethod;
+            document.getElementById('changes').value = 0;
             
             $('#paymentModal').modal('hide');
 
@@ -499,38 +512,43 @@
 
             const receiptItems = document.getElementById('receiptItems');
             receiptItems.innerHTML = ''; // Clear previous items
-            products.forEach(product => {
+            orderList.forEach(product => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${product.name}</td>
                     <td>${product.qty}</td>
                     <td>Rp.${formatNumber(product.price)}</td>
+                    <td>${product.notes}</td>
                 `;
                 receiptItems.appendChild(row);
             });
 
-            const totalItemsElement = document.getElementById('totalItems');
-            const totalCostElement = document.getElementById('totalPayment');
-            const taxElement = document.getElementById('tax');
-            const paidElement = document.getElementById('paid');
-            const changeElement = document.getElementById('change');
-            const transactionCodeElement = document.getElementById('transactionCode');
+            // SUMBER
+            const trxID = document.getElementById('trxID').value;
+            const dineType = document.getElementById('dineType').value;
+            const tax = document.getElementById('tax').value;
+            const jumlahItems = document.getElementById('jumlahItems').value;
+            const totalPayment = document.getElementById('totalPayment').value;
+            const payMethod = document.getElementById('payMethod').value;
+            const changes = document.getElementById('changes').value;
 
-            totalItemsElement.innerText = `TOTAL ITEMS: ${products.reduce((sum, product) => sum + product.qty, 0)}`;
-            const totalPayment = parseFloat(document.getElementById('totalPayment').value);
-            const tax = totalPayment * 0.11;
-            taxElement.innerText = `TAX (11%): RP.${formatNumber(tax)}`;
-            totalCostElement.innerText = `TOTAL PAYMENT: RP.${formatNumber(totalPayment)}`;
-            paidElement.innerText = `PAID METHOD: RP.${formatNumber(totalPayment)}`;
-            changeElement.innerText = `CHANGE: RP.${formatNumber(0)}`; // Adjust as necessary
-            transactionCodeElement.innerText = 'Kode Transaksi';
 
-            const receiptContent = document.getElementById('receiptContent').innerHTML;
 
+            // IMPLEMENT
+            document.getElementById('totalItemsLabel').innerText = `Total Items: ${formatNumber(jumlahItems)}`;
+            document.getElementById('taxes').innerText = `Tax: Rp.${formatNumber(tax)}`;
+            document.getElementById('totalsPayment').innerText = `Total Payment: Rp.${formatNumber(totalPayment)}`;
+            document.getElementById('paidsMeth').innerText = `Paid Method: ${payMethod}`;
+            document.getElementById('theChange').innerText = `Change: Rp.${formatNumber(changes)}`;
+            document.getElementById('transactionRef').innerText = `Ref: ${trxID}`;
+
+
+            // SHOW
+            const printBon = document.getElementById('printBon').innerHTML;
             const newWindow = window.open('', '', 'width=600,height=400');
-            newWindow.document.write('<html><head><title>Receipt</title>');
+            newWindow.document.write('<html><head><title>Receipt '+trxID+'</title>');
             newWindow.document.write('</head><body>');
-            newWindow.document.write(receiptContent);
+            newWindow.document.write(printBon);
             newWindow.document.write('</body></html>');
             newWindow.document.close();
             newWindow.print();
