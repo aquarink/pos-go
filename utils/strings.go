@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"math/big"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,6 +22,7 @@ func AddTemplateFuncs(t *template.Template) *template.Template {
 		"dateFormat": DateFormat,
 		"ucwords":    UcWords,
 		"coma":       Comma,
+		"splits":     Splits,
 	})
 }
 
@@ -60,8 +62,27 @@ func CreateSlug(input string) string {
 	return slug
 }
 
-func Comma(x int) string {
-	return humanize.Comma(int64(x))
+func Comma(value interface{}) string {
+	switch v := value.(type) {
+	case int:
+		return humanize.Comma(int64(v))
+	case float64:
+		return humanize.Commaf(v)
+	case string:
+		// Attempt to parse string to float
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			return humanize.Commaf(f)
+		}
+		// Attempt to parse string to int
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
+			return humanize.Comma(i)
+		}
+		// If parsing fails, return original string
+		return v
+	default:
+		// If the type is not handled, return empty string
+		return ""
+	}
 }
 
 func Uniqid(moreEntropy bool) string {
@@ -84,4 +105,8 @@ func Uniqid(moreEntropy bool) string {
 
 func GetCurrentTime() string {
 	return time.Now().Format("2006-01-02T15:04:05Z07:00")
+}
+
+func Splits(s, sep string) []string {
+	return strings.Split(s, sep)
 }

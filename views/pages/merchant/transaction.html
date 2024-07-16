@@ -1,0 +1,158 @@
+{{ define "content" }}
+
+{{range .Data.checkout}}
+<!-- Modal -->
+<div class="modal fade" id="detailModal{{.ID}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-20" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="width: 100%;">
+            <div class="modal-body">
+                <h2 class="text-center">NAMA TOKO</h2>
+                <h6 class="text-center">Ref : {{.TrxId}}</h6>
+                <hr>
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Items}}
+                            {{ $parts := splits . "|" }}
+                            <tr>
+                                <td>{{ index $parts 1 }}</td>
+                                <td>{{ index $parts 3 }}</td>
+                                <td>Rp.{{ (index $parts 2) | coma }}</td>
+                                <td>{{ index $parts 4 }}</td>
+                            </tr>
+                        {{end}}
+                        <tr>
+                            <td colspan="4"><hr></td>
+                        </tr>
+
+                        <tr>
+                            <td>Queue</td>
+                            <td>{{.Queue}}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="4"><hr></td>
+                        </tr>
+
+                        <tr>
+                            <td>Total Items</td>
+                            <td>{{.TotalItem}}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr>
+                            <td>Tax (11%)</td>
+                            <td>Rp.{{.Tax | coma}}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr>
+                            <td>Total Payment</td>
+                            <td>Rp.{{.TotalPayment | coma}}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr>
+                            <td>Paid Method</td>
+                            <td>{{.PaymentMethod}}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr>
+                            <td>Change</td>
+                            <td>Rp.{{.Change | coma}}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+<div class="row mt-4">
+    <div class="col-lg-12 mb-lg-0 mb-4">
+        <div class="card">
+            <div class="card-header pb-0 p-3">
+                <div class="d-flex justify-content-between">
+                    <div class="text-primary"></div>
+                    <div>
+                        {{if .Error}}
+                            <p class="text-danger">{{.Error | ucwords}}</p>
+                        {{end}}
+                        {{if .Msg}}
+                            <p class="text-info">{{.Msg | ucwords}}</p>
+                        {{end}}
+                    </div>
+
+                    <form action="/app/category" method="get">
+                        <div class="form-group">
+                            <div class="input-group mb-4">
+                              <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span>
+                              <input name="search" class="form-control" placeholder="Search" type="text" autocomplete="off">
+                            </div>
+                          </div>
+                    </form>
+                </div>
+            </div>
+            <div class="ct-example" style="position: relative;border: 2px solid #f5f7ff !important;border-bottom: none !important;padding: 1rem 1rem 2rem 1rem;margin-bottom: -1.25rem;">
+                <div class="p-4">
+                    <div class="table-responsive">
+                        <table id="dtTable" class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Transaction ID</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Total Payment</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Payment Method</th>
+                                    <th class="text-secondary opacity-7"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Data.checkout}}
+                                <tr>
+                                    <td>
+                                        <p class="text-sm font-weight-bold mb-0">{{.TrxId}}</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-sm font-weight-bold mb-0">{{.CreatedDate}}</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-sm font-weight-bold mb-0">Rp.{{.TotalPayment | coma}}</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-sm font-weight-bold mb-0">{{.PaymentMethod}}</p>
+                                    </td>
+                                    <td class="align-middle">
+                                        <a href="/app/transaction/details/{{.ID}}" class="text-secondary font-weight-bold text-xs" data-bs-toggle="modal" data-bs-target="#detailModal{{.ID}}">Details</a>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
