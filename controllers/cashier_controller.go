@@ -12,7 +12,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func Order(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
@@ -28,8 +30,6 @@ func Order(w http.ResponseWriter, r *http.Request, client *services.AppwriteClie
 		if err != nil {
 			log.Println(" >>>> " + err.Error())
 		}
-
-		log.Println(checkout)
 
 		if checkout != nil {
 			if len(checkout) > 0 {
@@ -147,5 +147,150 @@ func Checkout(w http.ResponseWriter, r *http.Request, client *services.AppwriteC
 		}
 
 		http.Redirect(w, r, "/app/order?msg=checkout created successfully", http.StatusSeeOther)
+	}
+}
+
+//
+
+func CashierList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+
+		cashier, err := client.ListCashier(os.Getenv("CASHIERS"))
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/list?error=failed to load package", http.StatusSeeOther)
+			return
+		}
+
+		data := models.PublicData{
+			Title:   "List of Cashier",
+			Data:    map[string]interface{}{"cashier": cashier},
+			Error:   r.URL.Query().Get("error"),
+			Msg:     r.URL.Query().Get("msg"),
+			Session: models.GlobalSessionData,
+		}
+
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/cashier/cashier_list.html", data)
+		return
+	}
+}
+
+func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+
+		data := models.PublicData{
+			Title:   "Add New Cashier",
+			Data:    map[string]interface{}{},
+			Error:   r.URL.Query().Get("error"),
+			Msg:     r.URL.Query().Get("msg"),
+			Session: models.GlobalSessionData,
+		}
+
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/cashier/cashier_add.html", data)
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		name := r.FormValue("name")
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+		repassword := r.FormValue("repassword")
+
+		if name == "" || email == "" || password == "" || repassword == "" {
+			http.Redirect(w, r, "/app/cashier/add?error=form tidak lengkap", http.StatusSeeOther)
+			return
+		}
+
+		if len(password) < 8 {
+			http.Redirect(w, r, "/app/cashier/add?error=password kurang dari 8 karakter", http.StatusSeeOther)
+			return
+		}
+
+		existingUser, _ := client.GetUserByEmail(os.Getenv("USERS"), email)
+		if existingUser != nil {
+			http.Redirect(w, r, "/app/cashier/add?error=email sudah ada", http.StatusSeeOther)
+			return
+		}
+
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/add?error=internal server failed", http.StatusSeeOther)
+			return
+		}
+
+		user := models.User{
+			Name:     name,
+			Email:    email,
+			Password: string(hashedPassword),
+			Role:     "cashier",
+		}
+
+		err = client.CreateUser(os.Getenv("USERS"), user)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/add?error=internal server error "+err.Error(), http.StatusSeeOther)
+			return
+		}
+
+		// COLLECTION KASIR
+		uniqueID := utils.Uniqid(true)
+		kasir := models.Cashier{
+			MerchantId:   models.GlobalSessionData.UserId,
+			CashierId:    uniqueID,
+			CashierEmail: email,
+		}
+
+		err = client.CreateCashier(os.Getenv("CASHIERS"), kasir)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/add?error=internal server error cashier"+err.Error(), http.StatusSeeOther)
+			return
+		}
+
+		// KIRIM EMAIL
+		verifyId := user.ID
+		subject := "Email Verification"
+		text := fmt.Sprintf("Hi %s,\n\nThank you for registering with us.", name)
+		html := fmt.Sprintf("Hi %s,<br><br>Thank you for registering with us.<br>Click <a href='%s%s'>here</a> to verify your email.", name, os.Getenv("EMAIL_VERIFY_URL"), verifyId)
+
+		err = utils.SendEmail(email, subject, text, html)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/add?error=gagal mengirim email verifikasi", http.StatusSeeOther)
+			return
+		}
+
+		// MODEL MAILS
+		emailDoc := models.Mails{
+			UserID:  user.ID,
+			Email:   email,
+			Subject: subject,
+			Text:    text,
+			HTML:    html,
+		}
+
+		err = client.CreateEmail(os.Getenv("MAILS"), emailDoc)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/add?error=internal server fails", http.StatusSeeOther)
+			return
+		}
+
+		http.Redirect(w, r, "/app/cashier/list?message=silahkan cek email anda untuk verifikasi", http.StatusSeeOther)
+	}
+}
+
+func CashierDelete(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		if id == "" {
+			http.Redirect(w, r, "/app/cashier/list?error=invalid data", http.StatusSeeOther)
+			return
+		}
+
+		err := client.DeleteCashier(os.Getenv("CASHIERS"), id)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/list?error=paket tidak ditemukan", http.StatusSeeOther)
+			return
+		}
+
+		http.Redirect(w, r, "/app/cashier/list?msg=berhasil menghapus paket", http.StatusSeeOther)
 	}
 }

@@ -152,20 +152,20 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 	// CASHIER
 
 	router.Handle("/app/cashier", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		controllers.PackageList(w, r, client, store)
+		controllers.CashierList(w, r, client, store)
 	}))).Methods("GET")
 
 	router.Handle("/app/cashier/list", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		controllers.PackageList(w, r, client, store)
+		controllers.CashierList(w, r, client, store)
 	}))).Methods("GET")
 
 	// add form dan submit
 	router.Handle("/app/cashier/add", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		controllers.PackageAdd(w, r, client, store)
+		controllers.CashierAdd(w, r, client, store)
 	}))).Methods("GET", "POST")
 
 	router.Handle("/app/cashier/remove/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		controllers.PackageDelete(w, r, client, store)
+		controllers.CashierDelete(w, r, client, store)
 	}))).Methods("GET")
 
 	// USER

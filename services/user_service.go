@@ -75,7 +75,7 @@ func (c *AppwriteClient) GetAllUsers(collectionID string) ([]models.User, error)
 	return response.Documents, nil
 }
 
-func (c *AppwriteClient) GetUserByEmail(collectionID, email string) ([]models.User, error) {
+func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.User, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	query := fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"email\",\"values\":[\"%s\"]}", email)
@@ -98,15 +98,13 @@ func (c *AppwriteClient) GetUserByEmail(collectionID, email string) ([]models.Us
 		return nil, err
 	}
 
-	var response struct {
-		Documents []models.User `json:"documents"`
-	}
-	err = json.Unmarshal(body, &response)
+	var mdl models.User
+	err = json.Unmarshal(body, &mdl)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Documents, nil
+	return &mdl, nil
 }
 
 func (c *AppwriteClient) GetUserByID(collectionID, id string) (*models.User, error) {
