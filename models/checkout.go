@@ -3,7 +3,7 @@ package models
 type Checkout struct {
 	ID            string   `json:"$id"`
 	UserId        string   `json:"user_id"`
-	Queue         string   `json:"queue"`
+	Queue         int      `json:"queue"`
 	TrxId         string   `json:"trx_id"`
 	DineType      string   `json:"dine_type"`
 	TableNumber   string   `json:"table_number"`
@@ -14,5 +14,6 @@ type Checkout struct {
 	TotalPayment  float64  `json:"total_payment"`
 	PaymentMethod string   `json:"payment_method"`
 	Change        float64  `json:"change"`
-	Createdat     string   `json:"created_at"`
+	CreatedDate   string   `json:"created_date"`
+	CreatedTime   string   `json:"created_time"`
 }

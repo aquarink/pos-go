@@ -450,6 +450,11 @@
             const receivedAmount = parseFloat(document.getElementById('receivedAmount').value);
             const changeAmount = receivedAmount - totalPayment;
 
+            if (changeAmount < 0) {
+                alert('Insufficient amount received.');
+                return;
+            }
+
             document.getElementById('paidDisplay').textContent = `Rp.${formatNumber(receivedAmount)}`;
             document.getElementById('paidMethod').textContent = `Cash`;
             document.getElementById('changeDisplay').textContent = `Rp.${formatNumber(changeAmount)}`;
@@ -482,6 +487,11 @@
 
             document.getElementById('payMethod').value = paymentMethod;
             document.getElementById('changes').value = 0;
+
+            if (!paymentMethod) {
+                alert('Please enter payment method and transaction code.');
+                return;
+            }
             
             $('#paymentModal').modal('hide');
 
@@ -505,7 +515,13 @@
             document.getElementById('changeAmt').textContent = "";
         });
 
+        function submitCheckoutForm() {
+            document.getElementById('checkoutForm').submit();
+        }
+
         function printReceipt() {
+            submitCheckoutForm();
+            
             const storeName = document.getElementById('storeName').innerText = 'NAMA TOKO';
             const queueNumber = document.getElementById('queueNumber').innerText = 'Nomor Antri';
             const cashierInfo = document.getElementById('cashierInfo').innerText = `Nama kasir - ${new Date().toLocaleString()}`;

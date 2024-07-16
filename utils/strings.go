@@ -81,3 +81,7 @@ func Uniqid(moreEntropy bool) string {
 
 	return uniqid
 }
+
+func GetCurrentTime() string {
+	return time.Now().Format("2006-01-02T15:04:05Z07:00")
+}

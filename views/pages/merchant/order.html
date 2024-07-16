@@ -139,24 +139,24 @@
                     {{if .Msg}}
                         <p class="text-info">{{.Msg | ucwords}}</p>
                     {{end}}
-                    <form action="/app/checkout" method="post">
+                    <form id="checkoutForm" action="/app/checkout" method="post">
                         {{.CSRFToken}}
                         <!-- input -->
-                        <input required id="trxID" name="trxID" type="hiddens" value="{{ .Data.unique }}">
-                        <input required id="antrian" name="antrian" type="hiddens" value="{{ .Data.antrian }}">
-                        <input required id="dineType" name="dineType" type="hiddens">
-                        <input id="nomorMeja" name="tableNumber" type="hiddens">
-                        <input required id="productIDs" name="productIDs[]" type="hiddens">
-                        <input required id="productNames" name="productNames[]" type="hiddens">
-                        <input required id="productPrices" name="productPrices[]" type="hiddens">
-                        <input required id="productQtys" name="productQtys[]" type="hiddens">
-                        <input required id="productNotes" name="productNotes[]" type="hiddens">
-                        <input required id="jumlahItems" name="jumlahItems" type="hiddens">
-                        <input required id="tax" name="tax" type="hiddens">
-                        <input required id="taxTotal" name="taxTotal" type="hiddens">
-                        <input required id="totalPayment" name="totalPayment" type="hiddens">
-                        <input required id="payMethod" name="payMethod" type="hiddens">
-                        <input required id="changes" name="changes" type="hiddens">
+                        <input required id="trxID" name="trxID" type="hidden" value="{{ .Data.unique }}">
+                        <input required id="antrian" name="antrian" type="hidden" value="{{ .Data.antrian }}">
+                        <input required id="dineType" name="dineType" type="hidden">
+                        <input id="nomorMeja" name="tableNumber" type="hidden">
+                        <input required id="productIDs" name="productIDs" type="hidden">
+                        <input required id="productNames" name="productNames" type="hidden">
+                        <input required id="productPrices" name="productPrices" type="hidden">
+                        <input required id="productQtys" name="productQtys" type="hidden">
+                        <input required id="productNotes" name="productNotes" type="hidden">
+                        <input required id="jumlahItems" name="jumlahItems" type="hidden">
+                        <input required id="tax" name="tax" type="hidden">
+                        <input required id="taxTotal" name="taxTotal" type="hidden">
+                        <input required id="totalPayment" name="totalPayment" type="hidden">
+                        <input required id="payMethod" name="payMethod" type="hidden">
+                        <input required id="changes" name="changes" type="hidden">
 
 
                         <div class="row">
