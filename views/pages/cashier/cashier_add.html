@@ -1,0 +1,42 @@
+{{ define "content" }}
+<div class="row mt-4">
+    <div class="col-lg-12 mb-lg-0 mb-4">
+        <div class="card">
+            <!-- <div class="card-header pb-0 p-3">
+                <div class="d-flex justify-content-between">
+                    <h4>Add New Category</h4>
+                </div>
+            </div> -->
+            <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
+                <div class="p-4" style="background-color: #f8f9fa;">
+                    {{if .Error}}
+                        <p class="text-danger">{{.Error | ucwords}}</p>
+                    {{end}}
+                    {{if .Msg}}
+                        <p class="text-info">{{.Msg | ucwords}}</p>
+                    {{end}}
+                    <form method="post" action="/app/cashier/add">
+                        <div class="form-group">
+                            <label for="name" class="font-weight-bold">Name</label>
+                            <input required name="name" type="text" class="form-control form-control-alternative" placeholder="Enter cashier name" >
+                            {{.CSRFToken}}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password" class="font-weight-bold">Password</label>
+                            <input required name="password" type="password" class="form-control form-control-alternative" placeholder="Enter cashier password" >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="repassword" class="font-weight-bold">Re Type Password</label>
+                            <input required name="repassword" type="repassword" class="form-control form-control-alternative" placeholder="Enter cashier password again" >
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Add New Cashier</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

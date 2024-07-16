@@ -75,8 +75,12 @@ func (c *AppwriteClient) GetAllUsers(collectionID string) ([]models.User, error)
 	return response.Documents, nil
 }
 
-func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.User, error) {
+func (c *AppwriteClient) GetUserByEmail(collectionID, email string) ([]models.User, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
+
+	query := fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"email\",\"values\":[\"%s\"]}", email)
+
+	url = fmt.Sprintf("%s?queries[]=%s", url, query)
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
@@ -102,17 +106,11 @@ func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.Use
 		return nil, err
 	}
 
-	for _, doc := range response.Documents {
-		if doc.Email == email {
-			return &doc, nil
-		}
-	}
-
-	return nil, fmt.Errorf("user not found")
+	return response.Documents, nil
 }
 
 func (c *AppwriteClient) GetUserByID(collectionID, id string) (*models.User, error) {
-	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
@@ -130,21 +128,13 @@ func (c *AppwriteClient) GetUserByID(collectionID, id string) (*models.User, err
 		return nil, err
 	}
 
-	var response struct {
-		Documents []models.User `json:"documents"`
-	}
-	err = json.Unmarshal(body, &response)
+	var mdl models.User
+	err = json.Unmarshal(body, &mdl)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, doc := range response.Documents {
-		if doc.ID == id {
-			return &doc, nil
-		}
-	}
-
-	return nil, fmt.Errorf("user not found")
+	return &mdl, nil
 }
 
 func (c *AppwriteClient) UpdateUser(collectionID, id string, user models.User) error {

@@ -212,11 +212,13 @@ func (c *AppwriteClient) ProductByUserID(collectionID, userID string) ([]models.
 	return response.Documents, nil
 }
 
-func (c *AppwriteClient) ProductByName(collectionID, name, userID string) ([]models.Products, error) {
+func (c *AppwriteClient) ProductByName(collectionID, name, id string) ([]models.Products, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"name\",\"values\":[\"%s\"]}&queries[1]={\"method\":\"equal\",\"attribute\":\"user_id\",\"values\":[\"%s\"]}", name, userID)
-	url = url + query
+	queryName := fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"name\",\"values\":[\"%s\"]}", name)
+	queryUser := fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"user_id\",\"values\":[\"%s\"]}", id)
+
+	url = fmt.Sprintf("%s?queries[]=%s&queries[]=%s", url, queryName, queryUser)
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {

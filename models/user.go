@@ -27,6 +27,16 @@ func IsValidRole(role string) bool {
 	}
 }
 
+type Cashier struct {
+	ID           string `json:"$id"`
+	MerchantId   string `json:"merchant_id"`
+	CashierId    string `json:"cashier_id"`
+	CashierName  string `json:"cashier_name"`
+	CashierEmail string `json:"cashier_email"`
+	CreatedAt    string `json:"$createdAt"`
+	UpdatedAt    string `json:"$updatedAt"`
+}
+
 type Mails struct {
 	ID        string `json:"$id"`
 	UserID    string

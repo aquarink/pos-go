@@ -140,8 +140,13 @@ func (c *AppwriteClient) CategoryByName(collectionID, name string) (*models.Cate
 	return nil, fmt.Errorf("not found")
 }
 
-func (c *AppwriteClient) CategoryByNameAndUserId(collectionID, name, id string) (*models.Categories, error) {
+func (c *AppwriteClient) CategoryByNameAndUserId(collectionID, name, id string) ([]models.Categories, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
+
+	queryName := fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"name\",\"values\":[\"%s\"]}", name)
+	queryUser := fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"user_id\",\"values\":[\"%s\"]}", id)
+
+	url = fmt.Sprintf("%s?queries[]=%s&queries[]=%s", url, queryName, queryUser)
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
@@ -167,13 +172,7 @@ func (c *AppwriteClient) CategoryByNameAndUserId(collectionID, name, id string) 
 		return nil, err
 	}
 
-	for _, doc := range response.Documents {
-		if doc.Name == name && doc.UserID == id {
-			return &doc, nil
-		}
-	}
-
-	return nil, fmt.Errorf("not found")
+	return response.Documents, nil
 }
 
 func (c *AppwriteClient) CategoryByUserId(collectionID, userID string) ([]models.Categories, error) {
