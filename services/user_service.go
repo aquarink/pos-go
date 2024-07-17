@@ -4,17 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"pos/models"
 )
 
-func (c *AppwriteClient) CreateUser(collectionID string, user models.User) error {
+func (c *AppwriteClient) CreateUser(collectionID string, user models.User) (string, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	userData := map[string]interface{}{
 		"name":     user.Name,
 		"email":    user.Email,
 		"password": user.Password,
+		"role":     user.Role,
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",
@@ -23,26 +25,44 @@ func (c *AppwriteClient) CreateUser(collectionID string, user models.User) error
 	}
 	userBytes, err := json.Marshal(documentData)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	req, err := c.kirimRequestKeAppWrite("POST", url, userBytes)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusCreated {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to create user: %s", string(body))
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
 	}
 
-	return nil
+	// Tambahkan logging untuk melihat isi dari body respons
+	log.Println("Response Body: ", string(body))
+
+	if resp.StatusCode != http.StatusCreated {
+		return "", fmt.Errorf("failed to create user: %s", string(body))
+	}
+
+	var response struct {
+		ID string `json:"$id"`
+	}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return "", err
+	}
+
+	// Tambahkan logging untuk memastikan ID pengguna
+	log.Println("Created User ID: ", response.ID)
+
+	return response.ID, nil
 }
 
 func (c *AppwriteClient) GetAllUsers(collectionID string) ([]models.User, error) {
@@ -78,9 +98,8 @@ func (c *AppwriteClient) GetAllUsers(collectionID string) ([]models.User, error)
 func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.User, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	query := fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"email\",\"values\":[\"%s\"]}", email)
-
-	url = fmt.Sprintf("%s?queries[]=%s", url, query)
+	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"email\",\"values\":[\"%s\"]}", email)
+	url = url + query
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
@@ -93,18 +112,29 @@ func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.Use
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to get user by email, status code: %d, response: %s", resp.StatusCode, string(body))
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	var mdl models.User
+	var mdl struct {
+		Documents []models.User `json:"documents"`
+	}
 	err = json.Unmarshal(body, &mdl)
 	if err != nil {
 		return nil, err
 	}
 
-	return &mdl, nil
+	if len(mdl.Documents) == 0 {
+		return nil, nil
+	}
+
+	return &mdl.Documents[0], nil
 }
 
 func (c *AppwriteClient) GetUserByID(collectionID, id string) (*models.User, error) {
@@ -210,6 +240,39 @@ func (c *AppwriteClient) CreateEmail(collectionID string, email models.Mails) er
 	if resp.StatusCode != http.StatusCreated {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("failed to create email document: %s", string(body))
+	}
+
+	return nil
+}
+
+func (c *AppwriteClient) VerifyUserEmail(collectionID, userID string) error {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, userID)
+
+	updateData := map[string]interface{}{
+		"data": map[string]interface{}{
+			"email_verified": true,
+		},
+	}
+
+	jsonData, err := json.Marshal(updateData)
+	if err != nil {
+		return err
+	}
+
+	req, err := c.kirimRequestKeAppWrite("PATCH", url, jsonData)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to verify email: %s", string(body))
 	}
 
 	return nil

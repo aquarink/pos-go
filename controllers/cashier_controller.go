@@ -154,22 +154,28 @@ func Checkout(w http.ResponseWriter, r *http.Request, client *services.AppwriteC
 
 func CashierList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
+		if models.GlobalSessionData.Role == "Merchant" {
+			cashier, err := client.ListCashier(os.Getenv("CASHIERS"), models.GlobalSessionData.UserId)
+			if err != nil {
+				http.Redirect(w, r, "/app/cashier/list?error=failed to load package", http.StatusSeeOther)
+				return
+			}
 
-		cashier, err := client.ListCashier(os.Getenv("CASHIERS"))
-		if err != nil {
-			http.Redirect(w, r, "/app/cashier/list?error=failed to load package", http.StatusSeeOther)
+			log.Println(cashier)
+
+			data := models.PublicData{
+				Title:   "List of Cashier",
+				Data:    map[string]interface{}{"cashiers": cashier},
+				Error:   r.URL.Query().Get("error"),
+				Msg:     r.URL.Query().Get("msg"),
+				Session: models.GlobalSessionData,
+			}
+
+			utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/cashier/cashier_list.html", data)
 			return
 		}
 
-		data := models.PublicData{
-			Title:   "List of Cashier",
-			Data:    map[string]interface{}{"cashier": cashier},
-			Error:   r.URL.Query().Get("error"),
-			Msg:     r.URL.Query().Get("msg"),
-			Session: models.GlobalSessionData,
-		}
-
-		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/cashier/cashier_list.html", data)
+		http.Redirect(w, r, "/app/signout?error=your not allowed", http.StatusSeeOther)
 		return
 	}
 }
@@ -201,12 +207,24 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		}
 
 		if len(password) < 8 {
-			http.Redirect(w, r, "/app/cashier/add?error=password kurang dari 8 karakter", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/cashier/add?error=password less than 8 character", http.StatusSeeOther)
 			return
 		}
 
-		existingUser, _ := client.GetUserByEmail(os.Getenv("USERS"), email)
+		if password != repassword {
+			http.Redirect(w, r, "/app/cashier/add?error=password not match", http.StatusSeeOther)
+			return
+		}
+
+		existingUser, err := client.GetUserByEmail(os.Getenv("USERS"), email)
+		if err != nil {
+			log.Printf("error checking user by email: %v", err)
+			http.Redirect(w, r, "/app/cashier/add?error=internal server error", http.StatusSeeOther)
+			return
+		}
+
 		if existingUser != nil {
+			log.Printf("existing user found: %v", existingUser)
 			http.Redirect(w, r, "/app/cashier/add?error=email sudah ada", http.StatusSeeOther)
 			return
 		}
@@ -221,20 +239,20 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			Name:     name,
 			Email:    email,
 			Password: string(hashedPassword),
-			Role:     "cashier",
+			Role:     models.RoleCashier,
 		}
 
-		err = client.CreateUser(os.Getenv("USERS"), user)
+		userID, err := client.CreateUser(os.Getenv("USERS"), user)
 		if err != nil {
 			http.Redirect(w, r, "/app/cashier/add?error=internal server error "+err.Error(), http.StatusSeeOther)
 			return
 		}
 
 		// COLLECTION KASIR
-		uniqueID := utils.Uniqid(true)
 		kasir := models.Cashier{
 			MerchantId:   models.GlobalSessionData.UserId,
-			CashierId:    uniqueID,
+			CashierId:    userID,
+			CashierName:  name,
 			CashierEmail: email,
 		}
 
@@ -245,10 +263,9 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		}
 
 		// KIRIM EMAIL
-		verifyId := user.ID
 		subject := "Email Verification"
 		text := fmt.Sprintf("Hi %s,\n\nThank you for registering with us.", name)
-		html := fmt.Sprintf("Hi %s,<br><br>Thank you for registering with us.<br>Click <a href='%s%s'>here</a> to verify your email.", name, os.Getenv("EMAIL_VERIFY_URL"), verifyId)
+		html := fmt.Sprintf("Hi %s,<br><br>Thank you for registering with us.<br>Click <a href='%s%s'>here</a> to verify your email.", name, os.Getenv("EMAIL_VERIFY_URL"), userID)
 
 		err = utils.SendEmail(email, subject, text, html)
 		if err != nil {
@@ -258,7 +275,7 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 
 		// MODEL MAILS
 		emailDoc := models.Mails{
-			UserID:  user.ID,
+			UserID:  userID,
 			Email:   email,
 			Subject: subject,
 			Text:    text,
@@ -271,7 +288,7 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		http.Redirect(w, r, "/app/cashier/list?message=silahkan cek email anda untuk verifikasi", http.StatusSeeOther)
+		http.Redirect(w, r, "/app/cashier/list?msg=silahkan cek email anda untuk verifikasi", http.StatusSeeOther)
 	}
 }
 

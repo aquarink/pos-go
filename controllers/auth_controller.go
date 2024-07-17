@@ -8,6 +8,7 @@ import (
 	"pos/services"
 	"pos/utils"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -61,19 +62,19 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 				Name:     name,
 				Email:    email,
 				Password: string(hashedPassword),
+				Role:     models.RoleMerchant,
 			}
 
-			err = client.CreateUser(os.Getenv("USERS"), user)
+			userID, err := client.CreateUser(os.Getenv("USERS"), user)
 			if err != nil {
 				http.Redirect(w, r, "/app/signup?error=internal server error "+err.Error(), http.StatusSeeOther)
 				return
 			}
 
 			// KIRIM EMAIL
-			verifyId := user.ID
 			subject := "Email Verification"
 			text := fmt.Sprintf("Hi %s,\n\nThank you for registering with us.", name)
-			html := fmt.Sprintf("Hi %s,<br><br>Thank you for registering with us.<br>Click <a href='%s%s'>here</a> to verify your email.", name, os.Getenv("EMAIL_VERIFY_URL"), verifyId)
+			html := fmt.Sprintf("Hi %s,<br><br>Thank you for registering with us.<br>Click <a href='%s%s'>here</a> to verify your email.", name, os.Getenv("EMAIL_VERIFY_URL"), userID)
 
 			err = utils.SendEmail(email, subject, text, html)
 			if err != nil {
@@ -98,6 +99,44 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			http.Redirect(w, r, "/app/signin?message=silahkan cek email anda untuk verifikasi", http.StatusSeeOther)
 		}
+	}
+}
+
+func SignupVerifyController(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		vars := mux.Vars(r)
+		userID := vars["id"]
+
+		// Fetch user by ID
+		user, err := client.GetUserByID(os.Getenv("USERS"), userID)
+		if err != nil || user == nil {
+			http.Redirect(w, r, "/app/signin?error=invalid or expired link", http.StatusSeeOther)
+			return
+		}
+
+		if user.EmailVerified {
+			http.Redirect(w, r, "/app/signin?error=link expired", http.StatusSeeOther)
+			return
+		}
+
+		// Update user's email_verified to true
+		err = client.VerifyUserEmail(os.Getenv("USERS"), userID)
+		if err != nil {
+			http.Redirect(w, r, "/app/signin?error=failed to verify email", http.StatusSeeOther)
+			return
+		}
+
+		// Check and update cashier status if the role is "cashier"
+		if user.Role == models.RoleCashier {
+			err = client.UpdateCashierStatus(os.Getenv("CASHIERS"), userID, "active")
+			if err != nil {
+				http.Redirect(w, r, "/app/signin?error=failed to update cashier status", http.StatusSeeOther)
+				return
+			}
+		}
+
+		http.Redirect(w, r, "/app/signin?msg=Email verification successful", http.StatusSeeOther)
+		return
 	}
 }
 

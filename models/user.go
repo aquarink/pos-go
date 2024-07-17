@@ -39,11 +39,11 @@ type Cashier struct {
 
 type Mails struct {
 	ID        string `json:"$id"`
-	UserID    string
-	Email     string
-	Subject   string
-	Text      string
-	HTML      string
+	UserID    string `json:"user_id"`
+	Email     string `json:"email"`
+	Subject   string `json:"subject"`
+	Text      string `json:"text"`
+	HTML      string `json:"html"`
 	CreatedAt string `json:"$createdAt"`
 	UpdatedAt string `json:"$updatedAt"`
 }
