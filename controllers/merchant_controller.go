@@ -41,6 +41,25 @@ func TransactionList(w http.ResponseWriter, r *http.Request, client *services.Ap
 			return
 		}
 
+		if len(checkout) == 0 {
+			cashiers, err := client.CashierByMerchantId(os.Getenv("CASHIERS"), models.GlobalSessionData.UserId)
+			if err != nil {
+				http.Redirect(w, r, "/app/transaction?error=failed to load cashier", http.StatusSeeOther)
+				return
+			}
+
+			if len(cashiers) > 0 {
+				for _, cashier := range cashiers {
+					tempCheckout, err := client.CheckoutListByUserId(os.Getenv("CHECKOUTS"), cashier.CashierId)
+					if err != nil {
+						http.Redirect(w, r, "/app/transaction?error=failed to load transaction", http.StatusSeeOther)
+						return
+					}
+					checkout = append(checkout, tempCheckout...)
+				}
+			}
+		}
+
 		data := models.PublicData{
 			Title: "List of Transaction",
 			Data: map[string]interface{}{

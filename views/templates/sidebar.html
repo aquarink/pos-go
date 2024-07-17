@@ -9,6 +9,8 @@
     <hr class="horizontal dark mt-0">
     <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main" style="height: auto;">
         <ul class="navbar-nav">
+
+            {{ if or (eq .Session.Role "Merchant") (eq .Session.Role "Admin") }}
             <li class="nav-item">
                 <a class="nav-link" href="/app/dashboard">
                     <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -17,8 +19,9 @@
                     <span class="nav-link-text ms-1">Dashboard</span>
                 </a>
             </li>
+            {{ end }}
 
-            {{ if eq .Session.Role "Merchant" }}
+            {{ if eq .Session.Role "Cashier" }}
             <li class="nav-item">
                 <a class="nav-link" href="/app/order">
                     <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -40,11 +43,14 @@
             </li>
             {{ end }}
 
-            <li class="nav-item mt-3">
-                <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Merchant</h6>
-            </li>
+            {{ if or (eq .Session.Role "Merchant") (eq .Session.Role "Admin") }}
+                <li class="nav-item mt-3">
+                    <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Merchant</h6>
+                </li>
+            {{ end }}
 
-            {{ if eq .Session.Role "Merchant" }}
+
+            {{ if or (eq .Session.Role "Merchant") (eq .Session.Role "Cashier") }}
             <li class="nav-item">
                 <a class="nav-link" href="/app/transaction">
                     <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">

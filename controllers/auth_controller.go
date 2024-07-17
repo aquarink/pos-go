@@ -196,7 +196,11 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 				return
 			}
 
-			http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)
+			if user.Role == "cashier" {
+				http.Redirect(w, r, "/app/order", http.StatusSeeOther)
+			} else {
+				http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)
+			}
 		}
 	}
 }
