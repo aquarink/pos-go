@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"pos/models"
 	"time"
@@ -124,8 +123,7 @@ func (c *AppwriteClient) CreateCheckout(collectionID string, checkout models.Che
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
-		body, err := io.ReadAll(resp.Body)
-		log.Println(err.Error())
+		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("failed to create checkout: %s", string(body))
 	}
 

@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"pos/models"
@@ -26,7 +25,6 @@ func ProductList(w http.ResponseWriter, r *http.Request, client *services.Appwri
 
 		_, err = client.StoreByUserID(os.Getenv("STORES"), models.GlobalSessionData.UserId)
 		if err != nil {
-			log.Println(err.Error())
 			http.Redirect(w, r, "/app/store?error=harap lengkapi profile toko anda terlebih dahulu", http.StatusSeeOther)
 			return
 		}

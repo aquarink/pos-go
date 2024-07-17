@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"pos/models"
 )
@@ -44,9 +43,6 @@ func (c *AppwriteClient) CreateUser(collectionID string, user models.User) (stri
 		return "", err
 	}
 
-	// Tambahkan logging untuk melihat isi dari body respons
-	log.Println("Response Body: ", string(body))
-
 	if resp.StatusCode != http.StatusCreated {
 		return "", fmt.Errorf("failed to create user: %s", string(body))
 	}
@@ -58,9 +54,6 @@ func (c *AppwriteClient) CreateUser(collectionID string, user models.User) (stri
 	if err != nil {
 		return "", err
 	}
-
-	// Tambahkan logging untuk memastikan ID pengguna
-	log.Println("Created User ID: ", response.ID)
 
 	return response.ID, nil
 }

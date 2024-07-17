@@ -161,8 +161,6 @@ func CashierList(w http.ResponseWriter, r *http.Request, client *services.Appwri
 				return
 			}
 
-			log.Println(cashier)
-
 			data := models.PublicData{
 				Title:   "List of Cashier",
 				Data:    map[string]interface{}{"cashiers": cashier},
@@ -218,13 +216,11 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 
 		existingUser, err := client.GetUserByEmail(os.Getenv("USERS"), email)
 		if err != nil {
-			log.Printf("error checking user by email: %v", err)
 			http.Redirect(w, r, "/app/cashier/add?error=internal server error", http.StatusSeeOther)
 			return
 		}
 
 		if existingUser != nil {
-			log.Printf("existing user found: %v", existingUser)
 			http.Redirect(w, r, "/app/cashier/add?error=email sudah ada", http.StatusSeeOther)
 			return
 		}
