@@ -19,9 +19,25 @@ import (
 
 func Order(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
-		product, err := client.ProductByUserID(os.Getenv("PRODUCTS"), models.GlobalSessionData.UserId)
+		var products []models.Products
+
+		cashiers, err := client.CashierByCashierId(os.Getenv("CASHIERS"), models.GlobalSessionData.UserId)
 		if err != nil {
-			http.Redirect(w, r, "/app/dashboard?error=failed to load merchant", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/signout?error=failed to load cashier id", http.StatusSeeOther)
+			return
+		}
+
+		if len(cashiers) > 0 {
+			for _, cashier := range cashiers {
+				cashierProducts, err := client.ProductByUserID(os.Getenv("PRODUCTS"), cashier.MerchantId)
+				if err != nil {
+					http.Redirect(w, r, "/app/signout?error=failed to load merchant", http.StatusSeeOther)
+					return
+				}
+				products = append(products, cashierProducts...)
+			}
+		} else {
+			http.Redirect(w, r, "/app/signout?error=failed to load cashier", http.StatusSeeOther)
 			return
 		}
 
@@ -47,7 +63,7 @@ func Order(w http.ResponseWriter, r *http.Request, client *services.AppwriteClie
 		data := models.PublicData{
 			Title: "Order",
 			Data: map[string]interface{}{
-				"products": product,
+				"products": products,
 				"meja":     meja,
 				"unique":   uniqueID,
 				"antrian":  noAntrian,
