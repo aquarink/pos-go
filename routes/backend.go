@@ -168,6 +168,16 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 		controllers.CashierDelete(w, r, client, store)
 	}))).Methods("GET")
 
+	// BILLING
+
+	router.Handle("/app/billing", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.Billing(w, r, client, store)
+	}))).Methods("GET")
+
+	router.Handle("/app/billing/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.Billing(w, r, client, store)
+	}))).Methods("GET")
+
 	// USER
 
 	router.Handle("/app/password", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

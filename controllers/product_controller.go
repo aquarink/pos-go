@@ -94,8 +94,13 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		check, _ := client.ProductByName(os.Getenv("PRODUCTS"), name, user_id)
-		if check != nil {
+		checkName, err := client.ProductByName(os.Getenv("PRODUCTS"), name, user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/product/add?error=invalid produk", http.StatusSeeOther)
+			return
+		}
+
+		if len(checkName) > 0 {
 			http.Redirect(w, r, "/app/product/add?error=nama produk sudah ada", http.StatusSeeOther)
 			return
 		}

@@ -6,13 +6,11 @@
                 <div class="row">
                     <div class="col-8">
                         <div class="numbers">
-                            <p class="text-sm mb-0 text-uppercase font-weight-bold">Package</p>
+                            <p class="text-sm mb-0 text-uppercase font-weight-bold">Current Package</p>
                             {{ with .Data.stores }}
                             {{ if and .Package (gt (len .Package) 1) }}
                             <h5 class="font-weight-bolder">
                                 {{ index .Package 0 | ucwords }}
-                                
-                                <a href="/app/billing"><small style="font-size: x-small;">Upgrade Package</small></a>
                             </h5>
                             {{ end }}
                             {{ end }}
@@ -85,40 +83,26 @@
                     {{if .Msg}}
                         <p class="text-info">{{.Msg | ucwords}}</p>
                     {{end}}
-                    <form method="post" action="/app/store/update" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="name" class="font-weight-bold">Name</label>
-                            <input value="{{ with .Data.stores }}{{ .Name }}{{ end }}" required name="name" type="text" class="form-control form-control-alternative" placeholder="Enter store name">
-                            {{.CSRFToken}}
+
+                    <div class="row">
+                        {{range .Data.packg}}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{.Name | ucwords}}</h5>
+                                    <p class="card-text">Price: Rp.{{.Price | coma}}</p>
+                                    <p class="card-text">Cashier: {{.CashierAvailable}}</p>
+                                    <p class="card-text">Product: {{.ProductAvailable}}</p>
+                                    <div class="mt-auto">
+                                        <a href="/app/subscribe/{{.ID}}" class="btn btn-primary w-100">Subscribe</a>
+                                    </div>
+                                    <p class="card-text"><b>Description:</b> <br>{{.Description}}</p>
+                                </div>
+                            </div>
                         </div>
-                    
-                        <div class="form-group">
-                            <label for="city" class="font-weight-bold">City</label>
-                            <input value="{{ with .Data.stores }}{{ if gt (len .Address) 0 }}{{ index .Address 0 }}{{ end }}{{ end }}" required name="city" type="text" class="form-control form-control-alternative" placeholder="Enter city">
-                        </div>
-                    
-                        <div class="form-group">
-                            <label for="address" class="font-weight-bold">Address</label>
-                            <input value="{{ with .Data.stores }}{{ if gt (len .Address) 1 }}{{ index .Address 1 }}{{ end }}{{ end }}" required name="address" type="text" class="form-control form-control-alternative" placeholder="Enter address">
-                        </div>
-                    
-                        <div class="form-group">
-                            <label for="photo" class="font-weight-bold">Store Logo</label>
-                            <input name="logo" type="file" class="form-control form-control-alternative" accept=".png, .jpeg, .jpg">
-                        </div>
-                    
-                        {{ with .Data.stores }}
-                        {{ if and .Logo (gt (len .Logo) 1) }}
-                        <div class="form-group">
-                            <label for="existingPhoto" class="font-weight-bold">Existing Store Logo</label>
-                            <img src="{{ index .Logo 0 }}?project={{ index .Logo 3 }}" alt="{{ .Name }}" style="max-width: 100px;">
-                        </div>
-                        {{ end }}
-                        {{ end }}
-                    
-                        <button type="submit" class="btn btn-primary">{{ if .Data.stores }}Update Store{{ else }}Create Store{{ end }}</button>
-                    </form>
-                    
+                        {{end}}
+                    </div>
+
                 </div>
             </div>
         </div>

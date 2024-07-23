@@ -172,3 +172,36 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		http.Redirect(w, r, "/app/store?msg=product created successfully", http.StatusSeeOther)
 	}
 }
+
+func Billing(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		user_id := models.GlobalSessionData.UserId
+
+		if user_id == "" {
+			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+			return
+		}
+
+		stores, _ := client.StoreByUserID(os.Getenv("STORES"), user_id)
+
+		if stores == nil {
+			stores = &models.Store{} // pakai ini karena limit 1
+		}
+
+		packg, _ := client.ListPackage(os.Getenv("PACKAGES")) // ini list
+
+		data := models.PublicData{
+			Title: "Billing",
+			Data: map[string]interface{}{
+				"stores": stores,
+				"packg":  packg,
+			},
+			Error:   r.URL.Query().Get("error"),
+			Msg:     r.URL.Query().Get("msg"),
+			Session: models.GlobalSessionData,
+		}
+
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/merchant/billing.html", data)
+		return
+	}
+}
