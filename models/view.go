@@ -12,8 +12,9 @@ type PublicData struct {
 }
 
 type SessionData struct {
-	UserId string
-	Role   string
+	UserId   string
+	UserName string
+	Role     string
 }
 
 // ngelempar data ke global session

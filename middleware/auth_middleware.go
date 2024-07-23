@@ -43,11 +43,13 @@ func SessionMiddleware(store *sessions.CookieStore) func(http.Handler) http.Hand
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			session, _ := store.Get(r, "session")
 			user_id, _ := session.Values["user_id"].(string)
+			user_name, _ := session.Values["user_name"].(string)
 			role, _ := session.Values["role"].(string)
 
 			models.GlobalSessionData = models.SessionData{
-				UserId: user_id,
-				Role:   role,
+				UserId:   user_id,
+				UserName: user_name,
+				Role:     role,
 			}
 
 			next.ServeHTTP(w, r)

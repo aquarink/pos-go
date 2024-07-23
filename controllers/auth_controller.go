@@ -186,11 +186,12 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 			}
 
 			// SESSION KAYA $_SESSION NYA PHP
-			session, _ := store.Get(r, "session")
-			session.Values["user_id"] = user.ID
-			session.Values["role"] = utils.UcWords(user.Role)
+			ses, _ := store.Get(r, "session")
+			ses.Values["user_id"] = user.ID
+			ses.Values["user_name"] = user.Name
+			ses.Values["role"] = user.Role
 
-			err = session.Save(r, w)
+			err = ses.Save(r, w)
 			if err != nil {
 				http.Redirect(w, r, "/app/signin?error=perbaikan sistem, mohon coba lagi nant", http.StatusSeeOther)
 				return
