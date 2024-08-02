@@ -101,6 +101,11 @@
                             <label for="address" class="font-weight-bold">Address</label>
                             <input value="{{ with .Data.stores }}{{ if gt (len .Address) 1 }}{{ index .Address 1 }}{{ end }}{{ end }}" required name="address" type="text" class="form-control form-control-alternative" placeholder="Enter address">
                         </div>
+
+                        <div class="form-group">
+                            <label for="table" class="font-weight-bold">Total Table</label>
+                            <input value="{{ with .Data.stores }}{{ .Table }}{{ end }}" required name="table" type="text" class="form-control form-control-alternative" placeholder="Enter address">
+                        </div>
                     
                         <div class="form-group">
                             <label for="photo" class="font-weight-bold">Store Logo</label>

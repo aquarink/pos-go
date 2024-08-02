@@ -1,0 +1,38 @@
+{{ define "content" }}
+<div class="row mt-4">
+    <div class="col-lg-12 mb-lg-0 mb-4">
+        <div class="card">
+            <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
+                <div class="p-4" style="background-color: #f8f9fa;">
+                    {{if .Error}}
+                        <p class="text-danger">{{.Error | ucwords}}</p>
+                    {{end}}
+                    {{if .Msg}}
+                        <p class="text-info">{{.Msg | ucwords}}</p>
+                    {{end}}
+
+                    <div class="row">
+                        {{range .Data.packg}}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{.Name | ucwords}}</h5>
+                                    <p class="card-text">Price: Rp.{{.Price | coma}}</p>
+                                    <p class="card-text">Cashier: {{.CashierAvailable}}</p>
+                                    <p class="card-text">Product: {{.ProductAvailable}}</p>
+                                    <div class="mt-auto">
+                                        <a href="/app/subscribe/{{.ID}}" class="btn btn-primary w-100">Subscribe</a>
+                                    </div>
+                                    <p class="card-text"><b>Description:</b> <br>{{.Description}}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

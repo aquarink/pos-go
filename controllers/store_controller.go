@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -49,6 +48,7 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		name := r.FormValue("name")
 		city := r.FormValue("city")
 		address := r.FormValue("address")
+		tabl := r.FormValue("table")
 		user_id := models.GlobalSessionData.UserId
 
 		if user_id == "" {
@@ -56,7 +56,7 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
-		if name == "" || city == "" || address == "" {
+		if name == "" || city == "" || address == "" || tabl == "" {
 			http.Redirect(w, r, "/app/store?error=form tidak lengkap", http.StatusSeeOther)
 			return
 		}
@@ -69,45 +69,24 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
-		var fileURL string
-		var fileID string
-		var fileNAME string
-		var projectID string
+		var fileURL, fileID, fileNAME, projectID string
+		fileUploadService := &utils.FileUploadService{Client: client.Client}
 
-		file, _, err := r.FormFile("logo")
-		if err == nil {
-			defer file.Close()
-
+		fileURL, fileID, fileNAME, projectID, err = fileUploadService.UploadFile(os.Getenv("STORES_LOGO_BUCKET"), "logo", r)
+		if err != nil {
 			if stores != nil && len(stores.Logo) > 0 {
-				_ = client.FileRemove(os.Getenv("STORES_LOGO_BUCKET"), stores.Logo[1])
-			}
-
-			tempFile, err := os.CreateTemp("", "")
-			if err != nil {
-				http.Redirect(w, r, "/app/store?error=failed to create temp file", http.StatusSeeOther)
-				return
-			}
-			defer tempFile.Close()
-			defer os.Remove(tempFile.Name())
-
-			_, err = io.Copy(tempFile, file)
-			if err != nil {
-				http.Redirect(w, r, "/app/store?error=failed to save temp file", http.StatusSeeOther)
-				return
-			}
-
-			fileURL, fileID, fileNAME, err = client.FileUpload(os.Getenv("STORES_LOGO_BUCKET"), tempFile.Name())
-			if err != nil {
+				fileURL = stores.Logo[0]
+				fileID = stores.Logo[1]
+				fileNAME = stores.Logo[2]
+				projectID = stores.Logo[3]
+			} else {
 				http.Redirect(w, r, "/app/store?error=failed to upload file", http.StatusSeeOther)
 				return
 			}
-
-			projectID = os.Getenv("APPWRITE_PROJECT_ID")
 		} else {
-			fileURL = stores.Logo[0]
-			fileID = stores.Logo[1]
-			fileNAME = stores.Logo[2]
-			projectID = stores.Logo[3]
+			if stores != nil && len(stores.Logo) > 0 {
+				_ = client.FileRemove(os.Getenv("STORES_LOGO_BUCKET"), stores.Logo[1])
+			}
 		}
 
 		slug := utils.CreateSlug(name)
@@ -142,6 +121,20 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			}
 		}
 
+		//
+		table, err := strconv.Atoi(tabl)
+		if err != nil {
+			http.Redirect(w, r, "/app/store?error=invalid table number", http.StatusSeeOther)
+			return
+		}
+
+		for i := 1; i <= table; i++ {
+			err := client.CheckAndCreateTable(os.Getenv("TABLES"), models.GlobalSessionData.UserId, i)
+			if err != nil {
+				log.Println("ERROR : " + err.Error())
+			}
+		}
+
 		updates := models.Store{
 			User:      []string{user.ID, user.Name},
 			Name:      name,
@@ -149,6 +142,7 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			Logo:      []string{fileURL, fileID, fileNAME, projectID},
 			Slug:      slug,
 			Package:   []string{packageName, strconv.Itoa(packageCashier), strconv.Itoa(packageProduct)},
+			Table:     table,
 			CreatedAt: created,
 			UpdatedAt: now,
 		}

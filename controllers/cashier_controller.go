@@ -20,6 +20,7 @@ import (
 func Order(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
 		var products []models.Products
+		var stores []models.Store
 
 		cashiers, err := client.CashierByCashierId(os.Getenv("CASHIERS"), models.GlobalSessionData.UserId)
 		if err != nil {
@@ -35,6 +36,15 @@ func Order(w http.ResponseWriter, r *http.Request, client *services.AppwriteClie
 					return
 				}
 				products = append(products, cashierProducts...)
+
+				//
+
+				storeData, err := client.StoreByUserID(os.Getenv("STORES"), cashier.MerchantId)
+				if err != nil {
+					http.Redirect(w, r, "/app/signout?error=failed to load store id", http.StatusSeeOther)
+					return
+				}
+				stores = append(stores, *storeData)
 			}
 		} else {
 			http.Redirect(w, r, "/app/signout?error=failed to load cashier", http.StatusSeeOther)
@@ -53,8 +63,8 @@ func Order(w http.ResponseWriter, r *http.Request, client *services.AppwriteClie
 			}
 		}
 
-		meja := make([]int, 30)
-		for i := 0; i < 30; i++ {
+		meja := make([]int, stores[0].Table)
+		for i := 0; i < stores[0].Table; i++ {
 			meja[i] = i + 1
 		}
 
