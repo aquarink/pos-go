@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"pos/models"
@@ -275,7 +276,7 @@ func Packages(w http.ResponseWriter, r *http.Request, client *services.AppwriteC
 		}
 
 		data := models.PublicData{
-			Title: "Billing",
+			Title: "List Packages",
 			Data: map[string]interface{}{
 				"packages": packg,
 				"owner":    owner,
@@ -309,12 +310,13 @@ func PackagesDetail(w http.ResponseWriter, r *http.Request, client *services.App
 
 		packg, err := client.PackageById(os.Getenv("PACKAGES"), id)
 		if err != nil {
+			log.Println(err.Error())
 			http.Redirect(w, r, "/app/owner/package?error=failed package", http.StatusSeeOther)
 			return
 		}
 
 		data := models.PublicData{
-			Title: "Billing",
+			Title: "Detail Package",
 			Data: map[string]interface{}{
 				"packages": packg,
 				"owner":    owner,
