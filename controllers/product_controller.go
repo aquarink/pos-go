@@ -292,8 +292,6 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 				http.Redirect(w, r, fmt.Sprintf("/app/product/edit/%s?error=failed to upload file", productId), http.StatusSeeOther)
 				return
 			}
-
-			projectID = os.Getenv("APPWRITE_PROJECT_ID")
 		} else {
 			fileURL = product.Photo[0]
 			fileID = product.Photo[1]
