@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"pos/models"
+	"sort"
 )
 
 func (c *AppwriteClient) ListPackage(collectionID string) ([]models.Packages, error) {
@@ -35,6 +36,11 @@ func (c *AppwriteClient) ListPackage(collectionID string) ([]models.Packages, er
 		return nil, err
 	}
 
+	// Mengurutkan harga
+	sort.Slice(response.Documents, func(i, j int) bool {
+		return response.Documents[i].Price < response.Documents[j].Price
+	})
+
 	return response.Documents, nil
 }
 
@@ -46,7 +52,9 @@ func (c *AppwriteClient) CreatePackage(collectionID string, pkg models.Packages)
 		"price":       pkg.Price,
 		"merchant":    pkg.MerchantAvailable,
 		"cashier":     pkg.CashierAvailable,
+		"category":    pkg.CategoryAvailable,
 		"product":     pkg.ProductAvailable,
+		"table":       pkg.TableAvailable,
 		"description": pkg.Description,
 	}
 	documentData := map[string]interface{}{
@@ -151,7 +159,9 @@ func (c *AppwriteClient) UpdatePackage(collectionID, id string, pkg models.Packa
 		"price":       pkg.Price,
 		"merchant":    pkg.MerchantAvailable,
 		"cashier":     pkg.CashierAvailable,
+		"category":    pkg.CategoryAvailable,
 		"product":     pkg.ProductAvailable,
+		"table":       pkg.TableAvailable,
 		"description": pkg.Description,
 	}
 	updateData := map[string]interface{}{
@@ -226,7 +236,9 @@ func (c *AppwriteClient) CreateOwner(collectionID string, owner models.Owner) er
 		"package_name": owner.PackageName,
 		"max_merchant": owner.MerchantAvailable,
 		"max_cashier":  owner.CashierAvailable,
+		"max_category": owner.CategoryAvailable,
 		"max_product":  owner.ProductAvailable,
+		"max_table":    owner.TableAvailable,
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",

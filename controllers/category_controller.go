@@ -65,7 +65,35 @@ func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.Appwri
 
 		check, _ := client.CategoryByNameAndUserId(os.Getenv("CATEGORIES"), name, user_id)
 		if check != nil {
-			http.Redirect(w, r, "/app/category/list?error=nama kategori sudah ada", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/category/add?error=nama kategori sudah ada", http.StatusSeeOther)
+			return
+		}
+
+		// PREVENT
+		// Merchant data
+		merchantData, err := client.MerchantByMerchantId(os.Getenv("MERCHANTS"), user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/category/add?error=failed to load merchant data", http.StatusSeeOther)
+			return
+		}
+
+		// Owner data
+		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), merchantData[0].OwnerId)
+		if err != nil {
+			http.Redirect(w, r, "/app/category/add?error=failed to load owner data", http.StatusSeeOther)
+			return
+		}
+
+		maxCategory := ownerData.CategoryAvailable
+
+		catg, err := client.CategoryByUserId(os.Getenv("PRODUCTS"), user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/category/add?error=data produk invalid", http.StatusSeeOther)
+			return
+		}
+
+		if len(catg) >= maxCategory {
+			http.Redirect(w, r, "/app/category/add?error=anda tidak dapat menambah kategory, harap upgrade paket", http.StatusSeeOther)
 			return
 		}
 
@@ -76,7 +104,7 @@ func CategoryAdd(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			UserID: user_id,
 		}
 
-		err := client.CreateCategory(os.Getenv("CATEGORIES"), categoryData)
+		err = client.CreateCategory(os.Getenv("CATEGORIES"), categoryData)
 		if err != nil {
 			http.Redirect(w, r, "/app/category/list?error=kesalahan data, harap coba kembali", http.StatusSeeOther)
 			return

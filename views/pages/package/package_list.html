@@ -36,8 +36,10 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Price</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Merchants</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cashiers</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Category</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Products</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Description</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Table</th>
+                                    <!-- <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Description</th> -->
                                     <th class="text-secondary opacity-7"></th>
                                 </tr>
                             </thead>
@@ -57,11 +59,17 @@
                                             <p class="text-sm font-weight-bold mb-0">{{.CashierAvailable | coma}}</p>
                                         </td>
                                         <td>
+                                            <p class="text-sm font-weight-bold mb-0">{{.CategoryAvailable | coma}}</p>
+                                        </td>
+                                        <td>
                                             <p class="text-sm font-weight-bold mb-0">{{.ProductAvailable | coma}}</p>
                                         </td>
-                                        <td style="max-width: 200px; word-wrap: break-word; white-space: normal;">
-                                            <p class="text-sm font-weight-bold mb-0">{{.Description}}</p>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">{{.TableAvailable | coma}}</p>
                                         </td>
+                                        <!-- <td style="max-width: 200px; word-wrap: break-word; white-space: normal;">
+                                            <p class="text-sm font-weight-bold mb-0">{{.Description}}</p>
+                                        </td> -->
                                         <td class="align-middle">
                                             <a href="/app/package/edit/{{.ID}}" class="text-secondary font-weight-bold text-xs">Edit</a>
                                         </td>

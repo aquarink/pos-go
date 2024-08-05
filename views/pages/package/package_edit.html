@@ -39,8 +39,18 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="category" class="font-weight-bold">Maximum Category</label>
+                            <input value="{{ .Data.package.CategoryAvailable }}" required name="category" type="number" class="form-control form-control-alternative" placeholder="Enter maximum category" >
+                        </div>
+
+                        <div class="form-group">
                             <label for="product" class="font-weight-bold">Maximum Product</label>
                             <input value="{{ .Data.package.ProductAvailable }}" required name="product" type="number" class="form-control form-control-alternative" placeholder="Enter maximum product" >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="table" class="font-weight-bold">Maximum Table</label>
+                            <input value="{{ .Data.package.TableAvailable }}" required name="table" type="number" class="form-control form-control-alternative" placeholder="Enter maximum table" >
                         </div>
 
                         <div class="form-group">
@@ -48,7 +58,7 @@
                             <textarea required name="desc" type="text" class="form-control form-control-alternative" placeholder="Enter package description">{{ .Data.package.Description }}</textarea>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Add New Category</button>
+                        <button type="submit" class="btn btn-primary">Update Category</button>
                         <a class="btn btn-danger" href="/app/package/remove/{{.Data.package.ID}}" onclick="return confirm('Are you sure you want to remove this package?');">Remove Package</a>
                     </form>
                 </div>

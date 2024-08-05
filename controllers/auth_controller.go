@@ -86,7 +86,9 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 				PackageName:       pkg.Name,
 				MerchantAvailable: pkg.MerchantAvailable,
 				CashierAvailable:  pkg.CashierAvailable,
+				CategoryAvailable: pkg.CategoryAvailable,
 				ProductAvailable:  pkg.ProductAvailable,
+				TableAvailable:    pkg.TableAvailable,
 			}
 			err = client.CreateOwner(os.Getenv("OWNERS"), own)
 			if err != nil {

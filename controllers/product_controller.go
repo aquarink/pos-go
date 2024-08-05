@@ -105,17 +105,18 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
+		// PREVENT
 		// Merchant data
 		merchantData, err := client.MerchantByMerchantId(os.Getenv("MERCHANTS"), user_id)
 		if err != nil {
-			http.Redirect(w, r, "/app/order?error=failed to load merchant data", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/product/add?error=failed to load merchant data", http.StatusSeeOther)
 			return
 		}
 
 		// Owner data
 		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), merchantData[0].OwnerId)
 		if err != nil {
-			http.Redirect(w, r, "/app/order?error=failed to load owner data", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/product/add?error=failed to load owner data", http.StatusSeeOther)
 			return
 		}
 

@@ -258,12 +258,7 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		cashierData, err := client.CashierByMerchantId(os.Getenv("CASHIERS"), user_id)
-		if err != nil {
-			http.Redirect(w, r, "/app/cashier/add?error=data cashier invalid", http.StatusSeeOther)
-			return
-		}
-
+		// PREVENT
 		// Merchant data
 		merchantData, err := client.MerchantByMerchantId(os.Getenv("MERCHANTS"), user_id)
 		if err != nil {
@@ -275,6 +270,12 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), merchantData[0].OwnerId)
 		if err != nil {
 			http.Redirect(w, r, "/app/cashier/add?error=failed to load owner data", http.StatusSeeOther)
+			return
+		}
+
+		cashierData, err := client.CashierByMerchantId(os.Getenv("CASHIERS"), user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/add?error=data cashier invalid", http.StatusSeeOther)
 			return
 		}
 

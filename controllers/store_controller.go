@@ -78,19 +78,33 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
-		stores, _ := client.StoreByUserID(os.Getenv("STORES"), user_id)
+		table, err := strconv.Atoi(tabl)
+		if err != nil {
+			http.Redirect(w, r, "/app/store?error=invalid table number", http.StatusSeeOther)
+			return
+		}
 
-		// merchant di merchants by cashier. ambil MerchantName
+		// PREVENT
+		// Merchant data
 		merchantData, err := client.MerchantByMerchantId(os.Getenv("MERCHANTS"), user_id)
 		if err != nil {
 			http.Redirect(w, r, "/app/store?error=failed merchant data", http.StatusSeeOther)
 			return
 		}
 
-		//
+		// Owner data
 		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), merchantData[0].OwnerId)
 		if err != nil {
 			http.Redirect(w, r, "/app/store?error=failed owner owner", http.StatusSeeOther)
+			return
+		}
+
+		stores, _ := client.StoreByUserID(os.Getenv("STORES"), user_id)
+
+		maxTables := ownerData.TableAvailable
+
+		if table >= maxTables {
+			http.Redirect(w, r, "/app/product/add?error=anda tidak dapat menambah table, harap upgrade paket", http.StatusSeeOther)
 			return
 		}
 
@@ -147,12 +161,6 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		created := now
 
 		//
-		table, err := strconv.Atoi(tabl)
-		if err != nil {
-			http.Redirect(w, r, "/app/store?error=invalid table number", http.StatusSeeOther)
-			return
-		}
-
 		for i := 1; i <= table; i++ {
 			err := client.CheckAndCreateTable(os.Getenv("TABLES"), models.GlobalSessionData.UserId, i)
 			if err != nil {

@@ -54,7 +54,9 @@ func PackageAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		price := r.FormValue("price")
 		merchant := r.FormValue("merchant")
 		cashier := r.FormValue("cashier")
+		category := r.FormValue("category")
 		product := r.FormValue("product")
+		table := r.FormValue("table")
 		description := r.FormValue("desc")
 
 		check, _ := client.PackageByName(os.Getenv("PACKAGES"), name)
@@ -81,9 +83,21 @@ func PackageAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
+		categoryInt, err := strconv.Atoi(category)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/list?error=invalid category available", http.StatusSeeOther)
+			return
+		}
+
 		productInt, err := strconv.Atoi(product)
 		if err != nil {
 			http.Redirect(w, r, "/app/package/add?error=invalid product available", http.StatusSeeOther)
+			return
+		}
+
+		tableInt, err := strconv.Atoi(table)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/list?error=invalid table available", http.StatusSeeOther)
 			return
 		}
 
@@ -92,7 +106,9 @@ func PackageAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			Price:             priceInt,
 			MerchantAvailable: merchantInt,
 			CashierAvailable:  cashierInt,
+			CategoryAvailable: categoryInt,
 			ProductAvailable:  productInt,
+			TableAvailable:    tableInt,
 			Description:       description,
 		}
 
@@ -142,10 +158,12 @@ func PackageUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 		price := r.FormValue("price")
 		merchant := r.FormValue("merchant")
 		cashier := r.FormValue("cashier")
+		category := r.FormValue("category")
 		product := r.FormValue("product")
+		table := r.FormValue("table")
 		description := r.FormValue("desc")
 
-		if id == "" || name == "" || price == "" || merchant == "" || cashier == "" || product == "" || description == "" {
+		if id == "" || name == "" || price == "" || merchant == "" || cashier == "" || category == "" || product == "" || table == "" || description == "" {
 			http.Redirect(w, r, "/app/package/list?error=form tidak lengkap", http.StatusSeeOther)
 			return
 		}
@@ -168,9 +186,21 @@ func PackageUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 			return
 		}
 
+		categoryInt, err := strconv.Atoi(category)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/list?error=invalid category available", http.StatusSeeOther)
+			return
+		}
+
 		productInt, err := strconv.Atoi(product)
 		if err != nil {
 			http.Redirect(w, r, "/app/package/list?error=invalid product available", http.StatusSeeOther)
+			return
+		}
+
+		tableInt, err := strconv.Atoi(table)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/list?error=invalid table available", http.StatusSeeOther)
 			return
 		}
 
@@ -185,7 +215,9 @@ func PackageUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 			Price:             priceInt,
 			MerchantAvailable: merchantInt,
 			CashierAvailable:  cashierInt,
+			CategoryAvailable: categoryInt,
 			ProductAvailable:  productInt,
+			TableAvailable:    tableInt,
 			Description:       description,
 		}
 

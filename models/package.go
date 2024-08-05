@@ -6,7 +6,9 @@ type Packages struct {
 	Price             int    `json:"price"`
 	MerchantAvailable int    `json:"merchant"`
 	CashierAvailable  int    `json:"cashier"`
+	CategoryAvailable int    `json:"category"`
 	ProductAvailable  int    `json:"product"`
+	TableAvailable    int    `json:"table"`
 	Description       string `json:"Description"`
 	CreatedAt         string `json:"$createdAt"`
 	UpdatedAt         string `json:"$updatedAt"`
@@ -20,7 +22,9 @@ type Owner struct {
 	PackageName       string `json:"package_name"`
 	MerchantAvailable int    `json:"max_merchant"`
 	CashierAvailable  int    `json:"max_cashier"`
+	CategoryAvailable int    `json:"max_category"`
 	ProductAvailable  int    `json:"max_product"`
+	TableAvailable    int    `json:"max_table"`
 	CreatedAt         string `json:"$createdAt"`
 	UpdatedAt         string `json:"$updatedAt"`
 }
