@@ -12,18 +12,17 @@
                     {{end}}
 
                     <div class="row">
-                        {{range .Data.packg}}
-                        <div class="col-md-4 mb-4">
-                            <div class="card h-100">
+                        {{range .Data.tables}}
+                        <div class="col-md-3 mb-4">
+                            <div class="card h-100 text-center">
                                 <div class="card-body">
-                                    <h5 class="card-title">{{.Name | ucwords}}</h5>
-                                    <p class="card-text">Price: Rp.{{.Price | coma}}</p>
-                                    <p class="card-text">Cashier: {{.CashierAvailable}}</p>
-                                    <p class="card-text">Product: {{.ProductAvailable}}</p>
-                                    <div class="mt-auto">
-                                        <a href="/app/subscribe/{{.ID}}" class="btn btn-primary w-100">Subscribe</a>
-                                    </div>
-                                    <p class="card-text"><b>Description:</b> <br>{{.Description}}</p>
+                                    {{if and .CodeImage (gt (len .CodeImage) 0)}}
+                                        <img style="width: 100%;" src="{{index .CodeImage 0}}?project={{index .CodeImage 3}}" alt="{{.Code}}">
+                                    {{else}}
+                                        no preview
+                                    {{end}}
+                                    <p class="mt-2">MEJA {{.TableNo}}</p>
+                                    <a href="{{index .CodeImage 0}}?project={{index .CodeImage 3}}" download="QR_Meja_{{.TableNo}}.png" class="btn btn-dark mt-2">Download</a>
                                 </div>
                             </div>
                         </div>

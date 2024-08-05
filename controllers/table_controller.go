@@ -12,16 +12,16 @@ import (
 
 func TableList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
-		cat, err := client.CategoryByUserId(os.Getenv("CATEGORIES"), models.GlobalSessionData.UserId)
+		tab, err := client.ListTables(os.Getenv("TABLES"), models.GlobalSessionData.UserId)
 		if err != nil {
-			http.Redirect(w, r, "/app/dashboard?error=email atau password salah", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/dashboard?error=table data error", http.StatusSeeOther)
 			return
 		}
 
 		data := models.PublicData{
-			Title: "QR Chair",
+			Title: "QR Tables",
 			Data: map[string]interface{}{
-				"categories": cat,
+				"tables": tab,
 			},
 			Error:   r.URL.Query().Get("error"),
 			Msg:     r.URL.Query().Get("msg"),

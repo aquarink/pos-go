@@ -20,6 +20,39 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
+func (c *AppwriteClient) ListTables(collectionID, merchantId string) ([]models.Table, error) {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
+
+	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"user_id\",\"values\":[\"%s\"]}", merchantId)
+	url = url + query
+
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var response struct {
+		Documents []models.Table `json:"documents"`
+	}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Documents, nil
+}
+
 // CheckAndCreateTable mengecek apakah meja sudah ada, jika belum maka membuatnya dan menghasilkan kode QR.
 func (c *AppwriteClient) CheckAndCreateTable(collectionID, userID string, tableNo int) error {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
@@ -167,19 +200,18 @@ func GenerateQRCodeCustom(text, filePath string, tableNo int) error {
 	}
 
 	// Load font
-	fontPath := projectDir + "/assets/back/assets/fonts/nucleo.ttf"
+	fontPath := projectDir + "/assets/TT-Neoris-Trial-Bold.ttf"
 	fontBytes, err := os.ReadFile(fontPath)
 	if err != nil {
-		log.Println("failed to load font:" + err.Error())
 		return fmt.Errorf("failed to load font: %v", err)
 	}
 	f, err := freetype.ParseFont(fontBytes)
 	if err != nil {
-		log.Println("failed to parse font:" + err.Error())
 		return fmt.Errorf("failed to parse font: %v", err)
 	}
 
 	// Create a colored image to draw the QR code
+	// totalHeight := 256 + 50
 	rgba := image.NewRGBA(image.Rect(0, 0, 256, 256))
 	draw.Draw(rgba, rgba.Bounds(), qrImage, image.Point{0, 0}, draw.Src)
 
@@ -187,30 +219,29 @@ func GenerateQRCodeCustom(text, filePath string, tableNo int) error {
 	c := freetype.NewContext()
 	c.SetDPI(72)
 	c.SetFont(f)
-	c.SetFontSize(48)
+	c.SetFontSize(24)
 	c.SetClip(rgba.Bounds())
 	c.SetDst(rgba)
 	c.SetSrc(image.NewUniform(color.Black))
 
 	// Calculate the position to center the text
-	pt := freetype.Pt(128-24, 128+24) // Adjusted to center the text in the image
-	_, err = c.DrawString(fmt.Sprintf("Meja %d", tableNo), pt)
+	tulisan := fmt.Sprintf("%d", tableNo)
+	textWidth := len(tulisan) * 12
+	pt := freetype.Pt((256-textWidth)/2, 250)
+	_, err = c.DrawString(tulisan, pt)
 	if err != nil {
-		log.Println("failed to draw string:" + err.Error())
 		return fmt.Errorf("failed to draw string: %v", err)
 	}
 
 	// Save the image to a file
 	file, err := os.Create(filePath)
 	if err != nil {
-		log.Println("failed to create file:" + err.Error())
 		return fmt.Errorf("failed to create file: %v", err)
 	}
 	defer file.Close()
 
 	err = png.Encode(file, rgba)
 	if err != nil {
-		log.Println("failed to encode PNG:" + err.Error())
 		return fmt.Errorf("failed to encode PNG: %v", err)
 	}
 
