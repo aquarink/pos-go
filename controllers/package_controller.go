@@ -52,6 +52,7 @@ func PackageAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 	if r.Method == http.MethodPost {
 		name := r.FormValue("name")
 		price := r.FormValue("price")
+		merchant := r.FormValue("merchant")
 		cashier := r.FormValue("cashier")
 		product := r.FormValue("product")
 		description := r.FormValue("desc")
@@ -68,6 +69,12 @@ func PackageAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
+		merchantInt, err := strconv.Atoi(merchant)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/add?error=invalid merchant available", http.StatusSeeOther)
+			return
+		}
+
 		cashierInt, err := strconv.Atoi(cashier)
 		if err != nil {
 			http.Redirect(w, r, "/app/package/add?error=invalid cashier available", http.StatusSeeOther)
@@ -81,11 +88,12 @@ func PackageAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		}
 
 		packageData := models.Packages{
-			Name:             name,
-			Price:            priceInt,
-			CashierAvailable: cashierInt,
-			ProductAvailable: productInt,
-			Description:      description,
+			Name:              name,
+			Price:             priceInt,
+			MerchantAvailable: merchantInt,
+			CashierAvailable:  cashierInt,
+			ProductAvailable:  productInt,
+			Description:       description,
 		}
 
 		err = client.CreatePackage(os.Getenv("PACKAGES"), packageData)
@@ -132,11 +140,12 @@ func PackageUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 		id := r.FormValue("id")
 		name := r.FormValue("name")
 		price := r.FormValue("price")
+		merchant := r.FormValue("merchant")
 		cashier := r.FormValue("cashier")
 		product := r.FormValue("product")
 		description := r.FormValue("desc")
 
-		if id == "" || name == "" || price == "" || cashier == "" || product == "" || description == "" {
+		if id == "" || name == "" || price == "" || merchant == "" || cashier == "" || product == "" || description == "" {
 			http.Redirect(w, r, "/app/package/list?error=form tidak lengkap", http.StatusSeeOther)
 			return
 		}
@@ -153,6 +162,12 @@ func PackageUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 			return
 		}
 
+		merchantInt, err := strconv.Atoi(merchant)
+		if err != nil {
+			http.Redirect(w, r, "/app/package/list?error=invalid merchant available", http.StatusSeeOther)
+			return
+		}
+
 		productInt, err := strconv.Atoi(product)
 		if err != nil {
 			http.Redirect(w, r, "/app/package/list?error=invalid product available", http.StatusSeeOther)
@@ -166,11 +181,12 @@ func PackageUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 		}
 
 		packageData := models.Packages{
-			Name:             name,
-			Price:            priceInt,
-			CashierAvailable: cashierInt,
-			ProductAvailable: productInt,
-			Description:      description,
+			Name:              name,
+			Price:             priceInt,
+			MerchantAvailable: merchantInt,
+			CashierAvailable:  cashierInt,
+			ProductAvailable:  productInt,
+			Description:       description,
 		}
 
 		_, err = client.UpdatePackage(os.Getenv("PACKAGES"), id, packageData)

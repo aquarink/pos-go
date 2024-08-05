@@ -47,12 +47,22 @@ func (c *AppwriteClient) CheckoutToday(collectionID, userID string) ([]models.Ch
 	return response.Documents, nil
 }
 
-func (c *AppwriteClient) CheckoutListByUserId(collectionID, userID string) ([]models.Checkout, error) {
+func (c *AppwriteClient) CheckoutListByRoleByUserId(collectionID, userID string) ([]models.Checkout, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	queryUser := fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"user_id\",\"values\":[\"%s\"]}", userID)
+	var query string
+	switch models.GlobalSessionData.Role {
+	case "Merchant", "merchant":
+		query = fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"merchant\",\"values\":[\"%s\"]}", userID)
+	case "Cashier", "cashier":
+		query = fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"cashier\",\"values\":[\"%s\"]}", userID)
+	case "Owner", "owner":
+		query = fmt.Sprintf("{\"method\":\"equal\",\"attribute\":\"owner\",\"values\":[\"%s\"]}", userID)
+	default:
+		return nil, fmt.Errorf("invalid role")
+	}
 
-	url = fmt.Sprintf("%s?queries[]=%s", url, queryUser)
+	url = fmt.Sprintf("%s?queries[]=%s", url, query)
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
 	if err != nil {
@@ -85,7 +95,6 @@ func (c *AppwriteClient) CreateCheckout(collectionID string, checkout models.Che
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	dt := map[string]interface{}{
-		"user_id":        checkout.UserId,
 		"queue":          checkout.Queue,
 		"trx_id":         checkout.TrxId,
 		"dine_type":      checkout.DineType,
@@ -97,8 +106,13 @@ func (c *AppwriteClient) CreateCheckout(collectionID string, checkout models.Che
 		"total_payment":  checkout.TotalPayment,
 		"payment_method": checkout.PaymentMethod,
 		"change":         checkout.Change,
-		"created_date":   checkout.CreatedDate,
-		"created_time":   checkout.CreatedTime,
+
+		"cashier":  checkout.CashierData,
+		"merchant": checkout.MerchantData,
+		"owner":    checkout.OwnerData,
+
+		"created_date": checkout.CreatedDate,
+		"created_time": checkout.CreatedTime,
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",
@@ -134,7 +148,6 @@ func (c *AppwriteClient) CreateCheckout2(collectionID string, checkout models.Ch
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	dt := map[string]interface{}{
-		"user_id":        checkout.UserId,
 		"queue":          checkout.Queue,
 		"trx_id":         checkout.TrxId,
 		"dine_type":      checkout.DineType,
@@ -146,8 +159,12 @@ func (c *AppwriteClient) CreateCheckout2(collectionID string, checkout models.Ch
 		"total_payment":  checkout.TotalPayment,
 		"payment_method": checkout.PaymentMethod,
 		"change":         checkout.Change,
-		"created_date":   checkout.CreatedDate,
-		"created_time":   checkout.CreatedTime,
+		"cashier":        checkout.CashierData,
+		"merchant":       checkout.MerchantData,
+		"owner":          checkout.OwnerData,
+
+		"created_date": checkout.CreatedDate,
+		"created_time": checkout.CreatedTime,
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",

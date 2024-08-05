@@ -77,12 +77,13 @@ func (c *AppwriteClient) CreateStore(collectionID string, stores models.Store) e
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	dt := map[string]interface{}{
-		"user":    stores.User,
-		"name":    stores.Name,
-		"address": stores.Address,
-		"logo":    stores.Logo,
-		"slug":    stores.Slug,
-		"package": stores.Package,
+		"name":     stores.Name,
+		"address":  stores.Address,
+		"logo":     stores.Logo,
+		"slug":     stores.Slug,
+		"table":    stores.Table,
+		"owner":    stores.Owner,
+		"merchant": stores.Merchant,
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",
@@ -124,12 +125,13 @@ func (c *AppwriteClient) UpdateStore(collectionID, userID string, stores models.
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, docID)
 
 	dt := map[string]interface{}{
-		"user":    stores.User,
-		"name":    stores.Name,
-		"address": stores.Address,
-		"logo":    stores.Logo,
-		"slug":    stores.Slug,
-		"package": stores.Package,
+		"name":     stores.Name,
+		"address":  stores.Address,
+		"logo":     stores.Logo,
+		"slug":     stores.Slug,
+		"table":    stores.Table,
+		"owner":    stores.Owner,
+		"merchant": stores.Merchant,
 	}
 	updateData := map[string]interface{}{
 		"data": dt,

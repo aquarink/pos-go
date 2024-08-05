@@ -38,15 +38,16 @@ func (c *AppwriteClient) ListPackage(collectionID string) ([]models.Packages, er
 	return response.Documents, nil
 }
 
-func (c *AppwriteClient) CreatePackage(collectionID string, category models.Packages) error {
+func (c *AppwriteClient) CreatePackage(collectionID string, pkg models.Packages) error {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	dt := map[string]interface{}{
-		"name":        category.Name,
-		"price":       category.Price,
-		"cashier":     category.CashierAvailable,
-		"product":     category.ProductAvailable,
-		"description": category.Description,
+		"name":        pkg.Name,
+		"price":       pkg.Price,
+		"merchant":    pkg.MerchantAvailable,
+		"cashier":     pkg.CashierAvailable,
+		"product":     pkg.ProductAvailable,
+		"description": pkg.Description,
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",
@@ -142,15 +143,16 @@ func (c *AppwriteClient) PackageByName(collectionID, name string) (*models.Packa
 	return nil, fmt.Errorf("not found")
 }
 
-func (c *AppwriteClient) UpdatePackage(collectionID, id string, category models.Packages) (*models.Packages, error) {
+func (c *AppwriteClient) UpdatePackage(collectionID, id string, pkg models.Packages) (*models.Packages, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
 	dt := map[string]interface{}{
-		"name":        category.Name,
-		"price":       category.Price,
-		"cashier":     category.CashierAvailable,
-		"product":     category.ProductAvailable,
-		"description": category.Description,
+		"name":        pkg.Name,
+		"price":       pkg.Price,
+		"merchant":    pkg.MerchantAvailable,
+		"cashier":     pkg.CashierAvailable,
+		"product":     pkg.ProductAvailable,
+		"description": pkg.Description,
 	}
 	updateData := map[string]interface{}{
 		"data": dt,
@@ -211,4 +213,36 @@ func (c *AppwriteClient) DeletePackage(collectionID, id string) error {
 	}
 
 	return nil
+}
+
+// OWNER
+func (c *AppwriteClient) OwnerDataByOwnerId(collectionID, owner_id string) (*models.Owner, error) {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
+
+	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"owner_id\",\"values\":[\"%s\"]}", owner_id)
+	url = url + query
+
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var mdl models.Owner
+	err = json.Unmarshal(body, &mdl)
+	if err != nil {
+		return nil, err
+	}
+
+	return &mdl, nil
 }

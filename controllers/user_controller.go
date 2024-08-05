@@ -78,7 +78,7 @@ func Password(w http.ResponseWriter, r *http.Request, client *services.AppwriteC
 			return
 		}
 
-		http.Redirect(w, r, "/app/signout?message=password was changed", http.StatusSeeOther)
+		http.Redirect(w, r, "/app/signout?msg=password was changed", http.StatusSeeOther)
 	}
 }
 

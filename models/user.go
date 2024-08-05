@@ -13,6 +13,7 @@ type User struct {
 
 const (
 	RoleAdmin    = "admin"
+	RoleOwner    = "owner"
 	RoleMerchant = "merchant"
 	RoleCashier  = "cashier"
 	RoleKitchen  = "kitchen"
@@ -25,16 +26,6 @@ func IsValidRole(role string) bool {
 	default:
 		return false
 	}
-}
-
-type Cashier struct {
-	ID           string `json:"$id"`
-	MerchantId   string `json:"merchant_id"`
-	CashierId    string `json:"cashier_id"`
-	CashierName  string `json:"cashier_name"`
-	CashierEmail string `json:"cashier_email"`
-	CreatedAt    string `json:"$createdAt"`
-	UpdatedAt    string `json:"$updatedAt"`
 }
 
 type Mails struct {

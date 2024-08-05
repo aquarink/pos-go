@@ -105,17 +105,21 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		countPaket, err := client.StoreByUserID(os.Getenv("STORES"), user_id)
+		// Merchant data
+		merchantData, err := client.MerchantByMerchantId(os.Getenv("MERCHANTS"), user_id)
 		if err != nil {
-			http.Redirect(w, r, "/app/product/add?error=paket produk invalid", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/order?error=failed to load merchant data", http.StatusSeeOther)
 			return
 		}
 
-		maxProducts, err := strconv.Atoi(countPaket.Package[2])
+		// Owner data
+		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("USERS"), merchantData[0].OwnerId)
 		if err != nil {
-			http.Redirect(w, r, "/app/product/add?error=invalid package limit", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/order?error=failed to load owner data", http.StatusSeeOther)
 			return
 		}
+
+		maxProducts := ownerData.ProductAvailable
 
 		prods, err := client.ProductByUserID(os.Getenv("PRODUCTS"), user_id)
 		if err != nil {

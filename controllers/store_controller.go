@@ -63,9 +63,17 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 
 		stores, _ := client.StoreByUserID(os.Getenv("STORES"), user_id)
 
-		user, err := client.GetUserByID(os.Getenv("USERS"), user_id)
+		// merchant di merchants by cashier. ambil MerchantName
+		merchantData, err := client.MerchantByMerchantId(os.Getenv("MERCHANTS"), user_id)
 		if err != nil {
-			http.Redirect(w, r, "/app/dahboard?error=data anda tidak valid", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/order?error=failed merchant data", http.StatusSeeOther)
+			return
+		}
+
+		//
+		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), merchantData[0].OwnerId)
+		if err != nil {
+			http.Redirect(w, r, "/app/order?error=failed owner owner", http.StatusSeeOther)
 			return
 		}
 
@@ -93,34 +101,6 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		now := time.Now().Format(time.RFC3339)
 		created := now
 
-		// PACKAGE
-		packageName := "free"
-		packageCashier := 1
-		packageProduct := 2
-
-		if stores != nil {
-			created = stores.CreatedAt
-
-			// package
-			if len(stores.Package) >= 3 {
-				if stores.Package[0] != "" {
-					packageName = stores.Package[0]
-				}
-				if stores.Package[1] != "" {
-					packageCashier, err = strconv.Atoi(stores.Package[1])
-					if err != nil {
-						log.Println(err.Error())
-					}
-				}
-				if stores.Package[2] != "" {
-					packageProduct, err = strconv.Atoi(stores.Package[2])
-					if err != nil {
-						log.Println(err.Error())
-					}
-				}
-			}
-		}
-
 		//
 		table, err := strconv.Atoi(tabl)
 		if err != nil {
@@ -136,13 +116,15 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		}
 
 		updates := models.Store{
-			User:      []string{user.ID, user.Name},
-			Name:      name,
-			Address:   []string{city, address},
-			Logo:      []string{fileURL, fileID, fileNAME, projectID},
-			Slug:      slug,
-			Package:   []string{packageName, strconv.Itoa(packageCashier), strconv.Itoa(packageProduct)},
-			Table:     table,
+			Name:    name,
+			Address: []string{city, address},
+			Logo:    []string{fileURL, fileID, fileNAME, projectID},
+			Slug:    slug,
+			Table:   table,
+
+			Merchant: []string{user_id, merchantData[0].MerchantName},
+			Owner:    []string{merchantData[0].OwnerId, ownerData.OwnerName},
+
 			CreatedAt: created,
 			UpdatedAt: now,
 		}

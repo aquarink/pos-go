@@ -33,7 +33,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 
 		err := utils.VerifyTurnstile(turnstileToken)
 		if err != nil {
-			http.Redirect(w, r, "/app/signup?error=validasi gagal", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/signin?error=validasi gagal", http.StatusSeeOther)
 			return
 		} else {
 			if name == "" || email == "" || password == "" {
@@ -62,7 +62,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 				Name:     name,
 				Email:    email,
 				Password: string(hashedPassword),
-				Role:     models.RoleMerchant,
+				Role:     models.RoleOwner,
 			}
 
 			userID, err := client.CreateUser(os.Getenv("USERS"), user)
@@ -97,7 +97,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 				return
 			}
 
-			http.Redirect(w, r, "/app/signin?message=silahkan cek email anda untuk verifikasi", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/signin?msg=silahkan cek email anda untuk verifikasi", http.StatusSeeOther)
 		}
 	}
 }
@@ -128,7 +128,7 @@ func SignupVerifyController(w http.ResponseWriter, r *http.Request, client *serv
 
 		// Check and update cashier status if the role is "cashier"
 		if user.Role == models.RoleCashier {
-			err = client.UpdateCashierStatus(os.Getenv("CASHIERS"), userID, "active")
+			err = client.UpdateCashierStatus(os.Getenv("CASHIERS"), userID, models.StatusActive)
 			if err != nil {
 				http.Redirect(w, r, "/app/signin?error=failed to update cashier status", http.StatusSeeOther)
 				return
@@ -199,6 +199,8 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 
 			if user.Role == "cashier" || user.Role == "Cashier" {
 				http.Redirect(w, r, "/app/order", http.StatusSeeOther)
+			} else if user.Role == "kitchen" || user.Role == "Kitchen" {
+				http.Redirect(w, r, "/app/kitchen", http.StatusSeeOther)
 			} else {
 				http.Redirect(w, r, "/app/dashboard", http.StatusSeeOther)
 			}

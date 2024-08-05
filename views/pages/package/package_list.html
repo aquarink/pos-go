@@ -34,6 +34,7 @@
                                 <tr>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Price</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Merchants</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cashiers</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Products</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Description</th>
@@ -48,6 +49,9 @@
                                         </td>
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0">Rp.{{.Price | coma}}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-bold mb-0">{{.MerchantAvailable | coma}}</p>
                                         </td>
                                         <td>
                                             <p class="text-sm font-weight-bold mb-0">{{.CashierAvailable | coma}}</p>

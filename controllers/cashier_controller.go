@@ -149,8 +149,29 @@ func Checkout(w http.ResponseWriter, r *http.Request, client *services.AppwriteC
 			items[i] = fmt.Sprintf("%s|%s|%s|%s|%s", productIDs[i], productNames[i], productPrices[i], productQtys[i], productNotes[i])
 		}
 
+		// CARI
+		// cashier by models.GlobalSessionData.UserId ambil CashierName
+		cashierData, err := client.CashierByCashierId(os.Getenv("CASHIERS"), models.GlobalSessionData.UserId)
+		if err != nil {
+			http.Redirect(w, r, "/app/order?error=failed cashir data", http.StatusSeeOther)
+			return
+		}
+
+		// merchant di merchants by cashier. ambil MerchantName
+		merchantData, err := client.MerchantByMerchantId(os.Getenv("MERCHANTS"), cashierData[0].MerchantId)
+		if err != nil {
+			http.Redirect(w, r, "/app/order?error=failed merchant data", http.StatusSeeOther)
+			return
+		}
+
+		// owner di users by merchant.OwnerId ambil name
+		ownerData, err := client.GetUserByID(os.Getenv("USERS"), merchantData[0].OwnerId)
+		if err != nil {
+			http.Redirect(w, r, "/app/order?error=failed owner data", http.StatusSeeOther)
+			return
+		}
+
 		checkout := models.Checkout{
-			UserId:        models.GlobalSessionData.UserId,
 			Queue:         antrian,
 			TrxId:         trxID,
 			DineType:      dineType,
@@ -162,8 +183,13 @@ func Checkout(w http.ResponseWriter, r *http.Request, client *services.AppwriteC
 			TotalPayment:  totalPayment,
 			PaymentMethod: payMethod,
 			Change:        changes,
-			CreatedDate:   time.Now().Format("02/01/2006"),
-			CreatedTime:   time.Now().Format("15:04:05"),
+
+			CashierData:  []string{cashierData[0].CashierId, cashierData[0].CashierName},
+			MerchantData: []string{cashierData[0].MerchantId, merchantData[0].MerchantName},
+			OwnerData:    []string{merchantData[0].OwnerId, ownerData.Name},
+
+			CreatedDate: time.Now().Format("02/01/2006"),
+			CreatedTime: time.Now().Format("15:04:05"),
 		}
 
 		err = client.CreateCheckout2(os.Getenv("CHECKOUTS"), checkout)
@@ -180,7 +206,8 @@ func Checkout(w http.ResponseWriter, r *http.Request, client *services.AppwriteC
 
 func CashierList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
-		if models.GlobalSessionData.Role == "Merchant" {
+		log.Println(models.GlobalSessionData.Role)
+		if models.GlobalSessionData.Role == "Merchant" || models.GlobalSessionData.Role == "merchant" {
 			cashier, err := client.ListCashier(os.Getenv("CASHIERS"), models.GlobalSessionData.UserId)
 			if err != nil {
 				http.Redirect(w, r, "/app/cashier/list?error=failed to load package", http.StatusSeeOther)
@@ -276,6 +303,7 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			CashierId:    userID,
 			CashierName:  name,
 			CashierEmail: email,
+			Status:       models.StatusActive,
 		}
 
 		err = client.CreateCashier(os.Getenv("CASHIERS"), kasir)
@@ -311,6 +339,41 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		}
 
 		http.Redirect(w, r, "/app/cashier/list?msg=silahkan cek email anda untuk verifikasi", http.StatusSeeOther)
+	}
+}
+
+func CashierStatus(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		if id == "" {
+			http.Redirect(w, r, "/app/cashier/list?error=invalid data", http.StatusSeeOther)
+			return
+		}
+
+		cashierData, err := client.CashierById(os.Getenv("CASHIERS"), id)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/list?error=gagal mendapatkan data kasir", http.StatusSeeOther)
+			return
+		}
+
+		log.Println("Status DB : " + cashierData.Status)
+
+		stat := models.StatusDeactive
+		if cashierData.Status == models.StatusDeactive {
+			stat = models.StatusActive
+		} else if cashierData.Status == models.StatusActive {
+			stat = models.StatusDeactive
+		}
+
+		err = client.UpdateCashierStatus(os.Getenv("CASHIERS"), cashierData.CashierId, stat)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/list?error=gagal update status", http.StatusSeeOther)
+			return
+		}
+
+		http.Redirect(w, r, "/app/cashier/list?msg=berhasil update status menjadi "+stat, http.StatusSeeOther)
 	}
 }
 
