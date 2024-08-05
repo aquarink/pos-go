@@ -154,7 +154,7 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		fileURL, fileID, fileNAME, err := client.FileUpload(os.Getenv("PRODUCTS_BUCKET"), tempFile.Name())
+		fileURL, fileID, fileNAME, projectID, err := client.FileUpload(os.Getenv("PRODUCTS_BUCKET"), tempFile.Name())
 		if err != nil {
 			http.Redirect(w, r, "/app/product/add?error=failed to upload photo to server", http.StatusSeeOther)
 			return
@@ -169,7 +169,7 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			Category:  []string{categoriesData.ID, categoriesData.Name},
 			Price:     priceInt,
 			UserID:    user_id,
-			Photo:     []string{fileURL, fileID, fileNAME, os.Getenv("APPWRITE_PROJECT_ID")},
+			Photo:     []string{fileURL, fileID, fileNAME, projectID},
 			Slug:      slug,
 			CreatedAt: now,
 			UpdatedAt: now,
@@ -286,7 +286,7 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 				return
 			}
 
-			fileURL, fileID, fileNAME, err = client.FileUpload(os.Getenv("PRODUCTS_BUCKET"), tempFile.Name())
+			fileURL, fileID, fileNAME, projectID, err = client.FileUpload(os.Getenv("PRODUCTS_BUCKET"), tempFile.Name())
 			if err != nil {
 				http.Redirect(w, r, fmt.Sprintf("/app/product/edit/%s?error=failed to upload file", productId), http.StatusSeeOther)
 				return

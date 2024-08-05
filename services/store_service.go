@@ -11,7 +11,7 @@ import (
 func (c *AppwriteClient) StoreByUserID(collectionID, userID string) (*models.Store, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"user\",\"values\":[\"%s\"]}", userID)
+	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"merchant\",\"values\":[\"%s\"]}", userID)
 	url = url + query
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)

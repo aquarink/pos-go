@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -22,6 +23,21 @@ func StoreEdit(w http.ResponseWriter, r *http.Request, client *services.Appwrite
 			return
 		}
 
+		// OWNER
+		// merchant di merchants by cashier. ambil MerchantName
+		merchantData, err := client.MerchantByMerchantId(os.Getenv("MERCHANTS"), user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/order?error=failed merchant data", http.StatusSeeOther)
+			return
+		}
+
+		//
+		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), merchantData[0].OwnerId)
+		if err != nil {
+			http.Redirect(w, r, "/app/order?error=failed owner owner", http.StatusSeeOther)
+			return
+		}
+
 		stores, _ := client.StoreByUserID(os.Getenv("STORES"), user_id)
 
 		if stores == nil {
@@ -32,6 +48,7 @@ func StoreEdit(w http.ResponseWriter, r *http.Request, client *services.Appwrite
 			Title: "Store Profile",
 			Data: map[string]interface{}{
 				"stores": stores,
+				"owner":  ownerData,
 			},
 			Error:   r.URL.Query().Get("error"),
 			Msg:     r.URL.Query().Get("msg"),
@@ -66,21 +83,42 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		// merchant di merchants by cashier. ambil MerchantName
 		merchantData, err := client.MerchantByMerchantId(os.Getenv("MERCHANTS"), user_id)
 		if err != nil {
-			http.Redirect(w, r, "/app/order?error=failed merchant data", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/store?error=failed merchant data", http.StatusSeeOther)
 			return
 		}
 
 		//
 		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), merchantData[0].OwnerId)
 		if err != nil {
-			http.Redirect(w, r, "/app/order?error=failed owner owner", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/store?error=failed owner owner", http.StatusSeeOther)
+			return
+		}
+
+		// INI UPLOTAN
+		file, _, err := r.FormFile("logo")
+		if err != nil {
+			http.Redirect(w, r, "/app/store?error=failed to upload photo", http.StatusSeeOther)
+			return
+		}
+		defer file.Close()
+
+		tempFile, err := os.CreateTemp("", "")
+		if err != nil {
+			http.Redirect(w, r, "/app/store?error=failed to create temp file", http.StatusSeeOther)
+			return
+		}
+		defer tempFile.Close()
+		defer os.Remove(tempFile.Name())
+
+		_, err = io.Copy(tempFile, file)
+		if err != nil {
+			http.Redirect(w, r, "/app/store?error=failed to save temp file", http.StatusSeeOther)
 			return
 		}
 
 		var fileURL, fileID, fileNAME, projectID string
-		fileUploadService := &utils.FileUploadService{Client: client.Client}
 
-		fileURL, fileID, fileNAME, projectID, err = fileUploadService.UploadFile(os.Getenv("STORES_LOGO_BUCKET"), "logo", r)
+		fileURL, fileID, fileNAME, projectID, err = client.FileUpload(os.Getenv("STORES_LOGO_BUCKET"), tempFile.Name())
 		if err != nil {
 			if stores != nil && len(stores.Logo) > 0 {
 				fileURL = stores.Logo[0]
@@ -108,12 +146,14 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
-		for i := 1; i <= table; i++ {
-			err := client.CheckAndCreateTable(os.Getenv("TABLES"), models.GlobalSessionData.UserId, i)
-			if err != nil {
-				log.Println("ERROR : " + err.Error())
-			}
-		}
+		log.Println("Table " + tabl)
+
+		// for i := 1; i <= table; i++ {
+		// 	err := client.CheckAndCreateTable(os.Getenv("TABLES"), models.GlobalSessionData.UserId, i)
+		// 	if err != nil {
+		// 		log.Println("ERROR : " + err.Error())
+		// 	}
+		// }
 
 		updates := models.Store{
 			Name:    name,

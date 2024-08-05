@@ -16,8 +16,8 @@ type Owner struct {
 	ID                string `json:"$id"`
 	OwnerId           string `json:"owner_id"`
 	OwnerName         string `json:"owner_name"`
-	PackageId         int    `json:"package_id"`
-	PackageName       int    `json:"package_name"`
+	PackageId         string `json:"package_id"`
+	PackageName       string `json:"package_name"`
 	MerchantAvailable int    `json:"max_merchant"`
 	CashierAvailable  int    `json:"max_cashier"`
 	ProductAvailable  int    `json:"max_product"`

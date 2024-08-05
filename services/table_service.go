@@ -53,7 +53,7 @@ func (c *AppwriteClient) CheckAndCreateTable(collectionID, userID string, tableN
 			return err
 		}
 
-		qrCodeURL, qrCodeID, qrCodeName, err := c.UploadFile(os.Getenv("TABLES_BUCKET"), qrCodeFilePath)
+		qrCodeURL, qrCodeID, qrCodeName, projectID, err := c.FileUpload(os.Getenv("TABLES_BUCKET"), qrCodeFilePath)
 		if err != nil {
 			return err
 		}
@@ -63,7 +63,7 @@ func (c *AppwriteClient) CheckAndCreateTable(collectionID, userID string, tableN
 			UserId:    userID,
 			TableNo:   tableNo,
 			Code:      generateCode,
-			CodeImage: []string{qrCodeURL, qrCodeID, qrCodeName},
+			CodeImage: []string{qrCodeURL, qrCodeID, qrCodeName, projectID}, // []string{fileURL, fileID, fileNAME, projectID},
 			CreatedAt: now,
 			UpdatedAt: now,
 		}
@@ -122,48 +122,4 @@ func GenerateQRCode(text, filePath string) error {
 		return fmt.Errorf("failed to generate QR code: %v", err)
 	}
 	return nil
-}
-
-// UploadFile mengunggah file ke bucket yang ditentukan dan mengembalikan URL file, ID, dan nama file.
-func (c *AppwriteClient) UploadFile(bucketID, filePath string) (string, string, string, error) {
-	url := fmt.Sprintf("%s/storage/buckets/%s/files", c.Endpoint, bucketID)
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		return "", "", "", fmt.Errorf("failed to open file: %v", err)
-	}
-	defer file.Close()
-
-	fileData, err := io.ReadAll(file)
-	if err != nil {
-		return "", "", "", fmt.Errorf("failed to read file: %v", err)
-	}
-
-	req, err := c.kirimRequestKeAppWrite("POST", url, fileData)
-	if err != nil {
-		return "", "", "", err
-	}
-
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return "", "", "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", "", "", err
-	}
-
-	var response struct {
-		URL  string `json:"url"`
-		ID   string `json:"$id"`
-		Name string `json:"name"`
-	}
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		return "", "", "", err
-	}
-
-	return response.URL, response.ID, response.Name, nil
 }

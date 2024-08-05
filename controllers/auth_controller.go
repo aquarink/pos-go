@@ -71,6 +71,29 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 				return
 			}
 
+			// OWNER PACKAGE
+			// PACKAGE
+			pkg, err := client.PackageByName(os.Getenv("PACKAGES"), "free")
+			if err != nil {
+				http.Redirect(w, r, "/app/signup?error=internal pkg error "+err.Error(), http.StatusSeeOther)
+				return
+			}
+
+			own := models.Owner{
+				OwnerId:           userID,
+				OwnerName:         name,
+				PackageId:         pkg.ID,
+				PackageName:       pkg.Name,
+				MerchantAvailable: pkg.MerchantAvailable,
+				CashierAvailable:  pkg.CashierAvailable,
+				ProductAvailable:  pkg.ProductAvailable,
+			}
+			err = client.CreateOwner(os.Getenv("OWNERS"), own)
+			if err != nil {
+				http.Redirect(w, r, "/app/signup?error=internal own error "+err.Error(), http.StatusSeeOther)
+				return
+			}
+
 			// KIRIM EMAIL
 			subject := "Email Verification"
 			text := fmt.Sprintf("Hi %s,\n\nThank you for registering with us.", name)
