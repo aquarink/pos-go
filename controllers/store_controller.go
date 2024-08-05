@@ -103,8 +103,8 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 
 		maxTables := ownerData.TableAvailable
 
-		if table >= maxTables {
-			http.Redirect(w, r, "/app/product/add?error=anda tidak dapat menambah table, harap upgrade paket", http.StatusSeeOther)
+		if table > maxTables {
+			http.Redirect(w, r, "/app/store?error=anda tidak dapat menambah table, harap upgrade paket", http.StatusSeeOther)
 			return
 		}
 
