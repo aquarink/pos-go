@@ -147,95 +147,79 @@
 <div class="row mt-4">
     <div class="col-lg-12 mb-lg-0 mb-4">
         <div class="card">
-            <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
-                <div class="p-4" style="background-color: #f8f9fa;">
-                    {{if .Error}}
-                        <p class="text-danger">{{.Error | ucwords}}</p>
-                    {{end}}
-                    {{if .Msg}}
-                        <p class="text-info">{{.Msg | ucwords}}</p>
-                    {{end}}
+            {{if .Error}}
+                <p class="text-danger">{{.Error | ucwords}}</p>
+            {{end}}
+            {{if .Msg}}
+                <p class="text-info">{{.Msg | ucwords}}</p>
+            {{end}}
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{.Data.packages.Name | ucwords}}</h5>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{.Data.packages.Name | ucwords}}</h5>
 
-                                    <table style="width: 100%;">
-                                        <tr>
-                                            <td><p class="card-text">Price</p></td>
-                                            <td><p class="card-text">:</p></td>
-                                            <td><p class="card-text">Rp.{{.Data.packages.Price | coma}}</p></td>
-                                        </tr>
-                                        <tr>
-                                            <td><p class="card-text">Merchant</p></td>
-                                            <td><p class="card-text">:</p></td>
-                                            <td><p class="card-text">{{.Data.packages.MerchantAvailable}}</p></td>
-                                        </tr>
-                                        <tr>
-                                            <td><p class="card-text">Cashier</p></td>
-                                            <td><p class="card-text">:</p></td>
-                                            <td><p class="card-text">{{.Data.packages.CashierAvailable}}</p></td>
-                                        </tr>
-                                        <tr>
-                                            <td><p class="card-text">Category</p></td>
-                                            <td><p class="card-text">:</p></td>
-                                            <td><p class="card-text">{{.Data.packages.CategoryAvailable}}</p></td>
-                                        </tr>
-                                        <tr>
-                                            <td><p class="card-text">Product</p></td>
-                                            <td><p class="card-text">:</p></td>
-                                            <td><p class="card-text">{{.Data.packages.ProductAvailable}}</p></td>
-                                        </tr>
-                                        <tr>
-                                            <td><p class="card-text">Table</p></td>
-                                            <td><p class="card-text">:</p></td>
-                                            <td><p class="card-text">{{.Data.packages.TableAvailable}}</p></td>
-                                        </tr>
-                                    </table>
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td><p class="card-text">Price</p></td>
+                                    <td><p class="card-text">:</p></td>
+                                    <td><p class="card-text">Rp.{{.Data.packages.Price | coma}}</p></td>
+                                </tr>
+                                <tr>
+                                    <td><p class="card-text">Merchant</p></td>
+                                    <td><p class="card-text">:</p></td>
+                                    <td><p class="card-text">{{.Data.packages.MerchantAvailable}}</p></td>
+                                </tr>
+                                <tr>
+                                    <td><p class="card-text">Cashier</p></td>
+                                    <td><p class="card-text">:</p></td>
+                                    <td><p class="card-text">{{.Data.packages.CashierAvailable}}</p></td>
+                                </tr>
+                                <tr>
+                                    <td><p class="card-text">Category</p></td>
+                                    <td><p class="card-text">:</p></td>
+                                    <td><p class="card-text">{{.Data.packages.CategoryAvailable}}</p></td>
+                                </tr>
+                                <tr>
+                                    <td><p class="card-text">Product</p></td>
+                                    <td><p class="card-text">:</p></td>
+                                    <td><p class="card-text">{{.Data.packages.ProductAvailable}}</p></td>
+                                </tr>
+                                <tr>
+                                    <td><p class="card-text">Table</p></td>
+                                    <td><p class="card-text">:</p></td>
+                                    <td><p class="card-text">{{.Data.packages.TableAvailable}}</p></td>
+                                </tr>
+                            </table>
 
-                                    <p class="card-text"><b>Description:</b> <br>{{.Data.packages.Description}}</p>
-                                </div>
+                            <p class="card-text"><b>Description:</b> <br>{{.Data.packages.Description}}</p>
+
+                            <p class="card-text">
+                                <b>Price:</b> <br>
+                                <ul>
+                                    <li>Tax : {{.Data.tax}}%</li>
+                                    <li>Trx Fee : Rp.{{.Data.fee | coma}}</li>
+                                    <li>Service Fee : {{.Data.admin}}%</li>
+                                </ul>
+                            </p>
+
+                            <p class="card-text">
+                                <b>Count:</b> <br>
+                                <ul>
+                                    <li>Tax Amount : Rp.{{.Data.taxAmount | coma}}</li>
+                                    <li>Fee Amount : Rp.{{.Data.adminAmount | coma}}</li>
+                                    <li><b>Total : Rp.{{.Data.totalPrice | coma}}</b></li>
+                                </ul>
+                            </p>
+
+                            <div class="mt-4">
+                                <a style="width: 100%;" target="_blank" class="btn btn-primary" href="{{ .Data.paymentURL }}">
+                                    <i class="ni ni-cart"></i> Buy Rp.{{.Data.totalPrice | coma}}
+                                </a>
                             </div>
                         </div>
                     </div>
-
-                    <!-- <div class="row" style="margin-top: 20px;"> -->
-                    <div class="row mt-4">
-                        <div class="col-lg-12 mb-lg-0 mb-4">
-                            <div class="card">
-                                <div class="row">
-                                    {{range .Data.paymentChannels.Data}}
-                                    {{if or (eq .Name "Virtual Account") (eq .Name "QRIS")}}
-                                    {{range .Channels}}
-                                    
-                                    <div class="col-md-4 mb-4 text-center">
-                                        <!-- <a href="/app/owner/package/{{$.Data.packages.ID}}/{{if eq .Code "mpm"}}qris{{else}}{{.Code}}{{end}}" class="text-decoration-none"></a> -->
-                                        <a href="/app/owner/package/{{$.Data.packages.ID}}/{{.Code}}" class="text-decoration-none">
-                                            <div class="card h-100">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">{{.Name}}</h5>
-                                                    {{if .Logo}}
-                                                    <img src="{{.Logo}}" alt="{{.Name}}" style="width: 100px; height: 50px;">
-                                                    {{end}}
-    
-                                                    {{if .TransactionFee.ActualFee}}
-                                                    <p>Transaction Fee: Rp.{{.TransactionFee.ActualFee | coma}}</p>
-                                                    {{end}}
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                    
-                                    {{end}}
-                                    {{end}}
-                                    {{end}}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
                 </div>
             </div>
         </div>

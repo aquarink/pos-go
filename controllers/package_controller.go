@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"pos/models"
@@ -304,7 +303,6 @@ func PackagesDetail(w http.ResponseWriter, r *http.Request, client *services.App
 
 		packg, err := client.PackageById(os.Getenv("PACKAGES"), id)
 		if err != nil {
-			log.Println(err.Error())
 			http.Redirect(w, r, "/app/owner/package?error=failed package", http.StatusSeeOther)
 			return
 		}
@@ -316,15 +314,25 @@ func PackagesDetail(w http.ResponseWriter, r *http.Request, client *services.App
 		}
 
 		// IPAYMU
+		// Hitung total harga dengan biaya tambahan
+		tax := 11   // persen
+		fee := 5000 // rupiah
+		admin := 3  // persen
+
+		initialPrice := packg.Price
+		taxAmount := initialPrice * tax / 100
+		adminAmount := initialPrice * admin / 100
+		totalPrice := initialPrice + taxAmount + fee + adminAmount
+
+		// IPAYMU EXEC SERVICE
 		ipaymuClient := services.NewIPaymuClient()
-		paymentResponse, err := ipaymuClient.RedirectPayment(*packg, *owner)
+		paymentResponse, err := ipaymuClient.RedirectPayment(totalPrice, *packg, *owner)
 		if err != nil {
 			http.Error(w, "Failed to redirect payment: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		if paymentResponse["Status"].(float64) != 200 {
-			log.Println("Failed to process payment: " + paymentResponse["Message"].(string))
 			http.Redirect(w, r, "/app/owner/package?error=Failed to process payment: "+paymentResponse["Message"].(string), http.StatusSeeOther)
 			return
 		}
@@ -332,15 +340,21 @@ func PackagesDetail(w http.ResponseWriter, r *http.Request, client *services.App
 		SessionID := paymentResponse["Data"].(map[string]interface{})["SessionID"].(string)
 		paymentURL := paymentResponse["Data"].(map[string]interface{})["Url"].(string)
 
-		log.Println(SessionID)
-		log.Println(paymentURL)
-
 		data := models.PublicData{
 			Title: "Detail Package",
 			Data: map[string]interface{}{
 				"packages":   packg,
 				"owner":      owner,
 				"paymentURL": paymentURL,
+				"SessionID":  SessionID,
+
+				"tax":   tax,
+				"fee":   fee,
+				"admin": admin,
+
+				"taxAmount":   taxAmount,
+				"adminAmount": adminAmount,
+				"totalPrice":  totalPrice,
 			},
 			Error:   r.URL.Query().Get("error"),
 			Msg:     r.URL.Query().Get("msg"),
@@ -380,7 +394,6 @@ func PackagesDetailPayment(w http.ResponseWriter, r *http.Request, client *servi
 
 		packg, err := client.PackageById(os.Getenv("PACKAGES"), id)
 		if err != nil {
-			log.Println(err.Error())
 			http.Redirect(w, r, "/app/owner/package?error=failed package", http.StatusSeeOther)
 			return
 		}

@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"pos/models"
@@ -42,21 +41,21 @@ func generateHMACSHA256(secret, message string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (c *IPaymuClient) generateSignature(method string, requestBody []byte) (string, error) {
+func (ipaymu *IPaymuClient) generateSignature(method string, requestBody []byte) (string, error) {
 	hashedBody := getSHA256Hash(string(requestBody))
-	stringToSign := method + ":" + c.VA + ":" + hashedBody + ":" + c.APIKey
-	signature := generateHMACSHA256(c.APIKey, stringToSign)
+	stringToSign := method + ":" + ipaymu.VA + ":" + hashedBody + ":" + ipaymu.APIKey
+	signature := generateHMACSHA256(ipaymu.APIKey, stringToSign)
 	return signature, nil
 }
 
-func (c *IPaymuClient) ListPaymentChannels() (map[string]interface{}, error) {
-	url := c.Endpoint + "-channels"
+func (ipaymu *IPaymuClient) ListPaymentChannels() (map[string]interface{}, error) {
+	url := ipaymu.Endpoint + "-channels"
 	timestamp := time.Now().Format("20060102150405")
 
 	// Create empty body for GET request
 	requestBody := []byte("{}")
 
-	signature, err := c.generateSignature("GET", requestBody)
+	signature, err := ipaymu.generateSignature("GET", requestBody)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +66,7 @@ func (c *IPaymuClient) ListPaymentChannels() (map[string]interface{}, error) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("va", c.VA)
+	req.Header.Set("va", ipaymu.VA)
 	req.Header.Set("timestamp", timestamp)
 	req.Header.Set("signature", signature)
 
@@ -92,32 +91,31 @@ func (c *IPaymuClient) ListPaymentChannels() (map[string]interface{}, error) {
 	return response, nil
 }
 
-func (c *IPaymuClient) RedirectPayment(packg models.Packages, owner models.Owner) (map[string]interface{}, error) {
-	url := c.Endpoint
+func (ipaymu *IPaymuClient) RedirectPayment(totalPrice int, packg models.Packages, owner models.Owner) (map[string]interface{}, error) {
+	url := ipaymu.Endpoint
 	timestamp := time.Now().Format("20060102150405")
 	generateId := uuid.New().String()
 
 	paymentData := map[string]interface{}{
-		"product[]":     []string{packg.Name},
-		"qty[]":         []int{1},
-		"price[]":       []int{packg.Price},
-		"description[]": []string{packg.Description},
+		"product":       []string{"Paket " + packg.Name},
+		"qty":           []int{1},
+		"price":         []int{totalPrice},
+		"description":   []string{packg.Description},
 		"returnUrl":     "https://your-website.com/return/" + generateId,
 		"notifyUrl":     "https://your-website.com/return/" + generateId,
 		"cancelUrl":     "https://your-website.com/return/" + generateId,
 		"referenceId":   generateId,
 		"buyerName":     owner.OwnerName,
+		"buyerEmail":    owner.OwnerId + "@pos.com",
+		"buyerPhone":    "081234567890",
 		"paymentMethod": "mpm",
 	}
-
-	log.Println(paymentData)
 
 	jsonData, err := json.Marshal(paymentData)
 	if err != nil {
 		return nil, err
 	}
-
-	signature, err := c.generateSignature("POST", jsonData)
+	signature, err := ipaymu.generateSignature("POST", jsonData)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +128,7 @@ func (c *IPaymuClient) RedirectPayment(packg models.Packages, owner models.Owner
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("signature", signature)
-	req.Header.Add("va", c.VA)
+	req.Header.Add("va", ipaymu.VA)
 	req.Header.Add("timestamp", timestamp)
 
 	resp, err := client.Do(req)
