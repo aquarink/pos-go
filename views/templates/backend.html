@@ -229,6 +229,28 @@
                     { className: "text-left", "targets": "_all" }
                 ]
             });
+
+            $('#dtTableAppTransaction').DataTable({
+                "lengthChange": false,
+                "searching": false,
+                "dom": 'lrtip',
+                "info": false,
+                "order": [[1, "asc"]], // kolom dari 0 hitungnya
+                "columnDefs": [
+                    { className: "text-left", "targets": "_all" }
+                ]
+            });
+
+            $('#dtTableAppPackage').DataTable({
+                "lengthChange": false,
+                "searching": false,
+                "dom": 'lrtip',
+                "info": false,
+                "order": [[4, "asc"]], // kolom dari 0 hitungnya
+                "columnDefs": [
+                    { className: "text-left", "targets": "_all" }
+                ]
+            });
         });
     </script>
 

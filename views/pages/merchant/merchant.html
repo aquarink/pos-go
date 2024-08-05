@@ -4,6 +4,16 @@
         <div class="card">
             <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
+                    <div class="text-primary"></div>
+                    <div>
+                        {{if .Error}}
+                            <p class="text-danger">{{.Error | ucwords}}</p>
+                        {{end}}
+                        {{if .Msg}}
+                            <p class="text-info">{{.Msg | ucwords}}</p>
+                        {{end}}
+                    </div>
+                    
                     <form action="/app/product" method="get">
                         <div class="form-group">
                             <div class="input-group mb-4">
@@ -23,43 +33,16 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Store Name</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Owner</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Address</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Package</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Logo</th>
                                     <!-- <th class="text-secondary opacity-7"></th> -->
                                 </tr>
                             </thead>
                             <tbody>
-                                {{range .Data.merchant}}
+                                {{range .Data.stores}}
                                     <tr>
                                         <td><p class="text-sm font-weight-bold mb-0">{{.Name | ucwords}}</p></td>
-
-                                        <td>
-                                            {{if gt (len .User) 1}}
-                                                <p class="text-sm font-weight-bold mb-0">{{index .User 1 | ucwords}}</p>
-                                            {{else}}
-                                                <p class="text-sm font-weight-bold mb-0">No owner</p>
-                                            {{end}}
-                                        </td>
-
-                                        <td>
-                                            {{if gt (len .Address) 1}}
-                                                <p class="text-sm font-weight-bold mb-0">
-                                                    {{index .Address 0 | ucwords}} - {{index .Address 1 | ucwords}}
-                                                </p>
-                                            {{else}}
-                                                <p class="text-sm font-weight-bold mb-0">No address</p>
-                                            {{end}}
-                                        </td>
-
-                                        <td>
-                                            {{if gt (len .Package) 1}}
-                                                <p class="text-sm font-weight-bold mb-0">
-                                                    {{index .Package 0 | ucwords}} ( {{index .Package 1 }} kasir dan {{index .Package 2 }} produk)
-                                                </p>
-                                            {{else}}
-                                                <p class="text-sm font-weight-bold mb-0">No address</p>
-                                            {{end}}
-                                        </td>
+                                        <td><p class="text-sm font-weight-bold mb-0">{{index .Owner 1 | ucwords}}</p></td>
+                                        <td><p class="text-sm font-weight-bold mb-0">{{index .Address 0 | ucwords}}</p></td>
 
                                         {{if and (ne .Logo nil) (gt (len .Logo) 3)}}
                                             <td><img src="{{index .Logo 0}}?project={{index .Logo 3}}" alt="{{.Name}}" style="max-width: 50px;"></td>

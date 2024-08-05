@@ -423,3 +423,28 @@ func CashierDelete(w http.ResponseWriter, r *http.Request, client *services.Appw
 		http.Redirect(w, r, "/app/cashier/list?msg=berhasil menghapus paket", http.StatusSeeOther)
 	}
 }
+
+// OWNER
+
+func CashierForOwnerList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		cashiers, err := client.CashierByMerchantId(os.Getenv("CASHIERS"), models.GlobalSessionData.UserId)
+		if err != nil {
+			http.Redirect(w, r, "/app/owner/store?error=failed to load cashier", http.StatusSeeOther)
+			return
+		}
+
+		data := models.PublicData{
+			Title: "List of Cashier",
+			Data: map[string]interface{}{
+				"cashiers": cashiers,
+			},
+			Error:   r.URL.Query().Get("error"),
+			Msg:     r.URL.Query().Get("msg"),
+			Session: models.GlobalSessionData,
+		}
+
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/owner/cashier.html", data)
+		return
+	}
+}

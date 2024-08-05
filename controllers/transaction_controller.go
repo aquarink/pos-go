@@ -33,11 +33,13 @@ func TransactionList(w http.ResponseWriter, r *http.Request, client *services.Ap
 	}
 }
 
+// OWNER
+
 func TransactionForOwnerList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
 		checkout, err := client.CheckoutListByRoleByUserId(os.Getenv("CHECKOUTS"), models.GlobalSessionData.UserId)
 		if err != nil {
-			http.Redirect(w, r, "/app/transaction?error=failed to load transaction", http.StatusSeeOther)
+			http.Redirect(w, r, "/app/owner/transaction?error=failed to load transaction", http.StatusSeeOther)
 			return
 		}
 
@@ -51,7 +53,7 @@ func TransactionForOwnerList(w http.ResponseWriter, r *http.Request, client *ser
 			Session: models.GlobalSessionData,
 		}
 
-		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/merchant/transaction.html", data)
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/owner/transaction.html", data)
 		return
 	}
 }

@@ -250,3 +250,118 @@ func PackageDelete(w http.ResponseWriter, r *http.Request, client *services.Appw
 		http.Redirect(w, r, "/app/package/list?msg=berhasil menghapus paket", http.StatusSeeOther)
 	}
 }
+
+// OWNER
+
+func Packages(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		user_id := models.GlobalSessionData.UserId
+
+		if user_id == "" {
+			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+			return
+		}
+
+		owner, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/dashboard?error=failed owner", http.StatusSeeOther)
+			return
+		}
+
+		packg, err := client.ListPackage(os.Getenv("PACKAGES"))
+		if err != nil {
+			http.Redirect(w, r, "/app/dashboard?error=failed package", http.StatusSeeOther)
+			return
+		}
+
+		data := models.PublicData{
+			Title: "Billing",
+			Data: map[string]interface{}{
+				"packages": packg,
+				"owner":    owner,
+			},
+			Error:   r.URL.Query().Get("error"),
+			Msg:     r.URL.Query().Get("msg"),
+			Session: models.GlobalSessionData,
+		}
+
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/owner/package.html", data)
+		return
+	}
+}
+
+func PackagesDetail(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		vars := mux.Vars(r)
+		id := vars["id"]
+		user_id := models.GlobalSessionData.UserId
+
+		if user_id == "" {
+			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+			return
+		}
+
+		owner, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/owner/package?error=failed owner", http.StatusSeeOther)
+			return
+		}
+
+		packg, err := client.PackageById(os.Getenv("PACKAGES"), id)
+		if err != nil {
+			http.Redirect(w, r, "/app/owner/package?error=failed package", http.StatusSeeOther)
+			return
+		}
+
+		data := models.PublicData{
+			Title: "Billing",
+			Data: map[string]interface{}{
+				"packages": packg,
+				"owner":    owner,
+			},
+			Error:   r.URL.Query().Get("error"),
+			Msg:     r.URL.Query().Get("msg"),
+			Session: models.GlobalSessionData,
+		}
+
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/owner/package_detail.html", data)
+		return
+	}
+}
+
+func Billing(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		user_id := models.GlobalSessionData.UserId
+
+		if user_id == "" {
+			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+			return
+		}
+
+		owner, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/dashboard?error=failed owner", http.StatusSeeOther)
+			return
+		}
+
+		packg, err := client.ListPackage(os.Getenv("PACKAGES"))
+		if err != nil {
+			http.Redirect(w, r, "/app/dashboard?error=failed package", http.StatusSeeOther)
+			return
+		}
+
+		data := models.PublicData{
+			Title: "Billing",
+			Data: map[string]interface{}{
+				"packages": packg,
+				"owner":    owner,
+			},
+			Error:   r.URL.Query().Get("error"),
+			Msg:     r.URL.Query().Get("msg"),
+			Session: models.GlobalSessionData,
+		}
+
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/owner/package.html", data)
+		return
+	}
+}

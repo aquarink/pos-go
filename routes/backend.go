@@ -172,17 +172,34 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 	}))).Methods("GET")
 
 	// OWNER
+
+	router.Handle("/app/owner", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.StoreForOwnerList(w, r, client, store)
+	}))).Methods("GET")
+
+	router.Handle("/app/owner/store", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.StoreForOwnerList(w, r, client, store)
+	}))).Methods("GET")
+
+	router.Handle("/app/owner/cashier", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.CashierForOwnerList(w, r, client, store)
+	}))).Methods("GET")
+
 	router.Handle("/app/owner/transaction", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.TransactionForOwnerList(w, r, client, store)
 	}))).Methods("GET")
 
-	// BILLING
+	// owner billing
 
-	router.Handle("/app/billing", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		controllers.Billing(w, r, client, store)
+	router.Handle("/app/owner/package", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.Packages(w, r, client, store)
 	}))).Methods("GET")
 
-	router.Handle("/app/billing/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.Handle("/app/owner/package/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.PackagesDetail(w, r, client, store)
+	}))).Methods("GET")
+
+	router.Handle("/app/owner/billing", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.Billing(w, r, client, store)
 	}))).Methods("GET")
 

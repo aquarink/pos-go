@@ -202,35 +202,34 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 	}
 }
 
-func Billing(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
-	if r.Method == http.MethodGet {
-		user_id := models.GlobalSessionData.UserId
+// OWNER
 
-		if user_id == "" {
-			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+func StoreForOwnerList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		owner, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), models.GlobalSessionData.UserId)
+		if err != nil {
+			http.Redirect(w, r, "/app/dashboard?error=failed to load owner", http.StatusSeeOther)
 			return
 		}
 
-		stores, _ := client.StoreByUserID(os.Getenv("STORES"), user_id)
-
-		if stores == nil {
-			stores = &models.Store{} // pakai ini karena limit 1
+		stores, err := client.ListStoreByOwnerID(os.Getenv("STORES"), models.GlobalSessionData.UserId)
+		if err != nil {
+			http.Redirect(w, r, "/app/dashboard?error=failed to load transaction", http.StatusSeeOther)
+			return
 		}
 
-		packg, _ := client.ListPackage(os.Getenv("PACKAGES")) // ini list
-
 		data := models.PublicData{
-			Title: "Billing",
+			Title: "List of Stores",
 			Data: map[string]interface{}{
 				"stores": stores,
-				"packg":  packg,
+				"owner":  owner,
 			},
 			Error:   r.URL.Query().Get("error"),
 			Msg:     r.URL.Query().Get("msg"),
 			Session: models.GlobalSessionData,
 		}
 
-		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/merchant/billing.html", data)
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/owner/store.html", data)
 		return
 	}
 }
