@@ -201,6 +201,41 @@
                         </div>
                     </div>
 
+                    <!-- <div class="row" style="margin-top: 20px;"> -->
+                    <div class="row mt-4">
+                        <div class="col-lg-12 mb-lg-0 mb-4">
+                            <div class="card">
+                                <div class="row">
+                                    {{range .Data.paymentChannels.Data}}
+                                    {{if or (eq .Name "Virtual Account") (eq .Name "QRIS")}}
+                                    {{range .Channels}}
+                                    
+                                    <div class="col-md-4 mb-4 text-center">
+                                        <!-- <a href="/app/owner/package/{{$.Data.packages.ID}}/{{if eq .Code "mpm"}}qris{{else}}{{.Code}}{{end}}" class="text-decoration-none"></a> -->
+                                        <a href="/app/owner/package/{{$.Data.packages.ID}}/{{.Code}}" class="text-decoration-none">
+                                            <div class="card h-100">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">{{.Name}}</h5>
+                                                    {{if .Logo}}
+                                                    <img src="{{.Logo}}" alt="{{.Name}}" style="width: 100px; height: 50px;">
+                                                    {{end}}
+    
+                                                    {{if .TransactionFee.ActualFee}}
+                                                    <p>Transaction Fee: Rp.{{.TransactionFee.ActualFee | coma}}</p>
+                                                    {{end}}
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    
+                                    {{end}}
+                                    {{end}}
+                                    {{end}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>

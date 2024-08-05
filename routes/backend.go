@@ -199,6 +199,10 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 		controllers.PackagesDetail(w, r, client, store)
 	}))).Methods("GET")
 
+	router.Handle("/app/owner/package/{id}/{channel}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.PackagesDetailPayment(w, r, client, store)
+	}))).Methods("GET")
+
 	router.Handle("/app/owner/billing", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controllers.Billing(w, r, client, store)
 	}))).Methods("GET")

@@ -297,8 +297,78 @@ func PackagesDetail(w http.ResponseWriter, r *http.Request, client *services.App
 		id := vars["id"]
 		user_id := models.GlobalSessionData.UserId
 
-		if user_id == "" {
+		if id == "" || user_id == "" {
 			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+			return
+		}
+
+		packg, err := client.PackageById(os.Getenv("PACKAGES"), id)
+		if err != nil {
+			log.Println(err.Error())
+			http.Redirect(w, r, "/app/owner/package?error=failed package", http.StatusSeeOther)
+			return
+		}
+
+		owner, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/owner/package?error=failed owner", http.StatusSeeOther)
+			return
+		}
+
+		// IPAYMU
+		ipaymuClient := services.NewIPaymuClient()
+		paymentResponse, err := ipaymuClient.RedirectPayment(*packg, *owner)
+		if err != nil {
+			http.Error(w, "Failed to redirect payment: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if paymentResponse["Status"].(float64) != 200 {
+			log.Println("Failed to process payment: " + paymentResponse["Message"].(string))
+			http.Redirect(w, r, "/app/owner/package?error=Failed to process payment: "+paymentResponse["Message"].(string), http.StatusSeeOther)
+			return
+		}
+
+		SessionID := paymentResponse["Data"].(map[string]interface{})["SessionID"].(string)
+		paymentURL := paymentResponse["Data"].(map[string]interface{})["Url"].(string)
+
+		log.Println(SessionID)
+		log.Println(paymentURL)
+
+		data := models.PublicData{
+			Title: "Detail Package",
+			Data: map[string]interface{}{
+				"packages":   packg,
+				"owner":      owner,
+				"paymentURL": paymentURL,
+			},
+			Error:   r.URL.Query().Get("error"),
+			Msg:     r.URL.Query().Get("msg"),
+			Session: models.GlobalSessionData,
+		}
+
+		utils.RenderTemplateWithSidebar(w, r, "views/templates/backend.html", "views/pages/owner/package_detail.html", data)
+		return
+	}
+}
+
+func PackagesDetailPayment(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
+	if r.Method == http.MethodGet {
+		vars := mux.Vars(r)
+		id := vars["id"]
+		channel := vars["channel"]
+		user_id := models.GlobalSessionData.UserId
+
+		if id == "" || user_id == "" || channel == "" {
+			http.Redirect(w, r, "/app/signout?error=sesi habis", http.StatusSeeOther)
+			return
+		}
+
+		// IPAYMU
+		ipaymuClient := services.NewIPaymuClient()
+		paymentChannels, err := ipaymuClient.ListPaymentChannels()
+		if err != nil {
+			http.Error(w, "Failed to get payment channels: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -318,8 +388,9 @@ func PackagesDetail(w http.ResponseWriter, r *http.Request, client *services.App
 		data := models.PublicData{
 			Title: "Detail Package",
 			Data: map[string]interface{}{
-				"packages": packg,
-				"owner":    owner,
+				"packages":        packg,
+				"owner":           owner,
+				"paymentChannels": paymentChannels,
 			},
 			Error:   r.URL.Query().Get("error"),
 			Msg:     r.URL.Query().Get("msg"),
