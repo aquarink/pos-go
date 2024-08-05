@@ -95,43 +95,50 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		}
 
 		// INI UPLOTAN
-		file, _, err := r.FormFile("logo")
-		if err != nil {
-			http.Redirect(w, r, "/app/store?error=failed to upload photo", http.StatusSeeOther)
-			return
-		}
-		defer file.Close()
-
-		tempFile, err := os.CreateTemp("", "")
-		if err != nil {
-			http.Redirect(w, r, "/app/store?error=failed to create temp file", http.StatusSeeOther)
-			return
-		}
-		defer tempFile.Close()
-		defer os.Remove(tempFile.Name())
-
-		_, err = io.Copy(tempFile, file)
-		if err != nil {
-			http.Redirect(w, r, "/app/store?error=failed to save temp file", http.StatusSeeOther)
-			return
-		}
-
 		var fileURL, fileID, fileNAME, projectID string
 
-		fileURL, fileID, fileNAME, projectID, err = client.FileUpload(os.Getenv("STORES_LOGO_BUCKET"), tempFile.Name())
-		if err != nil {
+		// Cek apakah ada file logo yang diupload
+		file, _, err := r.FormFile("logo")
+		if err == nil {
+			defer file.Close()
+
+			tempFile, err := os.CreateTemp("", "")
+			if err != nil {
+				http.Redirect(w, r, "/app/store?error=failed to create temp file", http.StatusSeeOther)
+				return
+			}
+			defer tempFile.Close()
+			defer os.Remove(tempFile.Name())
+
+			_, err = io.Copy(tempFile, file)
+			if err != nil {
+				http.Redirect(w, r, "/app/store?error=failed to save temp file", http.StatusSeeOther)
+				return
+			}
+
+			fileURL, fileID, fileNAME, projectID, err = client.FileUpload(os.Getenv("STORES_LOGO_BUCKET"), tempFile.Name())
+			if err != nil {
+				if stores != nil && len(stores.Logo) > 0 {
+					fileURL = stores.Logo[0]
+					fileID = stores.Logo[1]
+					fileNAME = stores.Logo[2]
+					projectID = stores.Logo[3]
+				} else {
+					http.Redirect(w, r, "/app/store?error=failed to upload file", http.StatusSeeOther)
+					return
+				}
+			} else {
+				if stores != nil && len(stores.Logo) > 0 {
+					_ = client.FileRemove(os.Getenv("STORES_LOGO_BUCKET"), stores.Logo[1])
+				}
+			}
+		} else {
+			// Jika tidak ada file logo yang diupload, gunakan nilai lama
 			if stores != nil && len(stores.Logo) > 0 {
 				fileURL = stores.Logo[0]
 				fileID = stores.Logo[1]
 				fileNAME = stores.Logo[2]
 				projectID = stores.Logo[3]
-			} else {
-				http.Redirect(w, r, "/app/store?error=failed to upload file", http.StatusSeeOther)
-				return
-			}
-		} else {
-			if stores != nil && len(stores.Logo) > 0 {
-				_ = client.FileRemove(os.Getenv("STORES_LOGO_BUCKET"), stores.Logo[1])
 			}
 		}
 
@@ -146,14 +153,12 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
-		log.Println("Table " + tabl)
-
-		// for i := 1; i <= table; i++ {
-		// 	err := client.CheckAndCreateTable(os.Getenv("TABLES"), models.GlobalSessionData.UserId, i)
-		// 	if err != nil {
-		// 		log.Println("ERROR : " + err.Error())
-		// 	}
-		// }
+		for i := 1; i <= table; i++ {
+			err := client.CheckAndCreateTable(os.Getenv("TABLES"), models.GlobalSessionData.UserId, i)
+			if err != nil {
+				log.Println("ERROR : " + err.Error())
+			}
+		}
 
 		updates := models.Store{
 			Name:    name,
@@ -185,7 +190,7 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			}
 		}
 
-		http.Redirect(w, r, "/app/store?msg=product created successfully", http.StatusSeeOther)
+		http.Redirect(w, r, "/app/store?msg=store updated", http.StatusSeeOther)
 	}
 }
 

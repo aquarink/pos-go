@@ -206,7 +206,6 @@ func Checkout(w http.ResponseWriter, r *http.Request, client *services.AppwriteC
 
 func CashierList(w http.ResponseWriter, r *http.Request, client *services.AppwriteClient, store *sessions.CookieStore) {
 	if r.Method == http.MethodGet {
-		log.Println(models.GlobalSessionData.Role)
 		if models.GlobalSessionData.Role == "Merchant" || models.GlobalSessionData.Role == "merchant" {
 			cashier, err := client.ListCashier(os.Getenv("CASHIERS"), models.GlobalSessionData.UserId)
 			if err != nil {
@@ -357,8 +356,6 @@ func CashierStatus(w http.ResponseWriter, r *http.Request, client *services.Appw
 			http.Redirect(w, r, "/app/cashier/list?error=gagal mendapatkan data kasir", http.StatusSeeOther)
 			return
 		}
-
-		log.Println("Status DB : " + cashierData.Status)
 
 		stat := models.StatusDeactive
 		if cashierData.Status == models.StatusDeactive {

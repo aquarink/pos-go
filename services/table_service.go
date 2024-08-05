@@ -3,13 +3,20 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/png"
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"pos/models"
 	"strconv"
 	"time"
 
+	"github.com/golang/freetype"
 	"github.com/skip2/go-qrcode"
 )
 
@@ -17,7 +24,7 @@ import (
 func (c *AppwriteClient) CheckAndCreateTable(collectionID, userID string, tableNo int) error {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
-	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"user_id\",\"values\":[\"%s\"]}&queries[1]={\"method\":\"equal\",\"attribute\":\"table_no\",\"values\":[\"%d\"]}", userID, tableNo)
+	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"user_id\",\"values\":[\"%s\"]}&queries[1]={\"method\":\"equal\",\"attribute\":\"table_no\",\"values\":[%d]}", userID, tableNo)
 	url = url + query
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
@@ -45,15 +52,37 @@ func (c *AppwriteClient) CheckAndCreateTable(collectionID, userID string, tableN
 	}
 
 	if len(response.Documents) == 0 {
+		// Path relatif ke folder proyek
+		projectDir, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("failed to get project directory: %v", err)
+		}
+
+		// Ensure the tmp directory exists
+		tmpDir := filepath.Join(projectDir, "tmp")
+		if _, err := os.Stat(tmpDir); os.IsNotExist(err) {
+			err = os.Mkdir(tmpDir, 0755)
+			if err != nil {
+				return fmt.Errorf("failed to create tmp directory: %v", err)
+			}
+		}
+
 		generateCode := strconv.Itoa(tableNo) + userID
-		// Generate QR code image
-		qrCodeFilePath := fmt.Sprintf("/tmp/qr_table_%d.png", tableNo)
-		err := GenerateQRCode(generateCode, qrCodeFilePath)
+		qrCodeFilePath := filepath.Join(projectDir, "tmp", fmt.Sprintf("%s.png", generateCode))
+		// err = GenerateQRCode(generateCode, qrCodeFilePath)
+		err = GenerateQRCodeCustom(generateCode, qrCodeFilePath, tableNo)
 		if err != nil {
 			return err
 		}
 
 		qrCodeURL, qrCodeID, qrCodeName, projectID, err := c.FileUpload(os.Getenv("TABLES_BUCKET"), qrCodeFilePath)
+		if err != nil {
+			log.Println("699999 >> " + err.Error())
+			return err
+		}
+
+		// Hapus file QR code setelah upload berhasil
+		err = os.Remove(qrCodeFilePath)
 		if err != nil {
 			return err
 		}
@@ -63,7 +92,7 @@ func (c *AppwriteClient) CheckAndCreateTable(collectionID, userID string, tableN
 			UserId:    userID,
 			TableNo:   tableNo,
 			Code:      generateCode,
-			CodeImage: []string{qrCodeURL, qrCodeID, qrCodeName, projectID}, // []string{fileURL, fileID, fileNAME, projectID},
+			CodeImage: []string{qrCodeURL, qrCodeID, qrCodeName, projectID},
 			CreatedAt: now,
 			UpdatedAt: now,
 		}
@@ -82,8 +111,6 @@ func (c *AppwriteClient) CreateTable(collectionID string, table models.Table) er
 		"table_no":   table.TableNo,
 		"code":       table.Code,
 		"code_image": table.CodeImage,
-		"created_at": table.CreatedAt,
-		"updated_at": table.UpdatedAt,
 	}
 	documentData := map[string]interface{}{
 		"documentId":  "unique()",
@@ -121,5 +148,71 @@ func GenerateQRCode(text, filePath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to generate QR code: %v", err)
 	}
+
+	return nil
+}
+
+func GenerateQRCodeCustom(text, filePath string, tableNo int) error {
+	// Generate QR code
+	qr, err := qrcode.New(text, qrcode.Medium)
+	if err != nil {
+		return fmt.Errorf("failed to generate QR code: %v", err)
+	}
+
+	qrImage := qr.Image(256)
+
+	projectDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get project directory: %v", err)
+	}
+
+	// Load font
+	fontPath := projectDir + "/assets/back/assets/fonts/nucleo.ttf"
+	fontBytes, err := os.ReadFile(fontPath)
+	if err != nil {
+		log.Println("failed to load font:" + err.Error())
+		return fmt.Errorf("failed to load font: %v", err)
+	}
+	f, err := freetype.ParseFont(fontBytes)
+	if err != nil {
+		log.Println("failed to parse font:" + err.Error())
+		return fmt.Errorf("failed to parse font: %v", err)
+	}
+
+	// Create a colored image to draw the QR code
+	rgba := image.NewRGBA(image.Rect(0, 0, 256, 256))
+	draw.Draw(rgba, rgba.Bounds(), qrImage, image.Point{0, 0}, draw.Src)
+
+	// Add text to the QR code
+	c := freetype.NewContext()
+	c.SetDPI(72)
+	c.SetFont(f)
+	c.SetFontSize(48)
+	c.SetClip(rgba.Bounds())
+	c.SetDst(rgba)
+	c.SetSrc(image.NewUniform(color.Black))
+
+	// Calculate the position to center the text
+	pt := freetype.Pt(128-24, 128+24) // Adjusted to center the text in the image
+	_, err = c.DrawString(fmt.Sprintf("Meja %d", tableNo), pt)
+	if err != nil {
+		log.Println("failed to draw string:" + err.Error())
+		return fmt.Errorf("failed to draw string: %v", err)
+	}
+
+	// Save the image to a file
+	file, err := os.Create(filePath)
+	if err != nil {
+		log.Println("failed to create file:" + err.Error())
+		return fmt.Errorf("failed to create file: %v", err)
+	}
+	defer file.Close()
+
+	err = png.Encode(file, rgba)
+	if err != nil {
+		log.Println("failed to encode PNG:" + err.Error())
+		return fmt.Errorf("failed to encode PNG: %v", err)
+	}
+
 	return nil
 }
