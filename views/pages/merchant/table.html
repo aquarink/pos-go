@@ -22,7 +22,7 @@
                                         no preview
                                     {{end}}
                                     <p class="mt-2">MEJA {{.TableNo}}</p>
-                                    <a href="{{index .CodeImage 0}}?project={{index .CodeImage 3}}" download="QR_Meja_{{.TableNo}}.png" class="btn btn-dark mt-2">Download</a>
+                                    <a href="{{viewDownload (index .CodeImage 0)}}?project={{index .CodeImage 3}}" download="QR_Meja_{{.TableNo}}.png" class="btn btn-primary mt-2">Download QR</a>
                                 </div>
                             </div>
                         </div>

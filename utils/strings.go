@@ -18,11 +18,12 @@ import (
 
 func AddTemplateFuncs(t *template.Template) *template.Template {
 	return t.Funcs(template.FuncMap{
-		"title":      Title,
-		"dateFormat": DateFormat,
-		"ucwords":    UcWords,
-		"coma":       Comma,
-		"splits":     Splits,
+		"title":        Title,
+		"dateFormat":   DateFormat,
+		"ucwords":      UcWords,
+		"coma":         Comma,
+		"splits":       Splits,
+		"viewDownload": ReplaceViewWithDownload,
 	})
 }
 
@@ -109,4 +110,8 @@ func GetCurrentTime() string {
 
 func Splits(s, sep string) []string {
 	return strings.Split(s, sep)
+}
+
+func ReplaceViewWithDownload(url string) string {
+	return strings.Replace(url, "view", "download", 1)
 }
