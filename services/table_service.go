@@ -8,7 +8,6 @@ import (
 	"image/draw"
 	"image/png"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -110,7 +109,6 @@ func (c *AppwriteClient) CheckAndCreateTable(collectionID, userID string, tableN
 
 		qrCodeURL, qrCodeID, qrCodeName, projectID, err := c.FileUpload(os.Getenv("TABLES_BUCKET"), qrCodeFilePath)
 		if err != nil {
-			log.Println("699999 >> " + err.Error())
 			return err
 		}
 

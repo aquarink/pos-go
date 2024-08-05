@@ -54,7 +54,7 @@ func Order(w http.ResponseWriter, r *http.Request, client *services.AppwriteClie
 		noAntrian := 1
 		checkout, err := client.CheckoutToday(os.Getenv("CHECKOUTS"), models.GlobalSessionData.UserId)
 		if err != nil {
-			log.Println(" >>>> " + err.Error())
+			log.Println("CASHIER ERROR : " + err.Error())
 		}
 
 		if checkout != nil {
@@ -251,8 +251,37 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		password := r.FormValue("password")
 		repassword := r.FormValue("repassword")
 
+		user_id := models.GlobalSessionData.UserId
+
 		if name == "" || email == "" || password == "" || repassword == "" {
 			http.Redirect(w, r, "/app/cashier/add?error=form tidak lengkap", http.StatusSeeOther)
+			return
+		}
+
+		cashierData, err := client.CashierByMerchantId(os.Getenv("CASHIERS"), user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/add?error=data cashier invalid", http.StatusSeeOther)
+			return
+		}
+
+		// Merchant data
+		merchantData, err := client.MerchantByMerchantId(os.Getenv("MERCHANTS"), user_id)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/add?error=failed to load merchant data", http.StatusSeeOther)
+			return
+		}
+
+		// Owner data
+		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), merchantData[0].OwnerId)
+		if err != nil {
+			http.Redirect(w, r, "/app/cashier/add?error=failed to load owner data", http.StatusSeeOther)
+			return
+		}
+
+		maxCashier := ownerData.CashierAvailable
+
+		if len(cashierData) >= maxCashier {
+			http.Redirect(w, r, "/app/cashier/add?error=anda tidak dapat menambah kasir, harap upgrade paket", http.StatusSeeOther)
 			return
 		}
 

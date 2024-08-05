@@ -293,3 +293,37 @@ func (c *AppwriteClient) OwnerDataByOwnerId(collectionID, ownerID string) (*mode
 
 	return &response.Documents[0], nil
 }
+
+func (c *AppwriteClient) UserDataByOwnerId(collectionID, ownerID string) (*models.Owner, error) {
+	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, ownerID)
+
+	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var response struct {
+		Documents []models.Owner `json:"documents"`
+	}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(response.Documents) == 0 {
+		return nil, fmt.Errorf("no owner found with owner_id: %s", ownerID)
+	}
+
+	return &response.Documents[0], nil
+}

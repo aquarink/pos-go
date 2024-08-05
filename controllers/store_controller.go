@@ -156,7 +156,7 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 		for i := 1; i <= table; i++ {
 			err := client.CheckAndCreateTable(os.Getenv("TABLES"), models.GlobalSessionData.UserId, i)
 			if err != nil {
-				log.Println("ERROR : " + err.Error())
+				log.Println("STORE ERROR : " + err.Error())
 			}
 		}
 

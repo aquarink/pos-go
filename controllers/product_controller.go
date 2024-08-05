@@ -113,7 +113,7 @@ func ProductAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 		}
 
 		// Owner data
-		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("USERS"), merchantData[0].OwnerId)
+		ownerData, err := client.OwnerDataByOwnerId(os.Getenv("OWNERS"), merchantData[0].OwnerId)
 		if err != nil {
 			http.Redirect(w, r, "/app/order?error=failed to load owner data", http.StatusSeeOther)
 			return
