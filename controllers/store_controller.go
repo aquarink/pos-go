@@ -130,7 +130,7 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 				return
 			}
 
-			fileURL, fileID, fileNAME, projectID, err = client.FileUpload(os.Getenv("STORES_LOGO_BUCKET"), tempFile.Name())
+			fileURL, fileID, fileNAME, projectID, err = client.FileUpload(os.Getenv("FILES_BUCKET"), tempFile.Name())
 			if err != nil {
 				if stores != nil && len(stores.Logo) > 0 {
 					fileURL = stores.Logo[0]
@@ -143,7 +143,7 @@ func StoreUpdate(w http.ResponseWriter, r *http.Request, client *services.Appwri
 				}
 			} else {
 				if stores != nil && len(stores.Logo) > 0 {
-					_ = client.FileRemove(os.Getenv("STORES_LOGO_BUCKET"), stores.Logo[1])
+					_ = client.FileRemove(os.Getenv("FILES_BUCKET"), stores.Logo[1])
 				}
 			}
 		} else {
