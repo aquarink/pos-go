@@ -213,6 +213,36 @@ func RegisterBackendRoutes(router *mux.Router, client *services.AppwriteClient, 
 		controllers.TableList(w, r, client, store)
 	}))).Methods("GET")
 
+	// PAYMENT METHOD
+
+	router.Handle("/app/method", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.MethodList(w, r, client, store)
+	}))).Methods("GET")
+
+	router.Handle("/app/method/", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.MethodList(w, r, client, store)
+	}))).Methods("GET")
+
+	router.Handle("/app/method/list", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.MethodList(w, r, client, store)
+	}))).Methods("GET")
+
+	router.Handle("/app/method/add", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.MethodAdd(w, r, client, store)
+	}))).Methods("GET", "POST")
+
+	router.Handle("/app/method/edit/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.MethodEdit(w, r, client, store)
+	}))).Methods("GET")
+
+	router.Handle("/app/method/update", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.MethodUpdate(w, r, client, store)
+	}))).Methods("POST")
+
+	router.Handle("/app/method/delete/{id}", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		controllers.MethodDelete(w, r, client, store)
+	}))).Methods("GET")
+
 	// USER
 
 	router.Handle("/app/password", middleware.CheckSignin(store)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

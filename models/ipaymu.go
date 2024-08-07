@@ -30,3 +30,30 @@ type PaymentChannelsResponse struct {
 	Message string           `json:"Message"`
 	Data    []PaymentChannel `json:"Data"`
 }
+
+type Method struct {
+	ID            string   `json:"$id"`
+	Name          string   `json:"name"`
+	Tipe          string   `json:"type"`
+	Icon          []string `json:"icon"`
+	TrxFeePercent float32  `json:"trx_fee_percent"`
+	TrxFeeDenom   float32  `json:"trx_fee_denom"`
+	TrxTax        float32  `json:"trx_tax"`
+	Status        string   `json:"status"`
+	CreatedAt     string   `json:"$createdAt"`
+	UpdatedAt     string   `json:"$updatedAt"`
+}
+
+const (
+	TypeBank   = "bank"
+	TypeWallet = "wallet"
+)
+
+func IsValidTypeMethod(tipe string) bool {
+	switch tipe {
+	case TypeBank, TypeWallet:
+		return true
+	default:
+		return false
+	}
+}

@@ -66,23 +66,43 @@ func CreateSlug(input string) string {
 func Comma(value interface{}) string {
 	switch v := value.(type) {
 	case int:
+		if v == 0 {
+			return "0"
+		}
 		return humanize.Comma(int64(v))
 	case float64:
+		if v == 0.0 {
+			return "0"
+		}
 		return humanize.Commaf(v)
+	case float32:
+		if v == 0.0 {
+			return "0"
+		}
+		return humanize.Commaf(float64(v))
 	case string:
 		// Attempt to parse string to float
 		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			if f == 0.0 {
+				return "0"
+			}
 			return humanize.Commaf(f)
 		}
 		// Attempt to parse string to int
 		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
+			if i == 0 {
+				return "0"
+			}
 			return humanize.Comma(i)
 		}
-		// If parsing fails, return original string
+		// If parsing fails, return original string or "0" if empty
+		if v == "" {
+			return "0"
+		}
 		return v
 	default:
-		// If the type is not handled, return empty string
-		return ""
+		// If the type is not handled, return "0"
+		return "0"
 	}
 }
 

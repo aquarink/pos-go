@@ -1,0 +1,73 @@
+{{define "content"}}
+<div class="row mt-4">
+    <div class="col-lg-12 mb-lg-0 mb-4">
+        <div class="card">
+            <div class="ct-example" style="position: relative; border: 2px solid #f5f7ff !important; border-bottom: none !important; padding: 1rem;">
+                <div class="p-4" style="background-color: #f8f9fa;">
+                    {{if .Error}}
+                        <p class="text-danger">{{.Error | ucwords}}</p>
+                    {{end}}
+                    {{if .Msg}}
+                        <p class="text-info">{{.Msg | ucwords}}</p>
+                    {{end}}
+
+                    <form method="post" action="/app/method/update" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="name" class="font-weight-bold">Name</label>
+                            <input value="{{ .Data.method.Name }}" required name="name" type="text" class="form-control form-control-alternative" placeholder="Enter name" >
+                            {{.CSRFToken}}
+                            <input required type="hidden" name="id" value="{{.Data.method.ID}}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="type" class="font-weight-bold">Type</label>
+                            <select required name="type" class="form-control form-control-alternative">
+                                {{if eq .Data.method.Tipe "bank"}}
+                                    <option selected value="bank">Bank</option>
+                                    <option value="wallet">Wallet</option>
+                                {{else if eq .Data.method.Tipe "wallet"}}
+                                    <option value="bank">Bank</option>
+                                    <option selected value="wallet">Wallet</option>
+                                {{else}}
+                                    <option value="bank">Bank</option>
+                                    <option value="wallet">Wallet</option>
+                                {{end}}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="percent" class="font-weight-bold">Fee Percent (%)</label>
+                            <input value="{{ .Data.method.TrxFeePercent }}" required name="percent" type="number" class="form-control form-control-alternative" placeholder="Enter fee percent">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="denom" class="font-weight-bold">Fee Denom</label>
+                            <input value="{{ .Data.method.TrxFeeDenom }}" required name="denom" type="number" class="form-control form-control-alternative" placeholder="Enter fee denom">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tax" class="font-weight-bold">Fee Tax</label>
+                            <input value="{{ .Data.method.TrxTax }}" required name="tax" type="number" class="form-control form-control-alternative" placeholder="Enter fee tax" value="11">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="icon" class="font-weight-bold">Icon</label>
+                            <input name="icon" type="file" class="form-control form-control-alternative" accept=".png, .jpeg, .jpg">
+                        </div>
+
+                        {{ if and .Data.method.Icon (gt (len .Data.method.Icon) 3) }}
+                            <div class="form-group">
+                                <label for="existingicon" class="font-weight-bold">Existing Icon</label>
+                                <img src="{{index .Data.method.Icon 0}}?project={{index .Data.method.Icon 3}}" alt="{{.Data.method.Name}}" style="max-width: 100px;">
+                            </div>
+                        {{ end }}
+
+                        <button type="submit" class="btn btn-primary">Update Payment Method</button>
+                        <a href="/app/method/delete/{{ .Data.method.ID }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this method?');">Remove Method</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

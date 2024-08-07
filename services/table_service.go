@@ -107,7 +107,7 @@ func (c *AppwriteClient) CheckAndCreateTable(collectionID, userID string, tableN
 			return err
 		}
 
-		qrCodeURL, qrCodeID, qrCodeName, projectID, err := c.FileUpload(os.Getenv("TABLES_BUCKET"), qrCodeFilePath)
+		qrCodeURL, qrCodeID, qrCodeName, projectID, err := c.FileUpload(os.Getenv("FILES_BUCKET"), qrCodeFilePath)
 		if err != nil {
 			return err
 		}

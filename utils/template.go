@@ -2,6 +2,7 @@ package utils
 
 import (
 	"html/template"
+	"log"
 	"net/http"
 	"pos/models"
 
@@ -40,6 +41,7 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, layout string, tmpl 
 func RenderTemplateWithSidebar(w http.ResponseWriter, r *http.Request, layout string, tmpl string, data interface{}) {
 	parsedTemplate, err := AddTemplateFuncs(template.New("layout")).ParseFiles(layout, tmpl, "views/templates/sidebar.html")
 	if err != nil {
+		log.Println(err.Error())
 		http.Redirect(w, r, "/app/signin?error=perbaikan grafik, harap coba lagi", http.StatusSeeOther)
 		return
 	}
@@ -61,6 +63,7 @@ func RenderTemplateWithSidebar(w http.ResponseWriter, r *http.Request, layout st
 
 	err = parsedTemplate.ExecuteTemplate(w, "layout", dataMap)
 	if err != nil {
+		log.Println(err.Error())
 		http.Redirect(w, r, "/app/signin?error=perbaikan sistem tampilan, harap coba lagi", http.StatusSeeOther)
 		return
 	}
