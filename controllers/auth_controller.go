@@ -46,7 +46,7 @@ func SignupController(w http.ResponseWriter, r *http.Request, client *services.A
 				return
 			}
 
-			existingUser, _ := client.GetUserByEmail(os.Getenv("USERS"), email)
+			existingUser, _ := client.UserByEmail(os.Getenv("USERS"), email)
 			if existingUser != nil {
 				http.Redirect(w, r, "/app/signup?error=email sudah ada", http.StatusSeeOther)
 				return
@@ -133,7 +133,7 @@ func SignupVerifyController(w http.ResponseWriter, r *http.Request, client *serv
 		userID := vars["id"]
 
 		// Fetch user by ID
-		user, err := client.GetUserByID(os.Getenv("USERS"), userID)
+		user, err := client.UserByID(os.Getenv("USERS"), userID)
 		if err != nil || user == nil {
 			http.Redirect(w, r, "/app/signin?error=invalid or expired link", http.StatusSeeOther)
 			return
@@ -193,7 +193,7 @@ func SigninController(w http.ResponseWriter, r *http.Request, client *services.A
 				return
 			}
 
-			user, err := client.GetUserByEmail(os.Getenv("USERS"), email)
+			user, err := client.UserByEmail(os.Getenv("USERS"), email)
 			if err != nil {
 				http.Redirect(w, r, "/app/signin?error=email atau password salah", http.StatusSeeOther)
 				return

@@ -79,7 +79,7 @@ func (c *AppwriteClient) CreateProduct(collectionID string, product models.Produ
 	return nil
 }
 
-func (c *AppwriteClient) GetProductByID(collectionID, id string) (*models.Products, error) {
+func (c *AppwriteClient) ProductByID(collectionID, id string) (*models.Products, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)

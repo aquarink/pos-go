@@ -58,7 +58,7 @@ func (c *AppwriteClient) CreateUser(collectionID string, user models.User) (stri
 	return response.ID, nil
 }
 
-func (c *AppwriteClient) GetAllUsers(collectionID string) ([]models.User, error) {
+func (c *AppwriteClient) AllUsers(collectionID string) ([]models.User, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)
@@ -88,7 +88,7 @@ func (c *AppwriteClient) GetAllUsers(collectionID string) ([]models.User, error)
 	return response.Documents, nil
 }
 
-func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.User, error) {
+func (c *AppwriteClient) UserByEmail(collectionID, email string) (*models.User, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents", c.Endpoint, c.DatabaseID, collectionID)
 
 	query := fmt.Sprintf("?queries[0]={\"method\":\"equal\",\"attribute\":\"email\",\"values\":[\"%s\"]}", email)
@@ -130,7 +130,7 @@ func (c *AppwriteClient) GetUserByEmail(collectionID, email string) (*models.Use
 	return &mdl.Documents[0], nil
 }
 
-func (c *AppwriteClient) GetUserByID(collectionID, id string) (*models.User, error) {
+func (c *AppwriteClient) UserByID(collectionID, id string) (*models.User, error) {
 	url := fmt.Sprintf("%s/databases/%s/collections/%s/documents/%s", c.Endpoint, c.DatabaseID, collectionID, id)
 
 	req, err := c.kirimRequestKeAppWrite("GET", url, nil)

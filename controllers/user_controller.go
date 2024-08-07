@@ -46,7 +46,7 @@ func Password(w http.ResponseWriter, r *http.Request, client *services.AppwriteC
 			return
 		}
 
-		existingUser, err := client.GetUserByID(os.Getenv("USERS"), models.GlobalSessionData.UserId)
+		existingUser, err := client.UserByID(os.Getenv("USERS"), models.GlobalSessionData.UserId)
 		if err != nil {
 			http.Redirect(w, r, "/app/password?error=user not found", http.StatusSeeOther)
 			return

@@ -196,7 +196,7 @@ func ProductEdit(w http.ResponseWriter, r *http.Request, client *services.Appwri
 			return
 		}
 
-		product, err := client.GetProductByID(os.Getenv("PRODUCTS"), id)
+		product, err := client.ProductByID(os.Getenv("PRODUCTS"), id)
 		if err != nil {
 			http.Redirect(w, r, "/app/product/list?error=product not found", http.StatusSeeOther)
 			return
@@ -242,7 +242,7 @@ func ProductUpdate(w http.ResponseWriter, r *http.Request, client *services.Appw
 			return
 		}
 
-		product, err := client.GetProductByID(os.Getenv("PRODUCTS"), productId)
+		product, err := client.ProductByID(os.Getenv("PRODUCTS"), productId)
 		if err != nil {
 			http.Redirect(w, r, "/app/product/list?error=product not found", http.StatusSeeOther)
 			return

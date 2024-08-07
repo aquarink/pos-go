@@ -165,7 +165,7 @@ func Checkout(w http.ResponseWriter, r *http.Request, client *services.AppwriteC
 		}
 
 		// owner di users by merchant.OwnerId ambil name
-		ownerData, err := client.GetUserByID(os.Getenv("USERS"), merchantData[0].OwnerId)
+		ownerData, err := client.UserByID(os.Getenv("USERS"), merchantData[0].OwnerId)
 		if err != nil {
 			http.Redirect(w, r, "/app/order?error=failed owner data", http.StatusSeeOther)
 			return
@@ -296,7 +296,7 @@ func CashierAdd(w http.ResponseWriter, r *http.Request, client *services.Appwrit
 			return
 		}
 
-		existingUser, err := client.GetUserByEmail(os.Getenv("USERS"), email)
+		existingUser, err := client.UserByEmail(os.Getenv("USERS"), email)
 		if err != nil {
 			http.Redirect(w, r, "/app/cashier/add?error=internal server error", http.StatusSeeOther)
 			return
