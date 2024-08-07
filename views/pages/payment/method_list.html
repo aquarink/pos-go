@@ -38,7 +38,7 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fee (Denom)</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fee (Tax)</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Preview</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Icon</th>
                                     <th class="text-secondary opacity-7"></th>
                                 </tr>
                             </thead>
@@ -52,7 +52,13 @@
                                         <td><p class="text-sm font-weight-bold mb-0">Rp.{{.TrxFeeDenom | coma}}</p></td>
                                         <td><p class="text-sm font-weight-bold mb-0">{{.TrxTax}}%</p></td>
 
-                                        <td><p class="text-sm font-weight-bold mb-0">{{.Status | ucwords}}</p></td>
+                                        <td class="align-middle">
+                                            {{ if eq .Status "active" }}
+                                            <span class="text-secondary font-weight-bold text-xs text-success">{{.Status | ucwords}}</a>
+                                            {{ else }}
+                                            <span class="text-secondary font-weight-bold text-xs text-danger">{{.Status | ucwords}}</a>
+                                            {{ end }}
+                                        </td>
 
                                         {{if and (ne .Icon nil) (gt (len .Icon) 3)}}
                                             <td><img src="{{index .Icon 0}}?project={{index .Icon 3}}" alt="{{.Name}}" style="max-width: 50px;"></td>
